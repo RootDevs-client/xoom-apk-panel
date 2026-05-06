@@ -8,6 +8,7 @@ const SubscribeSchema = new Schema<ISubscribe>(
   {
     phone: {
       type: String,
+      required: true,
     },
     status: {
       type: Boolean,

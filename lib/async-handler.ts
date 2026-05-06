@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { authenticate } from "./authenticate";
 import { apiResponse } from "./utils";
+import { validateApiKey } from "./validate-api-key";
 
 // Updated handler types with params
 export type ApiHandler<T, P = Record<string, string>> = (
@@ -54,8 +55,8 @@ export function asyncHandler<T, P = Record<string, string>>(
         await dbConnect();
 
         //  API key check — public routes only
-        // const apiKeyError = validateApiKey(req);
-        // if (apiKeyError) return apiKeyError;
+        const apiKeyError = validateApiKey(req);
+        if (apiKeyError) return apiKeyError;
 
         // JWT check — protected routes only
         if (shouldCheckAuth) {
@@ -105,8 +106,8 @@ export function asyncHandler<T, P = Record<string, string>>(
       await dbConnect();
 
       // API key check — public routes only
-      // const apiKeyError = validateApiKey(req);
-      // if (apiKeyError) return apiKeyError;
+      const apiKeyError = validateApiKey(req);
+      if (apiKeyError) return apiKeyError;
 
       // JWT check — protected routes only
       if (shouldCheckAuth) {
