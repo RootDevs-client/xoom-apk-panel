@@ -9,6 +9,7 @@ type FetchOptions<TBody> = {
   cache?: "force-cache" | "no-store";
   isFormData?: boolean;
   revalidate?: number | false;
+  isPublic?: boolean;
 };
 
 export async function apiClient<TResponse = any, TBody = undefined>(
@@ -22,6 +23,7 @@ export async function apiClient<TResponse = any, TBody = undefined>(
     cache,
     isFormData = false,
     revalidate,
+    isPublic = false,
   } = options;
 
   try {
@@ -30,9 +32,21 @@ export async function apiClient<TResponse = any, TBody = undefined>(
 
     const baseURL = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
 
-    const headers: HeadersInit = {
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    };
+    const headers: HeadersInit = {};
+
+    // ── Admin routes → send JWT ──
+    if (!isPublic) {
+      const session = await auth();
+      const token = session?.token;
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+      }
+    }
+
+    // ── Public routes → send API key ──
+    if (isPublic) {
+      headers["x-api-key"] = process.env.NEXT_PUBLIC_API_KEY || "";
+    }
 
     if (!isFormData && body) {
       headers["Content-Type"] = "application/json";
@@ -71,7 +85,7 @@ export async function apiClient<TResponse = any, TBody = undefined>(
     const res = await fetch(`${baseURL}${url}`, fetchOptions);
 
     if (!res.ok) {
-      if (res?.status === 401) {
+      if (res?.status === 401 && !isPublic) {
         await signOut({ redirect: false });
         redirect(routes.publicRoutes.adminLogin);
       }

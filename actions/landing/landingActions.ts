@@ -8,6 +8,7 @@ export async function getAllSettingsDetails(context: string) {
       method: "GET",
       tags: ["settings"],
       cache: "force-cache",
+      isPublic: true,
     });
     return res;
   } catch (error) {

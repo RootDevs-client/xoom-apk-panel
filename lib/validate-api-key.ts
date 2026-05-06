@@ -2,26 +2,29 @@
 import { NextRequest, NextResponse } from "next/server";
 import { apiResponse } from "./server.utils";
 
-// ── Only public routes need API key ──
 const PUBLIC_ROUTES = ["/api/public"];
 
-// ── These routes skip everything ──
-const SKIP_ROUTES = ["/api/auth", "/api/admin"];
+const SKIP_ROUTES = [
+  "/api/auth",
+  "/api/admin", // skip ALL admin routes — not just login
+];
 
 export function shouldCheckApiKey(pathname: string): boolean {
-  // skip routes first
+  // ── skip routes — no API key check ──
   const isSkipped = SKIP_ROUTES.some((route) => pathname.startsWith(route));
   if (isSkipped) return false;
 
-  // public routes need API key
+  // ── public routes — need API key ──
   const isPublic = PUBLIC_ROUTES.some((route) => pathname.startsWith(route));
   return isPublic;
 }
 
 export function validateApiKey(req: NextRequest): NextResponse | null {
   const pathname = req.nextUrl.pathname;
+  const shouldCheck = shouldCheckApiKey(pathname);
+  // ── add this temporarily to debug ──
 
-  if (!shouldCheckApiKey(pathname)) return null; // skip
+  if (!shouldCheck) return null;
 
   const apiKey = req.headers.get("x-api-key");
 
@@ -33,5 +36,5 @@ export function validateApiKey(req: NextRequest): NextResponse | null {
     return apiResponse(false, 403, "Invalid API key!");
   }
 
-  return null; // valid
+  return null; // ✅ valid
 }
