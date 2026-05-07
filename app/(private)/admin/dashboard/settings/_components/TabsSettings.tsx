@@ -21,7 +21,7 @@ export default function TabsSettings({ generalSettings }: any) {
     }
   };
   return (
-    <div className="min-h-screen  p-4 md:p-8">
+    <div className="min-h-screen p-4 md:p-8">
       <div className="w-full">
         <div className="flex flex-col lg:flex-row gap-6">
           {/* Sidebar Navigation - Desktop */}

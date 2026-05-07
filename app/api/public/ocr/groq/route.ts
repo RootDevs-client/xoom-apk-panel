@@ -5,6 +5,13 @@ import Groq from "groq-sdk";
 import { NextRequest } from "next/server";
 
 const client = new Groq({ apiKey: process.env.GROQ_API_KEY });
+// ─── Clean extracted text ────────────────────────────────
+function cleanText(text: string): string {
+  return text
+    .replace(/[.\-\/\\,_|]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
 
 // ─── Groq OCR ───────────────────────────────────────────
 async function extractWithGroq(image: string, language: string) {
@@ -22,7 +29,11 @@ async function extractWithGroq(image: string, language: string) {
           },
           {
             type: "text",
-            text: `Extract all text, numbers, and everything visible in this image. Language: ${language}. Return only the extracted content, nothing else.`,
+            text: `Look at this image and extract ONLY the numeric digits you see. 
+                   Do NOT include any letters, symbols, dots, dashes or spaces.
+                   Return ONLY the digits as a single continuous number string.
+                   Example: if you see "8.8.20" return "8820", if you see "50 64" return "5064".
+                   Language: ${language}.`,
           },
         ],
       },
@@ -120,22 +131,16 @@ export const POST = asyncHandler(async (req: NextRequest) => {
     return apiResponse(false, 404, "No text found in image!");
   }
 
+  // ── clean text ──
+  const cleaned = cleanText(extractedText);
+
   // extract numbers
-  // const numbers = extractedText.match(/\d+(\.\d+)?/g) ?? [];
 
-  // extract emails
-  // const emails = extractedText.match(/[\w.-]+@[\w.-]+\.\w+/g) ?? [];
-
-  // extract phones
-  // const phones =
-  //   extractedText.match(/[+]?[\d\s\-().]{7,}/g)?.map((p: string) => p.trim()) ??
-  //   [];
+  const numbers = (cleaned.match(/\d+/g) ?? []).join("");
 
   return apiResponse(true, 200, "Text extracted successfully!", {
-    fullText: extractedText,
-    // numbers,
-    // emails,
-    // phones,
+    fullText: cleaned,
+    numbers,
     language,
     engine,
     fallbackUsed,
