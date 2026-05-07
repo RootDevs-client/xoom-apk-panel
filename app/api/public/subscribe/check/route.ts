@@ -1,4 +1,5 @@
 // app/api/public/subscribe/check/route.ts
+
 import { asyncHandler } from "@/lib/async-handler";
 import { apiResponse } from "@/lib/server.utils";
 import { Subscribe } from "@/model/Subscribe";
@@ -6,13 +7,24 @@ import { NextRequest } from "next/server";
 
 export const GET = asyncHandler(async (req: NextRequest) => {
   const { searchParams } = new URL(req.url);
-  const phone = searchParams.get("phone")?.trim();
+
+  let phone = searchParams.get("phone");
 
   if (!phone) {
     return apiResponse(false, 400, "Phone number is required!");
   }
 
-  const subscriber = await Subscribe.findOne({ phone });
+  // Normalize phone number
+  phone = decodeURIComponent(phone)
+    .trim()
+    .replace(/\s/g, "")
+    .replace(/^\+/, "");
+
+  console.log("Normalized Phone:", phone);
+
+  const subscriber = await Subscribe.findOne({
+    phone,
+  });
 
   if (!subscriber) {
     return apiResponse(true, 200, "User is not subscribed!", {

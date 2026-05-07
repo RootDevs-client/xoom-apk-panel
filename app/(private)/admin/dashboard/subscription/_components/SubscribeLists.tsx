@@ -2,6 +2,7 @@
 
 import { getSubscribeList } from "@/actions/subscribe/subscribeActions";
 import { DataTableWithPagination } from "@/components/custom/data-table/DataTableWithPagination";
+import { Card, CardContent } from "@/components/ui/card";
 import { useTableState } from "@/store/useTableStore";
 import { useEffect, useState } from "react";
 import { columns } from "./columns";
@@ -39,15 +40,19 @@ export default function SubscribeLists() {
   return (
     <div className="flex flex-col gap-6">
       <SubscribeToolbar tableId={tableId} />
-      <DataTableWithPagination
-        data={data}
-        columns={columns}
-        total={total}
-        tableId={tableId}
-        isLoading={isLoading}
-        // onSortEnd={handleDataChange}
-        pagination={true}
-      />
+      <Card>
+        <CardContent>
+          <DataTableWithPagination
+            data={data}
+            columns={columns}
+            total={total}
+            tableId={tableId}
+            isLoading={isLoading}
+            // onSortEnd={handleDataChange}
+            pagination={true}
+          />
+        </CardContent>
+      </Card>
     </div>
   );
 }
