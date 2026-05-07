@@ -142,10 +142,6 @@
     @apply bg-[#F0F0F0] text-foreground;
   }
 
-  /* Headings: Urbanist *
-
-  /* Paragraphs: DM Sans */
-
   /* Custom paragraph classes */
   .p-text-14 {
     font-family: var(--font-dm-sans);

@@ -83,7 +83,6 @@ export default function GeneralSettings({ general }: any) {
       };
 
       const result = await updateGeneralSettings(payload);
-      console.log("result===", result);
 
       if (!result.status) {
         ToastMessage.error(
@@ -192,32 +191,36 @@ export default function GeneralSettings({ general }: any) {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
-            <InputField
-              name="webviewUrl"
-              label="WebView URL"
-              placeholder="https://xoomsports.com"
-              prefix={<Globe size={16} />}
-              rules={{
-                pattern: {
-                  value: /^https?:\/\/.+/,
-                  message: "Must start with http:// or https://",
-                },
-              }}
-            />
+            <div className="grid lg:grid-cols-2 gap-4 grid-cols-1">
+              <div>
+                <InputField
+                  name="webviewUrl"
+                  label="WebView URL"
+                  placeholder="https://xoomsports.com"
+                  prefix={<Globe size={16} />}
+                  rules={{
+                    pattern: {
+                      value: /^https?:\/\/.+/,
+                      message: "Must start with http:// or https://",
+                    },
+                  }}
+                />
+              </div>
 
-            <div className="space-y-1">
-              <InputField
-                name="webhookUrl"
-                label="Unsubscribe Webhook URL"
-                placeholder="https://your-system.com/api/webhook/unsubscribe"
-                prefix={<Webhook size={16} />}
-                rules={{
-                  pattern: {
-                    value: /^https?:\/\/.+/,
-                    message: "Must start with http:// or https://",
-                  },
-                }}
-              />
+              <div className="space-y-1">
+                <InputField
+                  name="webhookUrl"
+                  label="Unsubscribe Webhook URL"
+                  placeholder="https://your-system.com/api/webhook/unsubscribe"
+                  prefix={<Webhook size={16} />}
+                  rules={{
+                    pattern: {
+                      value: /^https?:\/\/.+/,
+                      message: "Must start with http:// or https://",
+                    },
+                  }}
+                />
+              </div>
             </div>
           </CardContent>
         </Card>

@@ -18,14 +18,12 @@ const SettingsShimmerLoader = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Sidebar */}
-          <div className="lg:col-span-3">
+          {/* <div className="lg:col-span-3">
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden">
-              {/* Active menu item */}
               <div className="bg-orange-500 p-4">
                 <Skeleton className="h-5 w-20 bg-white/20" />
               </div>
 
-              {/* Other menu items */}
               {[1, 2, 3, 4, 5].map((item) => (
                 <div
                   key={item}
@@ -35,10 +33,10 @@ const SettingsShimmerLoader = () => {
                 </div>
               ))}
             </div>
-          </div>
+          </div> */}
 
           {/* Main Content */}
-          <div className="lg:col-span-9">
+          <div className="col-span-12">
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
               {/* Section Title */}
               <div className="mb-2">
