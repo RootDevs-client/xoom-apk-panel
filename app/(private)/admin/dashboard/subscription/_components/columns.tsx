@@ -52,11 +52,4 @@ export const columns: ColumnDef<Subscribe>[] = [
       );
     },
   },
-  // {
-  //   id: "actions",
-  //   header: "Actions",
-  //   cell: ({ row }) => {
-  //     return <div className="flex items-center gap-2"></div>;
-  //   },
-  // },
 ];
