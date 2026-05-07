@@ -9,7 +9,6 @@ import {
 import { cn } from "@/lib/utils";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import * as React from "react";
-import { Icons } from "../custom/icons";
 
 interface CustomCarouselProps<T> {
   items: T[];
@@ -17,7 +16,6 @@ interface CustomCarouselProps<T> {
   className?: string;
   title?: string;
   description?: string;
-  icon?: keyof typeof Icons;
   itemClassName?: string;
   responsive?: {
     base?: number;
@@ -41,7 +39,6 @@ export function CustomCarousel<T>({
   itemClassName,
   title,
   description,
-  icon = "arrowRight",
   responsive = { base: 1, md: 2, lg: 3 },
   autoplay = false,
   interval = 4000,
