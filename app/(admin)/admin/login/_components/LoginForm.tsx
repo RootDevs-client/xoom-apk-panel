@@ -26,7 +26,6 @@ export default function LoginForm() {
 
   //  Handle login
   const onSubmit = async (data: LoginInputs) => {
-    console.log("form submit");
     const loadingToast = ToastMessage.loading({
       title: "Admin Login...",
     });
