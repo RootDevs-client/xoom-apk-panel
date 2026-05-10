@@ -37,7 +37,7 @@ export const GET = asyncHandler(async (req: NextRequest) => {
     subscriber: {
       id: subscriber._id,
       phone: subscriber.phone,
-      isActive: subscriber.isActive,
+      isSubscribe: subscriber.status,
       createdAt: subscriber.createdAt,
       updatedAt: subscriber.updatedAt,
     },
