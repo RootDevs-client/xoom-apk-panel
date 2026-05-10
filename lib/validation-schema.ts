@@ -60,3 +60,8 @@ export const updateSubscribeSchema = z.object({
   phone: z.string().optional(),
   status: z.boolean().optional(),
 });
+
+// Validation schema
+export const unsubscribeSchema = z.object({
+  phone: z.string().min(1, "Phone number is required!"),
+});
