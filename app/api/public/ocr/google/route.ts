@@ -28,8 +28,8 @@ async function extractWithGoogleVision(
           {
             image: { content: base64 },
             features: [
-              { type: "TEXT_DETECTION" },
-              { type: "DOCUMENT_TEXT_DETECTION" },
+              // { type: "TEXT_DETECTION" },
+              { type: "DOCUMENT_TEXT_DETECTION", maxResults: 1 },
             ],
             imageContext: { languageHints: [language] },
           },
@@ -39,12 +39,6 @@ async function extractWithGoogleVision(
   );
 
   const data = await res.json();
-
-  // ── log full response ──
-  console.log(
-    "Google Vision Raw:",
-    JSON.stringify(data?.responses?.[0], null, 2),
-  );
 
   if (data?.error) {
     throw new Error(data.error.message);
@@ -80,7 +74,6 @@ export const POST = asyncHandler(async (req: NextRequest) => {
   try {
     extractedText = await extractWithGoogleVision(image, language);
   } catch (error: any) {
-    console.error("Google Vision error:", error.message);
     return apiResponse(false, 500, error.message || "Google Vision failed!");
   }
 
@@ -105,8 +98,8 @@ export const POST = asyncHandler(async (req: NextRequest) => {
   return apiResponse(true, 200, "Text extracted successfully!", {
     fullText: cleaned,
     numbers,
-    emails,
-    phones,
+    // emails,
+    // phones,
     language,
     engine: "google-vision",
   });

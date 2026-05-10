@@ -1,7 +1,6 @@
 import mongoose from "mongoose";
 import { ROLE } from "./constant";
 
-
 const MONGODB_URI = process.env.MONGODB_URI!;
 
 if (!MONGODB_URI) {
@@ -46,10 +45,6 @@ async function seedDefaultAdmin() {
     password: hashedPassword,
     role: ROLE.ADMIN,
   });
-
-  console.log(
-    "[DB] Default admin created → email: admin@example.com | password: ChangeMe123!",
-  );
 }
 
 async function dbConnect(): Promise<typeof mongoose> {

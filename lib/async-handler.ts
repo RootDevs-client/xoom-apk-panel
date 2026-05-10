@@ -90,7 +90,6 @@ export function asyncHandler<T, P = Record<string, string>>(
           return apiResponse(false, 401, "Unauthorized Token!");
         }
 
-        console.error(error);
         return apiResponse(false, 500, "Something went wrong!");
       }
     };
@@ -125,6 +124,7 @@ export function asyncHandler<T, P = Record<string, string>>(
         return apiResponse(false, 401, "Unauthorized Token!");
       }
       console.error(err);
+
       return apiResponse(false, 500, "Something went wrong!");
     }
   };

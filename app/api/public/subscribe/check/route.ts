@@ -20,8 +20,6 @@ export const GET = asyncHandler(async (req: NextRequest) => {
     .replace(/\s/g, "")
     .replace(/^\+/, "");
 
-  console.log("Normalized Phone:", phone);
-
   const subscriber = await Subscribe.findOne({
     phone,
   });
