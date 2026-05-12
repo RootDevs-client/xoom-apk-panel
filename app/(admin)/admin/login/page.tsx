@@ -1,4 +1,4 @@
-import { Shield } from "lucide-react";
+import { Trophy } from "lucide-react";
 import LoginForm from "./_components/LoginForm";
 
 export default function LoginPage() {
@@ -10,27 +10,27 @@ export default function LoginPage() {
           {/* Logo */}
           <div className="flex items-center gap-3">
             <div className="p-2 bg-slate-800 rounded-lg">
-              <Shield className="h-5 w-5 text-slate-400" />
+              <Trophy className="h-5 w-5 text-slate-400" />
             </div>
             <span className="text-slate-100 font-medium text-sm">
-              Admin Panel
+              XoomSports
             </span>
           </div>
 
           {/* Main copy */}
           <div className="space-y-5 my-3">
             <h1 className="text-2xl font-semibold text-slate-100 leading-snug">
-              Admin Administration
+              XoomSports Admin Portal
             </h1>
             <p className="text-slate-500 text-sm leading-relaxed max-w-xs">
-              Manage support requests, monitor performance, and oversee system
-              activity.
+              Manage subscriptions, monitor user activity, and oversee the
+              XoomSports platform with full control.
             </p>
             <div className="space-y-3">
               {[
-                { text: "Manage workflows and requests" },
-                { text: "Track performance and response times" },
-                { text: "Control users and permissions" },
+                { text: "Manage subscriber list & activity" },
+                { text: "Monitor platform performance" },
+                { text: "Control settings & permissions" },
               ].map(({ text }) => (
                 <div key={text} className="flex items-center gap-3">
                   <div className="w-7 h-7 bg-slate-800 rounded-md flex items-center justify-center shrink-0">
@@ -43,7 +43,7 @@ export default function LoginPage() {
           </div>
 
           <p className="text-slate-700 text-xs">
-            © 2026 Admin Panel · All rights reserved XoomSports
+            © 2026 XoomSports · All rights reserved
           </p>
         </div>
 
@@ -51,10 +51,10 @@ export default function LoginPage() {
         <div className="bg-white dark:bg-slate-900 md:p-10 p-5 flex flex-col justify-center gap-8">
           <div>
             <h2 className="text-xl font-semibold text-foreground">
-              Admin Sign In
+              Sign In to XoomSports
             </h2>
             <p className="text-sm text-muted-foreground mt-1">
-              Enter your credentials to access the admin dashboard.
+              Enter your credentials to access the XoomSports dashboard.
             </p>
           </div>
           <LoginForm />
