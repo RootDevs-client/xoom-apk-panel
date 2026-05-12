@@ -33,6 +33,7 @@ export default function UserMenu() {
     await signOut({
       redirect: false,
     });
+
     ToastMessage.success({ title: "Logout Successfully!" });
     clearAdminData();
     router.push(routes.publicRoutes.adminLogin);

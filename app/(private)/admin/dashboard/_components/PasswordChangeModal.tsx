@@ -13,13 +13,14 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Form } from "@/components/ui/form";
 
 import { passwordChangeSchema } from "@/lib/validation-schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Lock } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { useState } from "react";
-import { Form, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { ImSpinner9 } from "react-icons/im";
 import * as z from "zod";
 
@@ -98,51 +99,53 @@ export default function PasswordChangeModal({
         </DialogHeader>
 
         <Form {...form}>
-          <div className="grid gap-4 py-4">
-            <PasswordField
-              name="oldPassword"
-              label="Old Password"
-              prefix={<Lock size={16} />}
-            />
-            <PasswordField
-              name="newPassword"
-              label="New Password"
-              prefix={<Lock size={16} />}
-            />
-            <PasswordField
-              name="confirmPassword"
-              label="Confirm Password"
-              prefix={<Lock size={16} />}
-            />
-          </div>
+          <form onSubmit={form.handleSubmit(onSubmit)}>
+            <div className="grid gap-4 py-4">
+              <PasswordField
+                name="oldPassword"
+                label="Old Password"
+                prefix={<Lock size={16} />}
+              />
+              <PasswordField
+                name="newPassword"
+                label="New Password"
+                prefix={<Lock size={16} />}
+              />
+              <PasswordField
+                name="confirmPassword"
+                label="Confirm Password"
+                prefix={<Lock size={16} />}
+              />
+            </div>
 
-          <DialogFooter>
-            <DialogClose asChild>
+            <DialogFooter>
+              <DialogClose asChild>
+                <CustomButton
+                  type="button"
+                  onClick={handleCancel}
+                  disabled={loading}
+                  className="border-red-500 text-red-500 rounded-lg hover:bg-transparent hover:border-red-500 hover:text-red-500"
+                >
+                  Cancel
+                </CustomButton>
+              </DialogClose>
               <CustomButton
-                type="button"
-                onClick={handleCancel}
+                type="submit"
+                // onClick={form.handleSubmit(onSubmit)}
                 disabled={loading}
-                className="border-red-500 text-red-500 rounded-lg hover:bg-transparent hover:border-red-500 hover:text-red-500"
+                className="rounded-lg"
               >
-                Cancel
+                {loading ? (
+                  <span className="flex items-center">
+                    Updating
+                    <ImSpinner9 className="ml-2 transition-all animate-spin duration-300" />
+                  </span>
+                ) : (
+                  "Update"
+                )}
               </CustomButton>
-            </DialogClose>
-            <CustomButton
-              type="button"
-              onClick={form.handleSubmit(onSubmit)}
-              disabled={loading}
-              className="rounded-lg"
-            >
-              {loading ? (
-                <span className="flex items-center">
-                  Updating
-                  <ImSpinner9 className="ml-2 transition-all animate-spin duration-300" />
-                </span>
-              ) : (
-                "Update"
-              )}
-            </CustomButton>
-          </DialogFooter>
+            </DialogFooter>
+          </form>
         </Form>
       </DialogContent>
     </Dialog>
