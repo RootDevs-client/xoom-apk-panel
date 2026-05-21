@@ -28,87 +28,119 @@ async function checkExternalSubscription(phone: string) {
   }
 }
 
-// ─── Main Route — POST ───────────────────────────────────
+// ─── Main Route ──────────────────────────────────────────
 export const POST = asyncHandler(createSubscribeSchema, async (req, data) => {
   const phone = data.phone.trim().replace(/^\+/, "");
+  const reference = data.reference.trim();
+  const platform = data.platform?.trim() || "";
 
-  // ── Step 1: check external API ──
+  // ── Step 1: external API ──
   const externalRes = await checkExternalSubscription(phone);
   const isExtActive = externalRes?.responseMessage === "Active";
 
-  // ── Step 2: check local DB ──
+  if (!externalRes) {
+    return apiResponse(false, 503, "External service unavailable!");
+  }
+
+  // ── Step 2: local DB ──
   const dbRecord = await Subscribe.findOne({ phone });
 
-  // ═══════════════════════════════════════════════
+  // ═══════════════════════════════════════════════════════
   // CASE 1: External Active
-  // → already subscribed, sync DB
-  // ═══════════════════════════════════════════════
+  // ═══════════════════════════════════════════════════════
   if (isExtActive) {
+    // ── DB not found → create new ──
     if (!dbRecord) {
-      // DB not found → create new
-      const newRecord = await Subscribe.create({ phone, status: true });
+      const newRecord = await Subscribe.create({
+        phone,
+        reference,
+        platform,
+        status: true,
+      });
+
       return apiResponse(true, 201, "Subscribed successfully!", {
         phone,
+        reference: newRecord.reference,
+        platform: newRecord.platform,
         isSubscribed: true,
         source: "external-active-created",
-        externalStatus: externalRes?.responseMessage,
+        externalStatus: externalRes.responseMessage,
         dbStatus: true,
         createdAt: newRecord.createdAt,
         updatedAt: newRecord.updatedAt,
       });
     }
-    if (dbRecord.status === false) {
-      // in DB but inactive → reactivate
-      dbRecord.status = true;
-      await dbRecord.save();
-      return apiResponse(true, 200, "Subscription reactivated!", {
-        phone,
-        isSubscribed: true,
-        source: "external-active-reactivated",
-        externalStatus: externalRes?.responseMessage,
-        dbStatus: true,
-        createdAt: dbRecord.createdAt,
-        updatedAt: dbRecord.updatedAt,
-      });
-    }
 
-    // in DB already active → nothing to do
-    return apiResponse(true, 200, "User is already subscribed!", {
+    // ── DB found → update reference, platform, status ──
+    const updated = await Subscribe.findOneAndUpdate(
+      { phone },
+      {
+        $set: {
+          reference,
+          platform,
+          status: true,
+        },
+      },
+      { new: true },
+    );
+
+    const source =
+      dbRecord.status === false
+        ? "external-active-reactivated"
+        : "external-active-existing";
+
+    const message =
+      dbRecord.status === false
+        ? "Subscription reactivated!"
+        : "User is already subscribed!";
+
+    return apiResponse(true, 200, message, {
       phone,
+      reference: updated!.reference,
+      platform: updated!.platform,
       isSubscribed: true,
-      source: "external-active-existing",
-      externalStatus: externalRes?.responseMessage,
+      source,
+      externalStatus: externalRes.responseMessage,
       dbStatus: true,
-      createdAt: dbRecord.createdAt,
-      updatedAt: dbRecord.updatedAt,
+      createdAt: updated!.createdAt,
+      updatedAt: updated!.updatedAt,
     });
   }
 
-  // ═══════════════════════════════════════════════
+  // ═══════════════════════════════════════════════════════
   // CASE 2: External Not Active
-  // ═══════════════════════════════════════════════
+  // ═══════════════════════════════════════════════════════
+
+  // DB active → deactivate
   if (dbRecord && dbRecord.status === true) {
-    // in DB active → make inactive
-    dbRecord.status = false;
-    await dbRecord.save();
+    const updated = await Subscribe.findOneAndUpdate(
+      { phone },
+      { $set: { status: false } },
+      { new: true },
+    );
+
     return apiResponse(true, 200, "Subscription deactivated!", {
       phone,
+      reference: updated!.reference,
+      platform: updated!.platform,
       isSubscribed: false,
       source: "external-inactive-deactivated",
-      externalStatus: externalRes?.responseMessage,
+      externalStatus: externalRes.responseMessage,
       dbStatus: false,
-      createdAt: dbRecord.createdAt,
-      updatedAt: dbRecord.updatedAt,
+      createdAt: updated!.createdAt,
+      updatedAt: updated!.updatedAt,
     });
   }
 
+  // DB inactive → nothing
   if (dbRecord && dbRecord.status === false) {
-    // already inactive in DB → nothing to do
     return apiResponse(true, 200, "User is not subscribed!", {
       phone,
+      reference: dbRecord.reference,
+      platform: dbRecord.platform,
       isSubscribed: false,
       source: "external-inactive-already",
-      externalStatus: externalRes?.responseMessage,
+      externalStatus: externalRes.responseMessage,
       dbStatus: false,
       createdAt: dbRecord.createdAt,
       updatedAt: dbRecord.updatedAt,
@@ -118,9 +150,11 @@ export const POST = asyncHandler(createSubscribeSchema, async (req, data) => {
   // DB not found → not subscribed
   return apiResponse(true, 200, "User is not subscribed!", {
     phone,
+    reference: null,
+    platform: null,
     isSubscribed: false,
     source: "external-inactive-not-found",
-    externalStatus: externalRes?.responseMessage,
+    externalStatus: externalRes.responseMessage,
     dbStatus: null,
   });
 });
