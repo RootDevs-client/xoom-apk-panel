@@ -53,11 +53,14 @@ export const dateFromForm = z.preprocess((v) => {
 //!subscribe validation schema
 export const createSubscribeSchema = z.object({
   phone: z.string().min(1, "Phone number is required!").trim(),
-
+  reference: z.string().min(1, "Reference is required!").trim(),
+  platform: z.string().optional().default(""),
   status: z.boolean().optional(),
 });
 export const updateSubscribeSchema = z.object({
   phone: z.string().optional(),
+  reference: z.string().optional(),
+  platform: z.string().optional(),
   status: z.boolean().optional(),
 });
 

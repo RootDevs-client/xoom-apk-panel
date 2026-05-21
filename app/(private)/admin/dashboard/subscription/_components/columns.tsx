@@ -9,6 +9,8 @@ import moment from "moment-timezone";
 export type Subscribe = {
   _id: string;
   phone: string;
+  reference: string;
+  platform: string;
   status: boolean;
   createdAt: string;
   updatedAt: string;
@@ -23,6 +25,14 @@ export const columns: ColumnDef<Subscribe>[] = [
   {
     accessorKey: "phone",
     header: "Phone Number",
+  },
+  {
+    accessorKey: "reference",
+    header: "Reference",
+  },
+  {
+    accessorKey: "platform",
+    header: "Platform",
   },
   {
     accessorKey: "createdAt",
