@@ -17,7 +17,7 @@ export async function checkExternalSubscription({
 }: CheckExternalSubscriptionParams) {
   try {
     const res = await fetch(
-      "https://universal-subscription-api.vclipss.com/CheckSubscriberStatus",
+      `${process.env.UNIVERSAL_SUBSCRIPTION_API_URL}/CheckSubscriberStatus`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
