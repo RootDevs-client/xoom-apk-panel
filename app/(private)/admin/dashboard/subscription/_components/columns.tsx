@@ -2,8 +2,8 @@
 
 import { Badge } from "@/components/ui/badge";
 import { ColumnDef } from "@tanstack/react-table";
-
 import moment from "moment-timezone";
+import { CancelSubscriptionCell } from "./CancelSubscriptionCell";
 
 // Define the type based on API response
 export type Subscribe = {
@@ -61,5 +61,10 @@ export const columns: ColumnDef<Subscribe>[] = [
         </Badge>
       );
     },
+  },
+  {
+    id: "actions",
+    header: "Actions",
+    cell: ({ row }) => <CancelSubscriptionCell row={row.original} />,
   },
 ];

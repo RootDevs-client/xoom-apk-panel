@@ -197,6 +197,20 @@
                   "variable": [{ "key": "id", "value": "SUBSCRIBER_ID_HERE" }]
                 }
               }
+            },
+            {
+              "name": "Cancel Subscription (Unsubscribe)",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+                "url": {
+                  "raw": "{{baseUrl}}/api/admin/subscribe/:id/unsubscribe",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "admin", "subscribe", ":id", "unsubscribe"],
+                  "variable": [{ "key": "id", "value": "SUBSCRIBER_ID_HERE" }]
+                },
+                "description": "Calls external unsubscribe API (lps.vclipss.com) with subscriber's phone, reference, and platform, then sets DB status=false.\n\n- 400: already inactive\n- 404: not found\n- 503: external service unavailable\n\nExternal URL: https://lps.vclipss.com/bdGp/unsubsg.aspx?mobilenumber=+{phone}&reference={reference}&Platform={platform}"
+              }
             }
           ]
         }
