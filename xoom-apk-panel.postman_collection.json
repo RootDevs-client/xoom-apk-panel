@@ -1,0 +1,329 @@
+{
+  "info": {
+    "name": "Xoom APK Panel",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "API collection for Xoom APK Panel. Set {{baseUrl}} and {{adminToken}} collection variables."
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:3000", "type": "string" },
+    { "key": "adminToken", "value": "", "type": "string" }
+  ],
+  "item": [
+    {
+      "name": "Admin",
+      "item": [
+        {
+          "name": "Auth",
+          "item": [
+            {
+              "name": "Login",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "const res = pm.response.json();",
+                      "if (res.data && res.data.token) {",
+                      "  pm.collectionVariables.set('adminToken', res.data.token);",
+                      "}"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "url": { "raw": "{{baseUrl}}/api/admin/auth/login", "host": ["{{baseUrl}}"], "path": ["api", "admin", "auth", "login"] },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"admin@example.com\",\n  \"password\": \"password123\"\n}"
+                }
+              }
+            },
+            {
+              "name": "Get Profile",
+              "request": {
+                "method": "GET",
+                "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+                "url": { "raw": "{{baseUrl}}/api/admin/auth/me", "host": ["{{baseUrl}}"], "path": ["api", "admin", "auth", "me"] }
+              }
+            },
+            {
+              "name": "Update Profile",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  { "key": "Content-Type", "value": "application/json" },
+                  { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+                ],
+                "url": { "raw": "{{baseUrl}}/api/admin/auth/me", "host": ["{{baseUrl}}"], "path": ["api", "admin", "auth", "me"] },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Admin User\"\n}"
+                }
+              }
+            },
+            {
+              "name": "Change Password",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  { "key": "Content-Type", "value": "application/json" },
+                  { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+                ],
+                "url": { "raw": "{{baseUrl}}/api/admin/auth/password", "host": ["{{baseUrl}}"], "path": ["api", "admin", "auth", "password"] },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"oldPassword\": \"currentPassword\",\n  \"newPassword\": \"newPassword123\"\n}"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Dashboard",
+          "item": [
+            {
+              "name": "Get Stats",
+              "request": {
+                "method": "GET",
+                "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+                "url": { "raw": "{{baseUrl}}/api/admin/dashboard/stats", "host": ["{{baseUrl}}"], "path": ["api", "admin", "dashboard", "stats"] }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Settings",
+          "item": [
+            {
+              "name": "Get All Settings",
+              "request": {
+                "method": "GET",
+                "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+                "url": { "raw": "{{baseUrl}}/api/admin/settings", "host": ["{{baseUrl}}"], "path": ["api", "admin", "settings"] }
+              }
+            },
+            {
+              "name": "Get General Settings",
+              "request": {
+                "method": "GET",
+                "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+                "url": { "raw": "{{baseUrl}}/api/admin/settings/general", "host": ["{{baseUrl}}"], "path": ["api", "admin", "settings", "general"] }
+              }
+            },
+            {
+              "name": "Update General Settings",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  { "key": "Content-Type", "value": "application/json" },
+                  { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+                ],
+                "url": { "raw": "{{baseUrl}}/api/admin/settings/general", "host": ["{{baseUrl}}"], "path": ["api", "admin", "settings", "general"] },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"siteName\": \"Xoom APK\"\n}"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Subscribers",
+          "item": [
+            {
+              "name": "List Subscribers",
+              "request": {
+                "method": "GET",
+                "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+                "url": {
+                  "raw": "{{baseUrl}}/api/admin/subscribe?page=1&limit=10&sortBy=createdAt&sortOrder=desc",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "admin", "subscribe"],
+                  "query": [
+                    { "key": "page", "value": "1" },
+                    { "key": "limit", "value": "10" },
+                    { "key": "sortBy", "value": "createdAt" },
+                    { "key": "sortOrder", "value": "desc" },
+                    { "key": "search", "value": "", "disabled": true }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Get Subscriber by ID",
+              "request": {
+                "method": "GET",
+                "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+                "url": {
+                  "raw": "{{baseUrl}}/api/admin/subscribe/:id",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "admin", "subscribe", ":id"],
+                  "variable": [{ "key": "id", "value": "SUBSCRIBER_ID_HERE" }]
+                }
+              }
+            },
+            {
+              "name": "Update Subscriber",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  { "key": "Content-Type", "value": "application/json" },
+                  { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/admin/subscribe/:id",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "admin", "subscribe", ":id"],
+                  "variable": [{ "key": "id", "value": "SUBSCRIBER_ID_HERE" }]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"status\": true,\n  \"reference\": \"REF123\",\n  \"platform\": \"android\"\n}"
+                }
+              }
+            },
+            {
+              "name": "Delete Subscriber",
+              "request": {
+                "method": "DELETE",
+                "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+                "url": {
+                  "raw": "{{baseUrl}}/api/admin/subscribe/:id",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "admin", "subscribe", ":id"],
+                  "variable": [{ "key": "id", "value": "SUBSCRIBER_ID_HERE" }]
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Public",
+      "item": [
+        {
+          "name": "Settings",
+          "item": [
+            {
+              "name": "Get Public Settings",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": { "raw": "{{baseUrl}}/api/public/settings", "host": ["{{baseUrl}}"], "path": ["api", "public", "settings"] }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Subscribe",
+          "item": [
+            {
+              "name": "Check Subscription",
+              "request": {
+                "method": "GET",
+                "header": [
+                  { "key": "X-Forwarded-For", "value": "103.0.0.1", "description": "Simulate client IP (optional — set automatically in production)", "disabled": true }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/public/subscribe/check?phone=8801700000000",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "public", "subscribe", "check"],
+                  "query": [{ "key": "phone", "value": "8801700000000", "description": "Phone without leading +" }]
+                },
+                "description": "Finds subscriber by phone, then calls external API using stored `reference` as `adAgencyCampaignTransactionId`.\n\n- External Not Active → sets DB status=false, returns isSubscribed: false\n- External Active → sets DB status=true if was false, returns isSubscribed: true\n- No DB record → returns isSubscribed: false (no external call)\n- External unavailable → 503"
+              }
+            },
+            {
+              "name": "Subscribe (Sync with External API)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  { "key": "Content-Type", "value": "application/json" },
+                  { "key": "X-Forwarded-For", "value": "103.0.0.1", "description": "Simulate client IP (optional — set automatically in production)", "disabled": true }
+                ],
+                "url": { "raw": "{{baseUrl}}/api/public/subscribe", "host": ["{{baseUrl}}"], "path": ["api", "public", "subscribe"] },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"phone\": \"8801700000000\",\n  \"reference\": \"e027829f-b0b2-405f-a3c7-bd79e6fb6e04\",\n  \"platform\": \"android\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "description": "Calls external API with `reference` as `adAgencyCampaignTransactionId` and client IP from `X-Forwarded-For` / `X-Real-IP` headers.\n\nSources returned:\n- external-active-created\n- external-active-reactivated\n- external-active-existing\n- external-inactive-deactivated\n- external-inactive-already\n- external-inactive-not-found"
+              }
+            },
+            {
+              "name": "Update Subscriber by ID",
+              "request": {
+                "method": "PUT",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "url": {
+                  "raw": "{{baseUrl}}/api/public/subscribe/:id",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "public", "subscribe", ":id"],
+                  "variable": [{ "key": "id", "value": "SUBSCRIBER_ID_HERE" }]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"status\": true,\n  \"reference\": \"REF123\",\n  \"platform\": \"android\"\n}"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Unsubscribe",
+          "item": [
+            {
+              "name": "Unsubscribe",
+              "request": {
+                "method": "PUT",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "url": { "raw": "{{baseUrl}}/api/public/unsubscribe", "host": ["{{baseUrl}}"], "path": ["api", "public", "unsubscribe"] },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"phone\": \"8801700000000\"\n}"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "OCR",
+          "item": [
+            {
+              "name": "OCR - Google Vision",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "url": { "raw": "{{baseUrl}}/api/public/ocr/google", "host": ["{{baseUrl}}"], "path": ["api", "public", "ocr", "google"] },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"image\": \"BASE64_ENCODED_IMAGE_HERE\",\n  \"language\": \"eng\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "description": "Returns: { fullText, numbers, language, engine: 'google-vision' }"
+              }
+            },
+            {
+              "name": "OCR - Groq (fallback: Google Vision)",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "url": { "raw": "{{baseUrl}}/api/public/ocr/groq", "host": ["{{baseUrl}}"], "path": ["api", "public", "ocr", "groq"] },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"image\": \"BASE64_ENCODED_IMAGE_HERE\",\n  \"language\": \"eng\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "description": "Falls back to Google Vision on Groq rate limit. Returns: { fullText, numbers, language, engine, fallbackUsed, tokens? }"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

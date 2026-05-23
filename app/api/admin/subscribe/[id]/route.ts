@@ -50,8 +50,8 @@ export const DELETE = asyncHandler(async (req, params) => {
     return apiResponse(false, 400, "Invalid or missing Subscribe id!");
   }
 
-  const existingTestimonail = await Subscribe.findById(id);
-  if (!existingTestimonail) {
+  const existingTestimonial = await Subscribe.findById(id);
+  if (!existingTestimonial) {
     return apiResponse(false, 404, "Subscribe not found!");
   }
 

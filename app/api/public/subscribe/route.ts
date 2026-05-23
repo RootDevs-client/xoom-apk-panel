@@ -1,32 +1,8 @@
-// app/api/public/subscribe/check/route.ts
 import { asyncHandler } from "@/lib/async-handler";
+import { checkExternalSubscription } from "@/lib/check-external-subscription";
 import { apiResponse } from "@/lib/server.utils";
 import { createSubscribeSchema } from "@/lib/validation-schema";
 import { Subscribe } from "@/model/Subscribe";
-
-// ─── Check External API ──────────────────────────────────
-async function checkExternalSubscription(phone: string) {
-  try {
-    const res = await fetch(
-      "https://universal-subscription-api.vclipss.com/CheckSubscriberStatus",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          msisdn: phone,
-          userTelcoServiceId: 200,
-          adAgencyCampaignId: 200,
-          adAgencyCampaignTransactionId: "e027829f-b0b2-405f-a3c7-bd79e6fb6e04",
-          userIP: "103.139.197.250",
-          ua: "windows",
-        }),
-      },
-    );
-    return await res.json();
-  } catch {
-    return null;
-  }
-}
 
 // ─── Main Route ──────────────────────────────────────────
 export const POST = asyncHandler(createSubscribeSchema, async (req, data) => {
@@ -34,8 +10,17 @@ export const POST = asyncHandler(createSubscribeSchema, async (req, data) => {
   const reference = data.reference.trim();
   const platform = data.platform?.trim() || "";
 
+  const userIP =
+    req.headers.get("x-forwarded-for")?.split(",")[0].trim() ??
+    req.headers.get("x-real-ip") ??
+    undefined;
+
   // ── Step 1: external API ──
-  const externalRes = await checkExternalSubscription(phone);
+  const externalRes = await checkExternalSubscription({
+    phone,
+    adAgencyCampaignTransactionId: reference,
+    userIP,
+  });
   const isExtActive = externalRes?.responseMessage === "Active";
 
   if (!externalRes) {

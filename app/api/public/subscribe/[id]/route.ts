@@ -4,7 +4,7 @@ import { updateSubscribeSchema } from "@/lib/validation-schema";
 import { Subscribe } from "@/model/Subscribe";
 import { Types } from "mongoose";
 
-//!update
+// Update
 export const PUT = asyncHandler(
   updateSubscribeSchema,
   async (req, data, params) => {
