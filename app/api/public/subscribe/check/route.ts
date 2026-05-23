@@ -49,7 +49,7 @@ export const GET = asyncHandler(async (req: NextRequest) => {
     await Subscribe.findOneAndUpdate(
       { phone },
       { $set: { status: false } },
-      { new: true },
+      { returnDocument: "after" },
     );
 
     return apiResponse(true, 200, "User is not subscribed!", {
@@ -64,7 +64,7 @@ export const GET = asyncHandler(async (req: NextRequest) => {
     await Subscribe.findOneAndUpdate(
       { phone },
       { $set: { status: true } },
-      { new: true },
+      { returnDocument: "after" },
     );
   }
 

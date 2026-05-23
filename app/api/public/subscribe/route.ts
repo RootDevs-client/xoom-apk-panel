@@ -66,7 +66,7 @@ export const POST = asyncHandler(createSubscribeSchema, async (req, data) => {
           status: true,
         },
       },
-      { new: true },
+      { returnDocument: "after" },
     );
 
     const source =
@@ -101,7 +101,7 @@ export const POST = asyncHandler(createSubscribeSchema, async (req, data) => {
     const updated = await Subscribe.findOneAndUpdate(
       { phone },
       { $set: { status: false } },
-      { new: true },
+      { returnDocument: "after" },
     );
 
     return apiResponse(true, 200, "Subscription deactivated!", {
