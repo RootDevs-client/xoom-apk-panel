@@ -5,7 +5,7 @@ import { updateTag } from "next/cache";
 // general settings
 export async function getGeneralSettings() {
   try {
-    const res = await apiClient(`/api/admin/settings/general`, {
+    const res = await apiClient(`/admin/settings`, {
       method: "GET",
       tags: ["settings"],
       cache: "force-cache",
@@ -30,7 +30,7 @@ export async function getGeneralSettings() {
 export async function updateGeneralSettings(data: any) {
   try {
     // Both create and update use PUT method
-    const endpoint = `/api/admin/settings/general`;
+    const endpoint = `/admin/settings/general`;
 
     const res = await apiClient(endpoint, {
       method: "PUT",
@@ -60,7 +60,7 @@ export async function updateGeneralSettings(data: any) {
 
 export async function getAllSettingsDetails(context: string) {
   try {
-    const res = await apiClient(`/api/settings?context=${context}`, {
+    const res = await apiClient(`/settings?context=${context}`, {
       method: "GET",
       tags: ["settings"],
       cache: "force-cache",

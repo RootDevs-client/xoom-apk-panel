@@ -2,12 +2,10 @@ import { Users } from "lucide-react";
 import StatCard from "./StatCard";
 
 interface StatsData {
-  subscribe: {
-    total: number;
-    active: number;
-    inactive: number;
-    featured: number;
-  };
+  total: number;
+  active: number;
+  inactive: number;
+  featured: number;
 }
 
 const DashboardStats = ({ statsData }: { statsData: StatsData }) => {
@@ -15,7 +13,7 @@ const DashboardStats = ({ statsData }: { statsData: StatsData }) => {
     {
       title: "Subscribe",
       icon: Users,
-      data: statsData?.subscribe || "",
+      data: statsData || "",
       gradient: "from-blue-500 to-cyan-500",
       bgLight: "bg-blue-50",
       bgDark: "dark:bg-blue-950/30",

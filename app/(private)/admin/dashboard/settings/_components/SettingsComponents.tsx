@@ -19,7 +19,7 @@ export default async function SettingsComponents() {
         </div>
       </div>
 
-      <TabsSettings generalSettings={generalSettings?.data || []} />
+      <TabsSettings generalSettings={generalSettings?.data?.general || []} />
     </div>
   );
 }

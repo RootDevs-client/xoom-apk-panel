@@ -11,7 +11,7 @@ export async function handleLogin(formData: FormData) {
       return { error: "Email and password are required." };
     }
 
-    const res = await apiClient(`/api/admin/auth/login`, {
+    const res = await apiClient(`/admin/auth/login`, {
       method: "POST",
       body: { email, password },
     });
@@ -22,7 +22,7 @@ export async function handleLogin(formData: FormData) {
       };
     }
 
-    const token = res?.data?.token;
+    const token = res?.data?.accessToken;
 
     // Return success result
     return { success: true, token };

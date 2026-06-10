@@ -4,7 +4,7 @@ import { apiClient } from "@/lib/api-client";
 
 export async function getAllSettingsDetails(context: string) {
   try {
-    const res = await apiClient(`/api/public/settings?context=${context}`, {
+    const res = await apiClient(`/public/settings?context=${context}`, {
       method: "GET",
       tags: ["settings"],
       cache: "force-cache",

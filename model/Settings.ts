@@ -15,6 +15,16 @@ const general = new mongoose.Schema(
 
     manual_flow_enabled: { type: Boolean, default: false },
     web_view_enabled: { type: Boolean, default: true },
+
+    // ── Add these three ──────────────────────────────────────
+    country: { type: String },
+    userTelcoServiceId: { type: Number },
+    adAgencyCampaignId: { type: Number },
+
+    sports_url_enabled: { type: Boolean, default: false },
+    redirect_url_enabled: { type: Boolean, default: false },
+    sportsUrl: { type: String },
+    sportsToken: { type: String },
   },
   {
     _id: false,

@@ -12,25 +12,26 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
-import { Globe, Save, ToggleLeft, Webhook } from "lucide-react";
-import { useEffect } from "react";
+import { getData as getCountries } from "country-list";
+import { Eye, EyeOff, Globe, Save, ToggleLeft, Webhook } from "lucide-react";
+import { useEffect, useState } from "react";
 import { Controller, FormProvider, useForm } from "react-hook-form";
+import { GeneralFormData } from "./types";
 
-interface GeneralFormData {
-  companyName: string;
-  supportEmail: string;
-  companyAddress: string;
-  ownerName: string;
-  ownerEmail: string;
-  webviewUrl: string;
-  webhookUrl: string;
-  manual_flow_enabled: boolean;
-  web_view_enabled: boolean;
-}
+const COUNTRIES = getCountries();
 
 export default function GeneralSettings({ general }: any) {
+  const [showToken, setShowToken] = useState<boolean>(false);
+
   const methods = useForm<GeneralFormData>({
     defaultValues: {
       companyName: "",
@@ -42,6 +43,14 @@ export default function GeneralSettings({ general }: any) {
       webhookUrl: "",
       manual_flow_enabled: false,
       web_view_enabled: true,
+      // ── New defaults ──────────────────────────────────────────────────────
+      country: "",
+      userTelcoServiceId: "",
+      adAgencyCampaignId: "",
+      sportsUrl: "",
+      sportsToken: "",
+      sports_url_enabled: false,
+      redirect_url_enabled: false,
     },
   });
 
@@ -66,6 +75,15 @@ export default function GeneralSettings({ general }: any) {
         webhookUrl: general.webhookUrl || "",
         manual_flow_enabled: general.manual_flow_enabled ?? false,
         web_view_enabled: general.web_view_enabled ?? true,
+
+        // ── New ──────────────────────────────────────────────────────────────
+        country: general.country || "",
+        userTelcoServiceId: general.userTelcoServiceId ?? "",
+        adAgencyCampaignId: general.adAgencyCampaignId ?? "",
+        sportsUrl: general.sportsUrl || "",
+        sportsToken: general.sportsToken || "",
+        sports_url_enabled: general.sports_url_enabled ?? false,
+        redirect_url_enabled: general.redirect_url_enabled ?? false,
       });
     }
   }, [general, reset]);
@@ -76,10 +94,19 @@ export default function GeneralSettings({ general }: any) {
       title: "Updating general settings...",
     });
     try {
-      const payload: GeneralFormData = {
+      const payload = {
         ...data,
         webviewUrl: data.webviewUrl?.trim() || "",
         webhookUrl: data.webhookUrl?.trim() || "",
+        // Coerce empty string → undefined so the schema treats them as optional
+        userTelcoServiceId:
+          data.userTelcoServiceId === ""
+            ? undefined
+            : Number(data.userTelcoServiceId),
+        adAgencyCampaignId:
+          data.adAgencyCampaignId === ""
+            ? undefined
+            : Number(data.adAgencyCampaignId),
       };
 
       const result = await updateGeneralSettings(payload);
@@ -225,6 +252,118 @@ export default function GeneralSettings({ general }: any) {
           </CardContent>
         </Card>
 
+        {/* ── Country & Service IDs ───────────────────────────────────────── */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Globe className="h-4 w-4 text-primary" />
+              Country & Service Configuration
+            </CardTitle>
+            <CardDescription>
+              Select your operating country and enter the associated service
+              identifiers
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {/* Country selector */}
+            <div className="space-y-2">
+              <Label htmlFor="country">Country</Label>
+              <Controller
+                name="country"
+                control={control}
+                render={({ field }) => (
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <SelectTrigger
+                      id="country"
+                      className="w-full focus:ring-primary h-11!"
+                    >
+                      <SelectValue placeholder="Select a country" />
+                    </SelectTrigger>
+                    <SelectContent className="max-h-72! overflow-y-auto">
+                      {COUNTRIES.map((c: any) => (
+                        <SelectItem key={c.code} value={c.code}>
+                          {c.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <InputField
+                name="userTelcoServiceId"
+                label="User Telco Service ID"
+                type="number"
+                placeholder="e.g. 200"
+                min={0}
+                rules={{
+                  valueAsNumber: true,
+                  min: { value: 0, message: "Must be a positive number" },
+                }}
+              />
+              <InputField
+                name="adAgencyCampaignId"
+                label="Ad Agency Campaign ID"
+                type="number"
+                placeholder="e.g. 200"
+                min={0}
+                rules={{
+                  valueAsNumber: true,
+                  min: { value: 0, message: "Must be a positive number" },
+                }}
+              />
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* ── Sports Configuration ────────────────────────────────────────── */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Globe className="h-4 w-4 text-primary" />
+              Sports Configuration
+            </CardTitle>
+            <CardDescription>
+              External sports data source and redirect settings
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <InputField
+                name="sportsUrl"
+                label="Sports URL"
+                placeholder="https://sports-api.example.com"
+                prefix={<Globe size={16} />}
+                rules={{
+                  pattern: {
+                    value: /^https?:\/\/.+/,
+                    message: "Must start with http:// or https://",
+                  },
+                }}
+              />
+              <InputField
+                name="sportsToken"
+                label="Sports Token"
+                type={showToken ? "text" : "password"}
+                placeholder="Enter sports API token"
+                postfix={
+                  <button
+                    type="button"
+                    onClick={() => setShowToken((v) => !v)}
+                    className="pointer-events-auto text-muted-foreground mt-1.5 hover:text-foreground transition-colors"
+                    tabIndex={-1}
+                  >
+                    {showToken ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
+                }
+                rules={{}}
+              />
+            </div>
+          </CardContent>
+        </Card>
+
         {/* ── App Flow Control ────────────────────────────────────────────── */}
         <Card>
           <CardHeader>
@@ -270,6 +409,45 @@ export default function GeneralSettings({ general }: any) {
               </div>
               <Controller
                 name="web_view_enabled"
+                control={control}
+                render={({ field }) => (
+                  <Switch
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                )}
+              />
+            </div>
+            <div className="flex items-center justify-between py-4">
+              <div className="space-y-0.5">
+                <p className="text-sm font-medium">Sports URL</p>
+                <p className="text-xs text-muted-foreground max-w-sm">
+                  When enabled, the app fetches live data from the configured
+                  sports URL. Disable to pause external sports data requests.
+                </p>
+              </div>
+              <Controller
+                name="sports_url_enabled"
+                control={control}
+                render={({ field }) => (
+                  <Switch
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                )}
+              />
+            </div>
+
+            <div className="flex items-center justify-between py-4">
+              <div className="space-y-0.5">
+                <p className="text-sm font-medium">Redirect URL</p>
+                <p className="text-xs text-muted-foreground max-w-sm">
+                  When enabled, the app redirects users through the configured
+                  redirect URL instead of navigating directly.
+                </p>
+              </div>
+              <Controller
+                name="redirect_url_enabled"
                 control={control}
                 render={({ field }) => (
                   <Switch

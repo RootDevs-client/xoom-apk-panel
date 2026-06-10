@@ -4,7 +4,7 @@ import { apiClient } from "@/lib/api-client";
 
 export async function getDashboardStats() {
   try {
-    const res = await apiClient(`/api/admin/dashboard/stats`, {
+    const res = await apiClient(`/admin/dashboard/stats`, {
       method: "GET",
       //   tags: ["contact-us"],
       // cache: "no-store",

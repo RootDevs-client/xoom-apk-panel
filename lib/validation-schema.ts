@@ -38,9 +38,25 @@ export const settingsGeneralSchema = z.object({
 
   webviewUrl: z.string().optional(),
   webhookUrl: z.string().optional(),
+  sportsUrl: z.string().optional(),
+  sportsToken: z.string().optional(),
 
   manual_flow_enabled: z.boolean().optional(),
   web_view_enabled: z.boolean().optional(),
+
+  // new filed added
+  country: z.string().optional(),
+  userTelcoServiceId: z
+    .union([z.number(), z.null()])
+    .optional()
+    .transform((val) => val ?? undefined),
+  adAgencyCampaignId: z
+    .union([z.number(), z.null()])
+    .optional()
+    .transform((val) => val ?? undefined),
+
+  sports_url_enabled: z.boolean().optional(),
+  redirect_url_enabled: z.boolean().optional(),
 });
 
 //! stories validation schema
