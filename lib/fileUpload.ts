@@ -16,11 +16,11 @@ export async function uploadSingleFile(file: File) {
   formData.append("file", file);
 
   const res = await uploadFile(formData);
-
-  if (res.status && res.data?.path) {
+  console.log("upload result================", res);
+  if (res.status && res.data?.url) {
     return {
-      imageId: res.data.path,
-      url: res.data.path,
+      imageId: res.data.url,
+      url: res.data.url,
     };
   }
 
