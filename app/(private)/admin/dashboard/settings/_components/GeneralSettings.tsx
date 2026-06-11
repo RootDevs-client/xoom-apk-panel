@@ -1,6 +1,7 @@
 "use client";
 
 import { updateGeneralSettings } from "@/actions/settings/settingsActions";
+import FileUploadComponent from "@/components/custom/FileUploadComponent";
 import { ToastMessage } from "@/components/custom/ToastMessage";
 import InputField from "@/components/form/InputField";
 import { Button } from "@/components/ui/button";
@@ -14,8 +15,9 @@ import {
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
-import { Globe, Save, ToggleLeft, Webhook } from "lucide-react";
-import { useEffect } from "react";
+import { uploadSingleFile } from "@/lib/fileUpload";
+import { Globe, ImageIcon, Save, ToggleLeft, Webhook } from "lucide-react";
+import { useEffect, useState } from "react";
 import { Controller, FormProvider, useForm } from "react-hook-form";
 
 interface GeneralFormData {
@@ -28,9 +30,15 @@ interface GeneralFormData {
   webhookUrl: string;
   manual_flow_enabled: boolean;
   web_view_enabled: boolean;
+  appLogo: string;
+  appName: string;
 }
 
 export default function GeneralSettings({ general }: any) {
+  const [imageFiles, setImageFiles] = useState<File[]>([]);
+  const [imageError, setImageError] = useState<string>("");
+  const [isExistingImageRemoved, setIsExistingImageRemoved] = useState(false);
+
   const methods = useForm<GeneralFormData>({
     defaultValues: {
       companyName: "",
@@ -42,9 +50,12 @@ export default function GeneralSettings({ general }: any) {
       webhookUrl: "",
       manual_flow_enabled: false,
       web_view_enabled: true,
+      appLogo: "",
+      appName: "",
     },
   });
 
+  console.log("imageFiles", imageFiles);
   const {
     handleSubmit,
     register,
@@ -66,21 +77,63 @@ export default function GeneralSettings({ general }: any) {
         webhookUrl: general.webhookUrl || "",
         manual_flow_enabled: general.manual_flow_enabled ?? false,
         web_view_enabled: general.web_view_enabled ?? true,
+        appLogo: general.appLogo || "",
+        appName: general.appName || "",
       });
     }
   }, [general, reset]);
 
   // ── Submit ─────────────────────────────────────────────────────────────────
   const onSubmit = async (data: GeneralFormData) => {
+    const hasExistingImage = general?.appLogo && !isExistingImageRemoved;
+    const hasNewImage = imageFiles.length > 0;
+    if (!hasExistingImage && !hasNewImage) {
+      setImageError("Image is required");
+      return;
+    }
+
     const loadingToast = ToastMessage.loading({
       title: "Updating general settings...",
     });
     try {
+      let imageIds: string = "";
+
+      // If new images are uploaded, upload them first
+      if (imageFiles.length > 0) {
+        ToastMessage.loading(
+          { title: "Uploading images..." },
+          { id: loadingToast },
+        );
+
+        const uploadResult = await uploadSingleFile(
+          imageFiles[0]?.name ? imageFiles[0] : new File([], "placeholder.png"),
+        );
+
+        if (!uploadResult) {
+          ToastMessage.error(
+            { title: "Failed to upload image" },
+            { id: loadingToast },
+          );
+          return;
+        }
+
+        imageIds = uploadResult.imageId;
+      } else if (general?.appLogo && general.appLogo) {
+        imageIds = general.appLogo;
+      }
+
+      ToastMessage.loading(
+        { title: "Saving section..." },
+        { id: loadingToast },
+      );
       const payload: GeneralFormData = {
         ...data,
         webviewUrl: data.webviewUrl?.trim() || "",
         webhookUrl: data.webhookUrl?.trim() || "",
+        appLogo: imageIds,
       };
+
+      console.log("payload,payload", payload);
 
       const result = await updateGeneralSettings(payload);
 
@@ -107,6 +160,47 @@ export default function GeneralSettings({ general }: any) {
   return (
     <FormProvider {...methods}>
       <div className="space-y-6">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <ImageIcon className="h-4 w-4 text-primary" />
+              App Branding
+            </CardTitle>
+            <CardDescription>
+              App name and logo shown across the mobile application
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
+              <FileUploadComponent
+                accept="image"
+                maxSize={10}
+                maxFiles={1}
+                onFilesChange={setImageFiles}
+                existingImageUrl={
+                  general?.appLogo?.startsWith("http")
+                    ? general.appLogo
+                    : `${process.env.NEXT_PUBLIC_AWS_BASE_URL}/${general.appLogo}`
+                }
+                onRemoveExisting={() => {
+                  setIsExistingImageRemoved(true);
+                  setImageError("Image is required");
+                }}
+                error={imageError}
+                required
+              />
+
+              <div className="space-y-4">
+                <InputField
+                  name="appName"
+                  label="App Name"
+                  placeholder="Xoom Sports"
+                  rules={{ required: "Required!" }}
+                />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
         {/* ── Company Information ─────────────────────────────────────────── */}
         <Card>
           <CardHeader>

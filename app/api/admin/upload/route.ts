@@ -8,8 +8,12 @@ export const POST = asyncFormDataHandler(
     if (!file) {
       return apiResponse(false, 400, "File is required!");
     }
+    console.log("file", file);
+    console.log("file name", file?.name);
+    console.log("file size", file?.size);
 
     const result = await uploadImage(file);
+    console.log("result,user-select-allow-file", result);
     return apiResponse(true, 200, "File uploaded successfully!", result);
   },
   true,
