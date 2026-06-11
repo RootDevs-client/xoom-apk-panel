@@ -29,7 +29,16 @@ export const passwordChangeSchema = z
     message: "Passwords do not match!",
     path: ["confirmPassword"],
   });
+const galleryItemSchema = z.object({
+  title: z.string(),
+  url: z.string(),
+});
+
 export const settingsGeneralSchema = z.object({
+  appLogo: z.string().optional(),
+  appName: z.string().optional(),
+  backgroundImage: z.string().optional(),
+
   companyName: z.string().optional(),
   companyAddress: z.string().optional(),
   supportEmail: z.string().email().optional(),
@@ -41,6 +50,14 @@ export const settingsGeneralSchema = z.object({
 
   manual_flow_enabled: z.boolean().optional(),
   web_view_enabled: z.boolean().optional(),
+
+  galleries: z.array(galleryItemSchema).optional(),
+  offerTitle: z.string().optional(),
+  offerDescription: z.string().optional(),
+
+  privacyPolicy: z.string().optional(),
+  termsOfService: z.string().optional(),
+  aboutUs: z.string().optional(),
 });
 
 //! stories validation schema

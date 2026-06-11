@@ -1,5 +1,5 @@
 import { asyncHandler } from "@/lib/async-handler";
-import { apiResponse } from "@/lib/server.utils";
+import { apiResponse, prependAwsBaseUrl } from "@/lib/server.utils";
 import { settingsGeneralSchema } from "@/lib/validation-schema";
 import Settings from "@/model/Settings";
 import { NextRequest } from "next/server";
@@ -35,9 +35,16 @@ export const GET = asyncHandler(async () => {
     return apiResponse(false, 404, "General settings not found!");
   }
 
-  const data = {
-    ...general.toObject(),
-  };
+  const data = general.toObject();
+
+  data.appLogo = prependAwsBaseUrl(data.appLogo);
+  data.backgroundImage = prependAwsBaseUrl(data.backgroundImage);
+  if (Array.isArray(data.galleries)) {
+    data.galleries = data.galleries.map((g: any) => ({
+      ...g,
+      url: prependAwsBaseUrl(g.url),
+    }));
+  }
 
   return apiResponse(
     true,

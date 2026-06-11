@@ -33,20 +33,37 @@ export interface ITermsPolicy {
   terms: string;
   policy: string;
 }
+export interface IGalleryItem {
+  title: string;
+  url: string;
+}
+
 export interface IGeneral extends Document {
-  companyName: string;
-  companyDialCode: string;
-  companyPhone: string;
-  companyAddress: string;
-  logo: string;
-  favicon: string;
-  supportEmail: string;
-  ownerName: string;
-  ownerEmail: string;
-  facebook: string;
-  instagram: string;
-  twitter: string;
-  youtube: string;
+  appLogo?: string;
+  appName?: string;
+  backgroundImage?: string;
+
+  companyName?: string;
+  companyAddress?: string;
+
+  supportEmail?: string;
+  ownerName?: string;
+  ownerEmail?: string;
+
+  webviewUrl?: string;
+  webhookUrl?: string;
+
+  manual_flow_enabled?: boolean;
+  web_view_enabled?: boolean;
+
+  galleries?: IGalleryItem[];
+
+  offerTitle?: string;
+  offerDescription?: string;
+
+  privacyPolicy?: string;
+  termsOfService?: string;
+  aboutUs?: string;
 }
 export interface ISettings extends Document {
   general: IGeneral;
