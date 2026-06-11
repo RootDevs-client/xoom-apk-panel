@@ -184,8 +184,6 @@ export default function GeneralSettings({ general }: any) {
     );
   };
 
-  console.log("general", general);
-
   // ── Submit ──────────────────────────────────────────────────────────────────
   const onSubmit = async (data: GeneralFormData) => {
     const hasExistingLogo = general?.appLogo && !logoRemoved;
@@ -337,23 +335,41 @@ export default function GeneralSettings({ general }: any) {
                   required
                 />
               </div>
-
-              <div className="space-y-4">
-                <InputField
-                  name="appName"
-                  label="App Name"
-                  placeholder="Xoom Sports"
-                  rules={{ required: "Required!" }}
+              <div className="space-y-1.5">
+                <Label>Background Image</Label>
+                <FileUploadComponent
+                  accept="image"
+                  maxSize={10}
+                  maxFiles={1}
+                  onFilesChange={(files) => {
+                    setBgFile(files);
+                    if (files.length > 0) setBgRemoved(false);
+                  }}
+                  existingImageUrl={
+                    !bgRemoved ? general?.backgroundImage || "" : ""
+                  }
+                  onRemoveExisting={() => {
+                    setBgRemoved(true);
+                    setBgFile([]);
+                  }}
                 />
-                <div className="space-y-2">
-                  <Label>About Us</Label>
-                  <Textarea
-                    placeholder="Write about your company..."
-                    rows={4}
-                    className="focus-visible:ring-primary"
-                    {...register("aboutUs")}
-                  />
-                </div>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <InputField
+                name="appName"
+                label="App Name"
+                placeholder="Xoom Sports"
+                rules={{ required: "Required!" }}
+              />
+              <div className="space-y-2">
+                <Label>About Us</Label>
+                <Textarea
+                  placeholder="Write about your company..."
+                  rows={4}
+                  className="focus-visible:ring-primary"
+                  {...register("aboutUs")}
+                />
               </div>
             </div>
 
@@ -393,39 +409,6 @@ export default function GeneralSettings({ general }: any) {
           </CardContent>
         </Card>
 
-        {/* ── Background Image ─────────────────────────────────────────────── */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <ImageIcon className="h-4 w-4 text-primary" />
-              Background Image
-            </CardTitle>
-            <CardDescription>
-              Full-screen background image shown in the mobile app
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="max-w-sm">
-              <FileUploadComponent
-                accept="image"
-                maxSize={10}
-                maxFiles={1}
-                onFilesChange={(files) => {
-                  setBgFile(files);
-                  if (files.length > 0) setBgRemoved(false);
-                }}
-                existingImageUrl={
-                  !bgRemoved ? general?.backgroundImage || "" : ""
-                }
-                onRemoveExisting={() => {
-                  setBgRemoved(true);
-                  setBgFile([]);
-                }}
-              />
-            </div>
-          </CardContent>
-        </Card>
-
         {/* ── Gallery ──────────────────────────────────────────────────────── */}
         <Card>
           <CardHeader>
@@ -437,21 +420,18 @@ export default function GeneralSettings({ general }: any) {
               Up to {GALLERY_SIZE} images shown in the app gallery
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6  p-4">
             {gallerySlots.map((slot, index) => (
-              <div
-                key={index}
-                className="grid grid-cols-1 md:grid-cols-2 gap-4 border rounded-lg p-4"
-              >
+              <div key={index} className=" flex flex-col gap-4">
                 {/* Title */}
                 <div className="space-y-1.5">
                   <Label>Gallery {index + 1} Title</Label>
-                  <input
+                  <InputField
                     type="text"
-                    value={slot.title}
+                    name={slot.title}
                     onChange={(e) => updateSlotTitle(index, e.target.value)}
                     placeholder={`Gallery ${index + 1}`}
-                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                    className=""
                   />
                 </div>
 
