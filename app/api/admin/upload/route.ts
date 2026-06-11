@@ -9,9 +9,6 @@ export const POST = asyncFormDataHandler(
     if (!file) {
       return apiResponse(false, 400, "File is required!");
     }
-    console.log("file", file);
-    console.log("file name", file?.name);
-    console.log("file size", file?.size);
 
     const buffer = Buffer.from(await file.arrayBuffer());
     const result = await uploadToS3(buffer, file.name, file.type);

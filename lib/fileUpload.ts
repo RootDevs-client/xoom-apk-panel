@@ -5,18 +5,12 @@ interface UploadResult {
   url: string;
 }
 
-/**
- * Upload a single file.
- * Passes the raw File to the server action — FormData is built there to avoid
- * Next.js serialization stripping the file contents across the action boundary.
- */
 export async function uploadSingleFile(file: File) {
   const formData = new FormData();
 
   formData.append("file", file);
 
   const res = await uploadFile(formData);
-  console.log("upload result================", res);
   if (res.status && res.data?.url) {
     return {
       imageId: res.data.url,
