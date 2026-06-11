@@ -16,11 +16,6 @@ interface UploadResponse {
   data: any;
 }
 
-/**
- * Accepts FormData directly — this is the ONLY type Next.js can reliably
- * pass across the client→server action boundary without stripping contents.
- * Build the FormData on the CLIENT before calling this action.
- */
 export async function uploadFile(formData: FormData): Promise<{
   status: boolean;
   message: string;

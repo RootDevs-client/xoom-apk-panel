@@ -83,6 +83,8 @@ export default function GeneralSettings({ general }: any) {
     }
   }, [general, reset]);
 
+  console.log("general,general", general);
+
   // ── Submit ─────────────────────────────────────────────────────────────────
   const onSubmit = async (data: GeneralFormData) => {
     const hasExistingImage = general?.appLogo && !isExistingImageRemoved;
@@ -157,6 +159,9 @@ export default function GeneralSettings({ general }: any) {
     }
   };
 
+  const appUrl = `${process.env.AWS_BASE_URL}/${general.appLogo}`;
+  console.log("appUrl,appUrl", appUrl);
+
   return (
     <FormProvider {...methods}>
       <div className="space-y-6">
@@ -177,11 +182,7 @@ export default function GeneralSettings({ general }: any) {
                 maxSize={10}
                 maxFiles={1}
                 onFilesChange={setImageFiles}
-                existingImageUrl={
-                  general?.appLogo?.startsWith("http")
-                    ? general.appLogo
-                    : `${process.env.NEXT_PUBLIC_AWS_BASE_URL}/${general.appLogo}`
-                }
+                existingImageUrl={general?.appLogo ? general.appLogo : ""}
                 onRemoveExisting={() => {
                   setIsExistingImageRemoved(true);
                   setImageError("Image is required");

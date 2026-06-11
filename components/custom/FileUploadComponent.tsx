@@ -214,7 +214,7 @@ const FileUploadComponent = ({
           />
 
           {/* Overlay with delete button */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex flex-col justify-end p-4">
+          <div className="absolute inset-0 bg-linear-to-t from-black/60 to-transparent flex flex-col justify-end p-4">
             <div className="flex items-end justify-between">
               <div className="text-white">
                 <p className="font-medium text-sm">Current Image</p>
@@ -272,7 +272,7 @@ const FileUploadComponent = ({
           />
 
           {/* Overlay with file info and delete button */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex flex-col justify-end p-4">
+          <div className="absolute inset-0 bg-linear-to-t from-black/60 to-transparent flex flex-col justify-end p-4">
             <div className="flex items-end justify-between">
               <div className="text-white">
                 <p className="font-medium text-sm truncate">
