@@ -486,3 +486,10 @@ export function truncateText(text: string, maxLength: number): string {
   if (text.length <= maxLength) return text;
   return text.slice(0, maxLength).trimEnd();
 }
+
+const AWS_BASE_URL = process.env.AWS_BASE_URL || "";
+
+export function prependAwsBaseUrl(value: string | undefined): string | undefined {
+  if (!value || value.startsWith("http")) return value;
+  return `${AWS_BASE_URL}/${value}`;
+}
