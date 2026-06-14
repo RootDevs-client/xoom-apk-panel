@@ -1,6 +1,7 @@
 import { asyncHandler } from "@/lib/async-handler";
 import { checkExternalSubscription } from "@/lib/check-external-subscription";
 import { createXoomSportsUser } from "@/lib/create-xoom-sports-user";
+import { getLocationFromIP } from "@/lib/location";
 import { apiResponse } from "@/lib/server.utils";
 import { createSubscribeSchema } from "@/lib/validation-schema";
 import { Subscribe } from "@/model/Subscribe";
@@ -17,25 +18,13 @@ export const POST = asyncHandler(createSubscribeSchema, async (req, data) => {
     req.headers.get("x-forwarded-for")?.split(",")[0].trim() ??
     req.headers.get("x-real-ip") ??
     undefined;
-
   const deviceInfoEntry: Record<string, any> = { ...(data.deviceInfo ?? {}) };
   if (userIP) {
     deviceInfoEntry.ip = userIP;
-    try {
-      const geoip = await import("geoip-lite");
-      const geo = geoip.default.lookup(userIP);
-      if (geo) {
-        deviceInfoEntry.location = {
-          city: geo.city,
-          region: geo.region,
-          country: geo.country,
-        };
-        if (geo.ll) {
-          deviceInfoEntry.location.lat = geo.ll[0];
-          deviceInfoEntry.location.lng = geo.ll[1];
-        }
-      }
-    } catch {}
+    const location = await getLocationFromIP(userIP);
+    if (location.country !== "Unknown") {
+      deviceInfoEntry.location = location;
+    }
   }
 
   // ── Step 1: external API ──

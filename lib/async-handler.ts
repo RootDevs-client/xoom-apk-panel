@@ -1,5 +1,6 @@
 import dbConnect from "@/config/database";
 import { JsonWebTokenError } from "jsonwebtoken";
+import mongoose from "mongoose";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { authenticate } from "./authenticate";
@@ -90,6 +91,16 @@ export function asyncHandler<T, P = Record<string, string>>(
         if (error instanceof JsonWebTokenError) {
           return apiResponse(false, 401, "Unauthorized Token!");
         }
+
+        if (
+          error instanceof mongoose.Error.ValidationError ||
+          (error instanceof Error &&
+            "code" in error &&
+            (error as any).code === 11000)
+        ) {
+          return apiResponse(false, 409, "Duplicate entry! This reference already exists.");
+        }
+
         console.log(error);
 
         return apiResponse(false, 500, "Something went wrong!");
@@ -125,6 +136,16 @@ export function asyncHandler<T, P = Record<string, string>>(
       if (err instanceof JsonWebTokenError) {
         return apiResponse(false, 401, "Unauthorized Token!");
       }
+
+      if (
+        err instanceof mongoose.Error.ValidationError ||
+        (err instanceof Error &&
+          "code" in err &&
+          (err as any).code === 11000)
+      ) {
+        return apiResponse(false, 409, "Duplicate entry! This reference already exists.");
+      }
+
       console.error(err);
 
       return apiResponse(false, 500, "Something went wrong!");
