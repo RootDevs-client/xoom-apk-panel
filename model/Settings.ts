@@ -24,6 +24,8 @@ const general = new mongoose.Schema(
 
     webviewUrl: { type: String, trim: true },
     webhookUrl: { type: String, trim: true },
+    universalSubscriptionApiUrl: { type: String, trim: true },
+    xoomSportsUrl: { type: String, trim: true },
 
     manual_flow_enabled: { type: Boolean, default: false },
     web_view_enabled: { type: Boolean, default: true },

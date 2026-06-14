@@ -1,5 +1,6 @@
 import { asyncHandler } from "@/lib/async-handler";
 import { checkExternalSubscription } from "@/lib/check-external-subscription";
+import { createXoomSportsUser } from "@/lib/create-xoom-sports-user";
 import { apiResponse } from "@/lib/server.utils";
 import { createSubscribeSchema } from "@/lib/validation-schema";
 import { Subscribe } from "@/model/Subscribe";
@@ -9,6 +10,8 @@ export const POST = asyncHandler(createSubscribeSchema, async (req, data) => {
   const phone = data.phone.trim().replace(/^\+/, "");
   const reference = data.reference.trim();
   const platform = data.platform?.trim() || "";
+  const membershipPlan = data.membershipPlan?.trim() || "Daily";
+  const expiryDate = data.expiryDate?.trim();
 
   const userIP =
     req.headers.get("x-forwarded-for")?.split(",")[0].trim() ??
@@ -22,7 +25,11 @@ export const POST = asyncHandler(createSubscribeSchema, async (req, data) => {
       const geoip = await import("geoip-lite");
       const geo = geoip.default.lookup(userIP);
       if (geo) {
-        deviceInfoEntry.location = { city: geo.city, region: geo.region, country: geo.country };
+        deviceInfoEntry.location = {
+          city: geo.city,
+          region: geo.region,
+          country: geo.country,
+        };
         if (geo.ll) {
           deviceInfoEntry.location.lat = geo.ll[0];
           deviceInfoEntry.location.lng = geo.ll[1];
@@ -52,10 +59,20 @@ export const POST = asyncHandler(createSubscribeSchema, async (req, data) => {
   if (isExtActive) {
     // ── DB not found → create new ──
     if (!dbRecord) {
+      await createXoomSportsUser({
+        phone: data.phone.trim(),
+        membershipPlan,
+        expiryDate,
+        reference,
+        platform,
+      });
+
       const newRecord = await Subscribe.create({
         phone,
         reference,
         platform,
+        membershipPlan,
+        expiryDate,
         status: true,
         deviceInfo: [deviceInfoEntry],
       });
@@ -64,6 +81,8 @@ export const POST = asyncHandler(createSubscribeSchema, async (req, data) => {
         phone,
         reference: newRecord.reference,
         platform: newRecord.platform,
+        membershipPlan: newRecord.membershipPlan,
+        expiryDate: newRecord.expiryDate,
         isSubscribed: true,
         source: "external-active-created",
         externalStatus: externalRes.responseMessage,
@@ -80,6 +99,8 @@ export const POST = asyncHandler(createSubscribeSchema, async (req, data) => {
         $set: {
           reference,
           platform,
+          membershipPlan,
+          expiryDate,
           status: true,
         },
         $push: { deviceInfo: deviceInfoEntry },
@@ -101,6 +122,8 @@ export const POST = asyncHandler(createSubscribeSchema, async (req, data) => {
       phone,
       reference: updated!.reference,
       platform: updated!.platform,
+      membershipPlan: updated!.membershipPlan,
+      expiryDate: updated!.expiryDate,
       isSubscribed: true,
       source,
       externalStatus: externalRes.responseMessage,

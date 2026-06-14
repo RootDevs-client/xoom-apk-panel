@@ -14,7 +14,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { uploadSingleFile } from "@/lib/fileUpload";
-import { Globe, Save, ToggleLeft, Webhook } from "lucide-react";
+import { Globe, Link, Save, ToggleLeft, Webhook } from "lucide-react";
 import { useEffect, useState } from "react";
 import { FormProvider, useFieldArray, useForm } from "react-hook-form";
 import { AppBrandingCard } from "./AppBrandingCard";
@@ -54,6 +54,8 @@ export default function GeneralSettings({ general }: any) {
       ownerEmail: "",
       webviewUrl: "",
       webhookUrl: "",
+      universalSubscriptionApiUrl: "",
+      xoomSportsUrl: "",
       manual_flow_enabled: false,
       web_view_enabled: true,
       appLogo: "",
@@ -109,6 +111,8 @@ export default function GeneralSettings({ general }: any) {
       termsOfService: general.termsOfService || "",
       galleries: general.galleries || [],
       backgroundImage: general.backgroundImage || "",
+      universalSubscriptionApiUrl: general.universalSubscriptionApiUrl || "",
+      xoomSportsUrl: general.xoomSportsUrl || "",
     });
 
     // Hydrate gallery slots from server data (one slot per existing gallery item)
@@ -122,6 +126,8 @@ export default function GeneralSettings({ general }: any) {
       })),
     );
   }, [general, reset]);
+
+  console.log("general", general);
 
   // ── Gallery slot helpers ────────────────────────────────────────────────────
   const updateSlotTitle = (index: number, title: string) => {
@@ -403,6 +409,30 @@ export default function GeneralSettings({ general }: any) {
                 label="Unsubscribe Webhook URL"
                 placeholder="https://your-system.com/api/webhook/unsubscribe"
                 prefix={<Webhook size={16} />}
+                rules={{
+                  pattern: {
+                    value: /^https?:\/\/.+/,
+                    message: "Must start with http:// or https://",
+                  },
+                }}
+              />
+              <InputField
+                name="universalSubscriptionApiUrl"
+                label="Universal Subscription API URL"
+                placeholder="https://api.example.com/api/v1"
+                prefix={<Link size={16} />}
+                rules={{
+                  pattern: {
+                    value: /^https?:\/\/.+/,
+                    message: "Must start with http:// or https://",
+                  },
+                }}
+              />
+              <InputField
+                name="xoomSportsUrl"
+                label="Xoom Sports URL"
+                placeholder="https://backend.xoomsports.com"
+                prefix={<Link size={16} />}
                 rules={{
                   pattern: {
                     value: /^https?:\/\/.+/,
