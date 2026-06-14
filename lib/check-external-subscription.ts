@@ -1,3 +1,5 @@
+import Settings from "@/model/Settings";
+
 type CheckExternalSubscriptionParams = {
   phone: string;
   adAgencyCampaignTransactionId?: string;
@@ -16,21 +18,25 @@ export async function checkExternalSubscription({
   adAgencyCampaignId = 200,
 }: CheckExternalSubscriptionParams) {
   try {
-    const res = await fetch(
-      `${process.env.UNIVERSAL_SUBSCRIPTION_API_URL}/CheckSubscriberStatus`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          msisdn: phone,
-          userTelcoServiceId,
-          adAgencyCampaignId,
-          adAgencyCampaignTransactionId,
-          userIP,
-          ua,
-        }),
-      },
-    );
+    const settings = await Settings.findOne({})
+      .select("general.universalSubscriptionApiUrl")
+      .lean();
+    const apiUrl =
+      settings?.general?.universalSubscriptionApiUrl ||
+      `${process.env.UNIVERSAL_SUBSCRIPTION_API_URL}/CheckSubscriberStatus`;
+    if (!apiUrl) return null;
+    const res = await fetch(`${apiUrl}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        msisdn: phone,
+        userTelcoServiceId,
+        adAgencyCampaignId,
+        adAgencyCampaignTransactionId,
+        userIP,
+        ua,
+      }),
+    });
 
     return await res.json();
   } catch (error) {

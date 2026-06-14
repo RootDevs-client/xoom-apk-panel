@@ -1,9 +1,13 @@
-// app/api/public/ocr/google/route.ts
 import { asyncHandler } from "@/lib/async-handler";
 import { apiResponse } from "@/lib/server.utils";
+import Settings from "@/model/Settings";
+import fs from "fs";
 import { NextRequest } from "next/server";
+import path from "path";
 
-// ─── Clean text ──────────────────────────────────────────
+// ─────────────────────────────────────────────
+// Clean OCR text
+// ─────────────────────────────────────────────
 function cleanText(text: string): string {
   return text
     .replace(/[.\-\/\\,_|]/g, " ")
@@ -11,13 +15,10 @@ function cleanText(text: string): string {
     .trim();
 }
 
-// ─── Google Vision ───────────────────────────────────────
-async function extractWithGoogleVision(
-  image: string,
-  language: string,
-): Promise<string> {
-  const base64 = image.replace(/^data:.+;base64,/, "");
-
+// ─────────────────────────────────────────────
+// Google Vision OCR
+// ─────────────────────────────────────────────
+async function googleVisionOCR(base64: string): Promise<string> {
   const res = await fetch(
     `https://vision.googleapis.com/v1/images:annotate?key=${process.env.GOOGLE_VISION_API_KEY}`,
     {
@@ -27,11 +28,7 @@ async function extractWithGoogleVision(
         requests: [
           {
             image: { content: base64 },
-            features: [
-              // { type: "TEXT_DETECTION" },
-              { type: "DOCUMENT_TEXT_DETECTION", maxResults: 1 },
-            ],
-            imageContext: { languageHints: [language] },
+            features: [{ type: "TEXT_DETECTION" }],
           },
         ],
       }),
@@ -44,63 +41,158 @@ async function extractWithGoogleVision(
     throw new Error(data.error.message);
   }
 
-  // try fullTextAnnotation
-  const fullText = data?.responses?.[0]?.fullTextAnnotation?.text?.trim();
-  if (fullText) return fullText;
-
-  // fallback to textAnnotations
-  const simpleText =
-    data?.responses?.[0]?.textAnnotations?.[0]?.description?.trim();
-  if (simpleText) return simpleText;
-
-  return "";
+  return (
+    data?.responses?.[0]?.fullTextAnnotation?.text ||
+    data?.responses?.[0]?.textAnnotations?.[0]?.description ||
+    ""
+  );
 }
 
-// ─── Main Route ──────────────────────────────────────────
+// ─────────────────────────────────────────────
+// OCR.space fallback
+// ─────────────────────────────────────────────
+async function ocrSpaceFallback(base64: string): Promise<string> {
+  const form = new FormData();
+
+  form.append("base64Image", `data:image/jpeg;base64,${base64}`);
+  form.append("language", "eng");
+  form.append("apikey", process.env.OCR_SPACE_KEY!);
+
+  const res = await fetch("https://api.ocr.space/parse/image", {
+    method: "POST",
+    body: form,
+  });
+
+  const data = await res.json();
+
+  return data?.ParsedResults?.[0]?.ParsedText || "";
+}
+
+// ─────────────────────────────────────────────
+// Gemini Flash OCR fallback (NEW)
+// ─────────────────────────────────────────────
+async function geminiFlashOCR(base64: string): Promise<string> {
+  const settings = await Settings.findOne({}).select("general.geminiApiKey").lean();
+  const apiKey = settings?.general?.geminiApiKey;
+  if (!apiKey) throw new Error("Gemini API key not configured");
+  const res = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${apiKey}`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        contents: [
+          {
+            role: "user",
+            parts: [
+              {
+                text: "Extract all text from this image. Return only raw text.",
+              },
+              {
+                inline_data: {
+                  mime_type: "image/jpeg",
+                  data: base64,
+                },
+              },
+            ],
+          },
+        ],
+      }),
+    },
+  );
+
+  const data = await res.json();
+  console.log(data);
+  if (data?.error) {
+    throw new Error(JSON.stringify(data.error));
+  }
+
+  return data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || "";
+}
+
+// ─────────────────────────────────────────────
+// Main OCR Handler
+// ─────────────────────────────────────────────
 export const POST = asyncHandler(async (req: NextRequest) => {
-  const body = await req.json();
-  const { image, language = "eng" } = body;
+  const { image } = await req.json();
 
   if (!image) {
     return apiResponse(false, 400, "Image is required!");
   }
 
-  if (!process.env.GOOGLE_VISION_API_KEY) {
-    return apiResponse(false, 500, "Google Vision API key not configured!");
-  }
+  const base64 = image.replace(/^data:.+;base64,/, "");
 
   let extractedText = "";
+  let engine = "google-vision";
 
+  // ────────────────
+  // 1. Google Vision
+  // ────────────────
   try {
-    extractedText = await extractWithGoogleVision(image, language);
-  } catch (error: any) {
-    return apiResponse(false, 500, error.message || "Google Vision failed!");
+    extractedText = await googleVisionOCR(base64);
+  } catch (err) {
+    console.log("Google Vision failed:", err);
   }
 
+  // ────────────────
+  // 2. OCR.space
+  // ────────────────
+  if (!extractedText || extractedText.trim().length < 3) {
+    console.log("Using OCR.space fallback...");
+    engine = "ocr-space";
+
+    try {
+      extractedText = await ocrSpaceFallback(base64);
+    } catch (err) {
+      console.log("OCR.space failed:", err);
+    }
+  }
+
+  // ────────────────
+  // 3. Gemini Flash OCR (NEW)
+  // ────────────────
+  if (!extractedText || extractedText.trim().length < 3) {
+    console.log("Using Gemini Flash fallback...");
+    engine = "gemini-flash";
+
+    try {
+      extractedText = await geminiFlashOCR(base64);
+    } catch (err) {
+      console.log("Gemini OCR failed:", err);
+    }
+  }
+
+  // ────────────────
+  // No text found — save debug image
+  // ────────────────
   if (!extractedText) {
+    const filePath = path.join(process.cwd(), "debug", `${Date.now()}.jpg`);
+    fs.mkdirSync(path.dirname(filePath), { recursive: true });
+    fs.writeFileSync(filePath, Buffer.from(base64, "base64"));
+
     return apiResponse(false, 404, "No text found in image!");
   }
 
-  // ── clean ──
+  // ────────────────
+  // Clean + extract data
+  // ────────────────
   const cleaned = cleanText(extractedText);
 
-  // ── numbers only ──
   const numbers = (cleaned.match(/\d+/g) ?? []).join("");
-
-  // ── emails ──
   const emails = extractedText.match(/[\w.-]+@[\w.-]+\.\w+/g) ?? [];
-
-  // ── phones ──
   const phones =
-    extractedText.match(/[+]?[\d\s\-().]{7,}/g)?.map((p: string) => p.trim()) ??
-    [];
+    extractedText.match(/[+]?[\d\s\-().]{7,}/g)?.map((p) => p.trim()) ?? [];
 
-  return apiResponse(true, 200, "Text extracted successfully!", {
+  // ────────────────
+  // Response
+  // ────────────────
+  return apiResponse(true, 200, "OCR success", {
     fullText: cleaned,
     numbers,
-    // emails,
-    // phones,
-    language,
-    engine: "google-vision",
+    emails,
+    phones,
+    engine,
   });
 });

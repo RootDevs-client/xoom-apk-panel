@@ -6,6 +6,13 @@ import moment from "moment-timezone";
 import { CancelSubscriptionCell } from "./CancelSubscriptionCell";
 
 // Define the type based on API response
+export type DeviceInfo = {
+  browser: string;
+  os: string;
+  ip: string;
+};
+
+// Define the type based on API response
 export type Subscribe = {
   _id: string;
   phone: string;
@@ -14,6 +21,7 @@ export type Subscribe = {
   status: boolean;
   createdAt: string;
   updatedAt: string;
+  deviceInfo?: DeviceInfo[];
 };
 
 const formatDate = (date: string) => {
@@ -33,6 +41,26 @@ export const columns: ColumnDef<Subscribe>[] = [
   {
     accessorKey: "platform",
     header: "Platform",
+  },
+  {
+    id: "deviceInfo",
+    header: "Device Info",
+    cell: ({ row }) => {
+      const device = row.original.deviceInfo?.[0];
+
+      if (!device) {
+        return <span className="text-muted-foreground text-sm">N/A</span>;
+      }
+
+      return (
+        <div className="text-sm leading-tight">
+          <div>
+            {device.browser} / {device.os}
+          </div>
+          <div className="text-muted-foreground text-xs"> Ip: {device.ip}</div>
+        </div>
+      );
+    },
   },
   {
     accessorKey: "createdAt",
