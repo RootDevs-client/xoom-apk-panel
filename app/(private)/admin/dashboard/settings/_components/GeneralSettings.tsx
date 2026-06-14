@@ -1,5 +1,4 @@
 "use client";
-
 import { updateGeneralSettings } from "@/actions/settings/settingsActions";
 import { ToastMessage } from "@/components/custom/ToastMessage";
 import InputField from "@/components/form/InputField";
@@ -21,7 +20,6 @@ import { AppBrandingCard } from "./AppBrandingCard";
 import { GalleryCard } from "./GalleryCard";
 import ToggleRow from "./ToggleRow";
 import { GalleryItem, GallerySlot, GeneralFormData } from "./types";
-
 function emptySlot(index: number): GallerySlot {
   return {
     title: `Gallery ${index + 1}`,
@@ -30,21 +28,16 @@ function emptySlot(index: number): GallerySlot {
     removedExisting: false,
   };
 }
-
 // ─── Component ────────────────────────────────────────────────────────────────
-
 export default function GeneralSettings({ general }: any) {
   // ── App logo ────────────────────────────────────────────────────────────────
   const [logoFile, setLogoFile] = useState<File[]>([]);
   const [logoError, setLogoError] = useState<string>("");
   const [logoRemoved, setLogoRemoved] = useState(false);
-
   const [bgFile, setBgFile] = useState<File[]>([]);
   const [bgRemoved, setBgRemoved] = useState(false);
-
   // ── Gallery slots ───────────────────────────────────────────────────────────
   const [gallerySlots, setGallerySlots] = useState<GallerySlot[]>([]);
-
   const methods = useForm<GeneralFormData>({
     defaultValues: {
       companyName: "",
@@ -69,7 +62,6 @@ export default function GeneralSettings({ general }: any) {
       backgroundImage: "",
     },
   });
-
   const {
     handleSubmit,
     register,
@@ -77,7 +69,6 @@ export default function GeneralSettings({ general }: any) {
     control,
     formState: { isSubmitting },
   } = methods;
-
   // ── useFieldArray for galleries ─────────────────────────────────────────────
   const {
     fields: galleryFields,
@@ -87,11 +78,9 @@ export default function GeneralSettings({ general }: any) {
     control,
     name: "galleries",
   });
-
   // ── Populate when server data arrives ───────────────────────────────────────
   useEffect(() => {
     if (!general) return;
-
     reset({
       companyName: general.companyName || "",
       supportEmail: general.supportEmail || "",
@@ -114,7 +103,6 @@ export default function GeneralSettings({ general }: any) {
       universalSubscriptionApiUrl: general.universalSubscriptionApiUrl || "",
       xoomSportsUrl: general.xoomSportsUrl || "",
     });
-
     // Hydrate gallery slots from server data (one slot per existing gallery item)
     const serverGalleries: GalleryItem[] = general.galleries || [];
     setGallerySlots(
@@ -135,7 +123,6 @@ export default function GeneralSettings({ general }: any) {
       prev.map((s, i) => (i === index ? { ...s, title } : s)),
     );
   };
-
   const updateSlotFile = (index: number, files: File[]) => {
     setGallerySlots((prev) =>
       prev.map((s, i) =>
@@ -143,7 +130,6 @@ export default function GeneralSettings({ general }: any) {
       ),
     );
   };
-
   const removeSlotExisting = (index: number) => {
     setGallerySlots((prev) =>
       prev.map((s, i) =>
@@ -151,14 +137,12 @@ export default function GeneralSettings({ general }: any) {
       ),
     );
   };
-
   // Add a new empty gallery slot/field
   const addGallerySlot = () => {
     const newIndex = galleryFields.length;
     appendGallery({ title: `Gallery ${newIndex + 1}`, url: "" });
     setGallerySlots((prev) => [...prev, emptySlot(newIndex)]);
   };
-
   // Remove a gallery slot/field entirely
   const removeGallerySlot = (index: number) => {
     removeGallery(index);
@@ -168,26 +152,21 @@ export default function GeneralSettings({ general }: any) {
   const onSubmit = async (data: GeneralFormData) => {
     const hasExistingLogo = general?.appLogo && !logoRemoved;
     const hasNewLogo = logoFile.length > 0;
-
     if (!hasExistingLogo && !hasNewLogo) {
       setLogoError("App logo is required");
       return;
     }
-
     const loadingToast = ToastMessage.loading({
       title: "Updating general settings...",
     });
-
     try {
       // ── 1. Upload app logo if changed ──────────────────────────────────────
       let appLogoUrl: string = general?.appLogo || "";
-
       if (hasNewLogo && logoFile[0]) {
         ToastMessage.loading(
           { title: "Uploading app logo..." },
           { id: loadingToast },
         );
-
         const result = await uploadSingleFile(logoFile[0]);
         if (!result) {
           ToastMessage.error(
@@ -198,15 +177,12 @@ export default function GeneralSettings({ general }: any) {
         }
         appLogoUrl = result.imageId; // full S3 URL or relative path from util
       }
-
       // ── 2. Resolve gallery slots ───────────────────────────────────────────
       // For each slot: upload new file if present, keep existing URL otherwise,
       // skip slot if no image at all.
       const resolvedGalleries: GalleryItem[] = [];
-
       for (let i = 0; i < gallerySlots.length; i++) {
         const slot = gallerySlots[i];
-
         if (slot.newFile) {
           // Upload the new file
           const upload = await uploadSingleFile(slot.newFile);
@@ -225,10 +201,8 @@ export default function GeneralSettings({ general }: any) {
         }
         // If neither — slot is empty, omit it from the payload
       }
-
       // ── 2b. Upload background image if changed ────────────────────────────
       let backgroundImageUrl: string = general?.backgroundImage || "";
-
       if (bgFile.length > 0 && bgFile[0]) {
         const bgResult = await uploadSingleFile(bgFile[0]);
         if (!bgResult) {
@@ -242,13 +216,11 @@ export default function GeneralSettings({ general }: any) {
       } else if (bgRemoved) {
         backgroundImageUrl = "";
       }
-
       // ── 3. Build & send payload ────────────────────────────────────────────
       ToastMessage.loading(
         { title: "Saving settings..." },
         { id: loadingToast },
       );
-
       const payload: GeneralFormData = {
         ...data,
         webviewUrl: data.webviewUrl?.trim() || "",
@@ -257,9 +229,7 @@ export default function GeneralSettings({ general }: any) {
         galleries: resolvedGalleries,
         backgroundImage: backgroundImageUrl,
       };
-
       const result = await updateGeneralSettings(payload);
-
       if (!result.status) {
         ToastMessage.error(
           { title: result?.message || "Failed to save general settings" },
@@ -267,7 +237,6 @@ export default function GeneralSettings({ general }: any) {
         );
         return;
       }
-
       ToastMessage.success(
         { title: result?.message || "General settings updated!" },
         { id: loadingToast },
@@ -279,7 +248,6 @@ export default function GeneralSettings({ general }: any) {
       );
     }
   };
-
   return (
     <FormProvider {...methods}>
       <div className="space-y-6">
@@ -296,7 +264,6 @@ export default function GeneralSettings({ general }: any) {
           setBgFile={setBgFile}
           setBgRemoved={setBgRemoved}
         />
-
         {/* ── Gallery ──────────────────────────────────────────────────────── */}
         <GalleryCard
           galleryFields={galleryFields}
@@ -307,7 +274,6 @@ export default function GeneralSettings({ general }: any) {
           updateSlotFile={updateSlotFile}
           removeSlotExisting={removeSlotExisting}
         />
-
         {/* ── Company Information ───────────────────────────────────────────── */}
         <Card>
           <CardHeader>
@@ -350,7 +316,6 @@ export default function GeneralSettings({ general }: any) {
             </div>
           </CardContent>
         </Card>
-
         {/* ── Owner Information ─────────────────────────────────────────────── */}
         <Card>
           <CardHeader>
@@ -381,7 +346,6 @@ export default function GeneralSettings({ general }: any) {
             </div>
           </CardContent>
         </Card>
-
         {/* ── App URL Configuration ─────────────────────────────────────────── */}
         <Card>
           <CardHeader>
@@ -443,7 +407,6 @@ export default function GeneralSettings({ general }: any) {
             </div>
           </CardContent>
         </Card>
-
         {/* ── App Flow Control ──────────────────────────────────────────────── */}
         <Card>
           <CardHeader>
@@ -470,7 +433,6 @@ export default function GeneralSettings({ general }: any) {
             />
           </CardContent>
         </Card>
-
         <div className="flex justify-end">
           <Button
             onClick={handleSubmit(onSubmit)}
@@ -485,5 +447,3 @@ export default function GeneralSettings({ general }: any) {
     </FormProvider>
   );
 }
-
-// ─── Shared toggle row ────────────────────────────────────────────────────────
