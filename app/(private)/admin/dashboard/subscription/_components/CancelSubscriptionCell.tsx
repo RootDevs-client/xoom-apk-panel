@@ -29,17 +29,24 @@ export function CancelSubscriptionCell({ row }: Props) {
 
   const handleConfirm = async () => {
     setLoading(true);
+
     try {
       const res = await cancelSubscription(row._id);
-      if (res?.ok) {
-        ToastMessage.success("Subscription cancelled successfully!");
+
+      if (res?.status) {
+        ToastMessage.success({
+          title: res?.message || "Subscription cancelled successfully!",
+        });
+
         setOpen(false);
         handleRefresh("subscribe");
       } else {
-        ToastMessage.error(res?.message || "Failed to cancel subscription");
+        ToastMessage.error({
+          title: res?.message || "Failed to cancel subscription",
+        });
       }
-    } catch {
-      ToastMessage.error("Something went wrong");
+    } catch (error) {
+      ToastMessage.error({ title: "Something went wrong" });
     } finally {
       setLoading(false);
     }
@@ -97,9 +104,7 @@ export function CancelSubscriptionCell({ row }: Props) {
               onClick={handleConfirm}
               disabled={loading}
             >
-              {loading && (
-                <ImSpinner9 className="mr-2 h-3 w-3 animate-spin" />
-              )}
+              {loading && <ImSpinner9 className="mr-2 h-3 w-3 animate-spin" />}
               Confirm Cancel
             </Button>
           </DialogFooter>
