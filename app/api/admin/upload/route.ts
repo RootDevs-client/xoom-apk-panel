@@ -1,6 +1,6 @@
 import { asyncFormDataHandler } from "@/lib/async-formdata-handler";
-import { apiResponse } from "@/lib/server.utils";
 import { uploadToS3 } from "@/lib/s3";
+import { apiResponse } from "@/lib/server.utils";
 
 export const POST = asyncFormDataHandler(
   null,

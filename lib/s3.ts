@@ -1,5 +1,5 @@
-import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
-import { randomUUID } from 'crypto';
+import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import { randomUUID } from "crypto";
 
 let client: S3Client | null = null;
 
@@ -17,7 +17,7 @@ function getS3Client() {
 }
 
 function getBaseUrl() {
-  return process.env.AWS_BASE_URL!;
+  return process.env.NEXT_PUBLIC_AWS_BASE_URL!;
 }
 
 function getBucket() {
@@ -28,9 +28,9 @@ export async function uploadToS3(
   buffer: Buffer,
   filename: string,
   mimetype: string,
-  folder = 'uploads',
+  folder = "uploads",
 ) {
-  const ext = filename.split('.').pop() ?? 'bin';
+  const ext = filename.split(".").pop() ?? "bin";
   const key = `${folder}/${randomUUID()}.${ext}`;
 
   await getS3Client().send(
