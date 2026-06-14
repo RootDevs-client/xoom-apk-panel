@@ -52,6 +52,8 @@ export interface IGeneral extends Document {
 
   webviewUrl?: string;
   webhookUrl?: string;
+  universalSubscriptionApiUrl?: string;
+  xoomSportsUrl?: string;
 
   manual_flow_enabled?: boolean;
   web_view_enabled?: boolean;

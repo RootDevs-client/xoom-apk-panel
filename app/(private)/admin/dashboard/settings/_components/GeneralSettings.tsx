@@ -14,7 +14,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
-import { Globe, Save, ToggleLeft, Webhook } from "lucide-react";
+import { Globe, Link, Save, ToggleLeft, Webhook } from "lucide-react";
 import { useEffect } from "react";
 import { Controller, FormProvider, useForm } from "react-hook-form";
 
@@ -26,6 +26,8 @@ interface GeneralFormData {
   ownerEmail: string;
   webviewUrl: string;
   webhookUrl: string;
+  universalSubscriptionApiUrl: string;
+  xoomSportsUrl: string;
   manual_flow_enabled: boolean;
   web_view_enabled: boolean;
 }
@@ -40,6 +42,8 @@ export default function GeneralSettings({ general }: any) {
       ownerEmail: "",
       webviewUrl: "",
       webhookUrl: "",
+      universalSubscriptionApiUrl: "",
+      xoomSportsUrl: "",
       manual_flow_enabled: false,
       web_view_enabled: true,
     },
@@ -64,6 +68,8 @@ export default function GeneralSettings({ general }: any) {
         ownerEmail: general.ownerEmail || "",
         webviewUrl: general.webviewUrl || "",
         webhookUrl: general.webhookUrl || "",
+        universalSubscriptionApiUrl: general.universalSubscriptionApiUrl || "",
+        xoomSportsUrl: general.xoomSportsUrl || "",
         manual_flow_enabled: general.manual_flow_enabled ?? false,
         web_view_enabled: general.web_view_enabled ?? true,
       });
@@ -80,6 +86,8 @@ export default function GeneralSettings({ general }: any) {
         ...data,
         webviewUrl: data.webviewUrl?.trim() || "",
         webhookUrl: data.webhookUrl?.trim() || "",
+        universalSubscriptionApiUrl: data.universalSubscriptionApiUrl?.trim() || "",
+        xoomSportsUrl: data.xoomSportsUrl?.trim() || "",
       };
 
       const result = await updateGeneralSettings(payload);
@@ -213,6 +221,36 @@ export default function GeneralSettings({ general }: any) {
                   label="Unsubscribe Webhook URL"
                   placeholder="https://your-system.com/api/webhook/unsubscribe"
                   prefix={<Webhook size={16} />}
+                  rules={{
+                    pattern: {
+                      value: /^https?:\/\/.+/,
+                      message: "Must start with http:// or https://",
+                    },
+                  }}
+                />
+              </div>
+
+              <div className="space-y-1">
+                <InputField
+                  name="universalSubscriptionApiUrl"
+                  label="Universal Subscription API URL"
+                  placeholder="https://api.example.com/api/v1"
+                  prefix={<Link size={16} />}
+                  rules={{
+                    pattern: {
+                      value: /^https?:\/\/.+/,
+                      message: "Must start with http:// or https://",
+                    },
+                  }}
+                />
+              </div>
+
+              <div className="space-y-1">
+                <InputField
+                  name="xoomSportsUrl"
+                  label="Xoom Sports Payment Gateway URL"
+                  placeholder="https://backend.xoomsports.com"
+                  prefix={<Link size={16} />}
                   rules={{
                     pattern: {
                       value: /^https?:\/\/.+/,

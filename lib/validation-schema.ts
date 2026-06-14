@@ -47,6 +47,8 @@ export const settingsGeneralSchema = z.object({
 
   webviewUrl: z.string().optional(),
   webhookUrl: z.string().optional(),
+  universalSubscriptionApiUrl: z.string().optional(),
+  xoomSportsUrl: z.string().optional(),
 
   manual_flow_enabled: z.boolean().optional(),
   web_view_enabled: z.boolean().optional(),
@@ -72,6 +74,8 @@ export const createSubscribeSchema = z.object({
   phone: z.string().min(1, "Phone number is required!").trim(),
   reference: z.string().min(1, "Reference is required!").trim(),
   platform: z.string().optional().default(""),
+  membershipPlan: z.string().optional().default("Daily"),
+  expiryDate: z.string().optional(),
   status: z.boolean().optional(),
   deviceInfo: z.record(z.string(), z.any()).optional(),
 });

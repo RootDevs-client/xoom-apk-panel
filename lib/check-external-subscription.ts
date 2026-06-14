@@ -1,3 +1,5 @@
+import Settings from "@/model/Settings";
+
 type CheckExternalSubscriptionParams = {
   phone: string;
   adAgencyCampaignTransactionId?: string;
@@ -16,8 +18,11 @@ export async function checkExternalSubscription({
   adAgencyCampaignId = 200,
 }: CheckExternalSubscriptionParams) {
   try {
+    const settings = await Settings.findOne({}).select("general.universalSubscriptionApiUrl").lean();
+    const apiUrl = settings?.general?.universalSubscriptionApiUrl;
+    if (!apiUrl) return null;
     const res = await fetch(
-      `${process.env.UNIVERSAL_SUBSCRIPTION_API_URL}/CheckSubscriberStatus`,
+      `${apiUrl}/CheckSubscriberStatus`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },

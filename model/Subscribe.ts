@@ -4,6 +4,8 @@ export interface ISubscribe extends Document {
   phone: string;
   reference: string;
   platform: string;
+  membershipPlan?: string;
+  expiryDate?: string;
   status: boolean;
   deviceInfo: Record<string, any>[];
   createdAt: Date;
@@ -28,6 +30,14 @@ const SubscribeSchema = new Schema<ISubscribe>(
       required: false,
       trim: true,
       default: "",
+    },
+    membershipPlan: {
+      type: String,
+      trim: true,
+    },
+    expiryDate: {
+      type: String,
+      trim: true,
     },
     status: {
       type: Boolean,
