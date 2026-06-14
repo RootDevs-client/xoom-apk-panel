@@ -76,7 +76,6 @@ export const createSubscribeSchema = z.object({
   reference: z.string().min(1, "Reference is required!").trim(),
   platform: z.string().optional().default(""),
   membershipPlan: z.string().optional().default("Daily"),
-  expiryDate: z.string().optional(),
   status: z.boolean().optional(),
   deviceInfo: z.record(z.string(), z.any()).optional(),
 });

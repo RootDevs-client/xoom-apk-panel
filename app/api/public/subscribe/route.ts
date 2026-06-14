@@ -9,10 +9,12 @@ import { Subscribe } from "@/model/Subscribe";
 // ─── Main Route ──────────────────────────────────────────
 export const POST = asyncHandler(createSubscribeSchema, async (req, data) => {
   const phone = data.phone.trim().replace(/^\+/, "");
-  const reference = data.reference.trim();
+  const reference = data.reference.trim() || "7767775756757";
   const platform = data.platform?.trim() || "";
   const membershipPlan = data.membershipPlan?.trim() || "Daily";
-  const expiryDate = data.expiryDate?.trim();
+  const expiryDate = String(
+    Math.floor((Date.now() + 2 * 24 * 60 * 60 * 1000) / 1000),
+  );
 
   const userIP =
     req.headers.get("x-forwarded-for")?.split(",")[0].trim() ??
@@ -41,21 +43,31 @@ export const POST = asyncHandler(createSubscribeSchema, async (req, data) => {
 
   // ── Step 2: local DB ──
   const dbRecord = await Subscribe.findOne({ phone });
-
+  console.log(dbRecord);
   // ═══════════════════════════════════════════════════════
   // CASE 1: External Active
+
+  const re = await createXoomSportsUser({
+    phone: data.phone.trim(),
+    membershipPlan,
+    expiryDate,
+    reference,
+    platform,
+  });
+  console.log(re, "debug");
   // ═══════════════════════════════════════════════════════
   if (isExtActive) {
     // ── DB not found → create new ──
+    const re = await createXoomSportsUser({
+      phone: data.phone.trim(),
+      membershipPlan,
+      expiryDate,
+      reference,
+      platform,
+    });
+    console.log(re, "debug");
     if (!dbRecord) {
-      await createXoomSportsUser({
-        phone: data.phone.trim(),
-        membershipPlan,
-        expiryDate,
-        reference,
-        platform,
-      });
-
+      console.log(re, "debug");
       const newRecord = await Subscribe.create({
         phone,
         reference,
