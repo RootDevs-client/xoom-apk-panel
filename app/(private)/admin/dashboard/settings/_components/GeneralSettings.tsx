@@ -49,6 +49,7 @@ export default function GeneralSettings({ general }: any) {
       webhookUrl: "",
       universalSubscriptionApiUrl: "",
       xoomSportsUrl: "",
+      geminiApiKey: "",
       manual_flow_enabled: false,
       web_view_enabled: true,
       appLogo: "",
@@ -102,6 +103,7 @@ export default function GeneralSettings({ general }: any) {
       backgroundImage: general.backgroundImage || "",
       universalSubscriptionApiUrl: general.universalSubscriptionApiUrl || "",
       xoomSportsUrl: general.xoomSportsUrl || "",
+      geminiApiKey: general.geminiApiKey || "",
     });
     // Hydrate gallery slots from server data (one slot per existing gallery item)
     const serverGalleries: GalleryItem[] = general.galleries || [];
@@ -403,6 +405,12 @@ export default function GeneralSettings({ general }: any) {
                     message: "Must start with http:// or https://",
                   },
                 }}
+              />
+              <InputField
+                name="geminiApiKey"
+                label="Gemini API Key"
+                placeholder="AIzaSy..."
+                type="password"
               />
             </div>
           </CardContent>

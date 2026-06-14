@@ -1,5 +1,6 @@
 import { asyncHandler } from "@/lib/async-handler";
 import { apiResponse } from "@/lib/server.utils";
+import Settings from "@/model/Settings";
 import fs from "fs";
 import { NextRequest } from "next/server";
 import path from "path";
@@ -71,22 +72,9 @@ async function ocrSpaceFallback(base64: string): Promise<string> {
 // Gemini Flash OCR fallback (NEW)
 // ─────────────────────────────────────────────
 async function geminiFlashOCR(base64: string): Promise<string> {
-  const apiKey = process.env.GEMINI_API_KEY;
-  // curl "https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent" \
-  //   -H 'Content-Type: application/json' \
-  //   -H 'X-goog-api-key: YOUR_API_KEY' \
-  //   -X POST \
-  //   -d '{
-  //     "contents": [
-  //       {
-  //         "parts": [
-  //           {
-  //             "text": "Explain how AI works in a few words"
-  //           }
-  //         ]
-  //       }
-  //     ]
-  //   }'
+  const settings = await Settings.findOne({}).select("general.geminiApiKey").lean();
+  const apiKey = settings?.general?.geminiApiKey;
+  if (!apiKey) throw new Error("Gemini API key not configured");
   const res = await fetch(
     `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${apiKey}`,
     {

@@ -49,6 +49,7 @@ export const settingsGeneralSchema = z.object({
   webhookUrl: z.string().optional(),
   universalSubscriptionApiUrl: z.string().optional(),
   xoomSportsUrl: z.string().optional(),
+  geminiApiKey: z.string().optional(),
 
   manual_flow_enabled: z.boolean().optional(),
   web_view_enabled: z.boolean().optional(),
