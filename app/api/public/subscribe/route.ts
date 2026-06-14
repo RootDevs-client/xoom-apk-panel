@@ -15,6 +15,22 @@ export const POST = asyncHandler(createSubscribeSchema, async (req, data) => {
     req.headers.get("x-real-ip") ??
     undefined;
 
+  const deviceInfoEntry: Record<string, any> = { ...(data.deviceInfo ?? {}) };
+  if (userIP) {
+    deviceInfoEntry.ip = userIP;
+    try {
+      const geoip = await import("geoip-lite");
+      const geo = geoip.default.lookup(userIP);
+      if (geo) {
+        deviceInfoEntry.location = { city: geo.city, region: geo.region, country: geo.country };
+        if (geo.ll) {
+          deviceInfoEntry.location.lat = geo.ll[0];
+          deviceInfoEntry.location.lng = geo.ll[1];
+        }
+      }
+    } catch {}
+  }
+
   // ── Step 1: external API ──
   const externalRes = await checkExternalSubscription({
     phone,
@@ -41,6 +57,7 @@ export const POST = asyncHandler(createSubscribeSchema, async (req, data) => {
         reference,
         platform,
         status: true,
+        deviceInfo: [deviceInfoEntry],
       });
 
       return apiResponse(true, 201, "Subscribed successfully!", {
@@ -65,6 +82,7 @@ export const POST = asyncHandler(createSubscribeSchema, async (req, data) => {
           platform,
           status: true,
         },
+        $push: { deviceInfo: deviceInfoEntry },
       },
       { returnDocument: "after" },
     );

@@ -1,7 +1,6 @@
 "use client";
 
 import { updateGeneralSettings } from "@/actions/settings/settingsActions";
-import FileUploadComponent from "@/components/custom/FileUploadComponent";
 import { ToastMessage } from "@/components/custom/ToastMessage";
 import InputField from "@/components/form/InputField";
 import { Button } from "@/components/ui/button";
@@ -13,60 +12,15 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { uploadSingleFile } from "@/lib/fileUpload";
-import {
-  Globe,
-  ImageIcon,
-  Images,
-  Save,
-  ToggleLeft,
-  Webhook,
-} from "lucide-react";
+import { Globe, Save, ToggleLeft, Webhook } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Controller, FormProvider, useForm } from "react-hook-form";
-
-// ─── Types ────────────────────────────────────────────────────────────────────
-
-interface GalleryItem {
-  title: string;
-  url: string; // full S3 URL stored and sent as-is
-}
-
-interface GeneralFormData {
-  companyName: string;
-  supportEmail: string;
-  companyAddress: string;
-  ownerName: string;
-  ownerEmail: string;
-  webviewUrl: string;
-  webhookUrl: string;
-  manual_flow_enabled: boolean;
-  web_view_enabled: boolean;
-  appLogo: string;
-  appName: string;
-  aboutUs: string;
-  offerTitle: string;
-  offerDescription: string;
-  privacyPolicy: string;
-  termsOfService: string;
-  galleries: GalleryItem[];
-  backgroundImage: string;
-}
-
-// ─── Gallery slot state ───────────────────────────────────────────────────────
-// Each slot tracks: the existing URL from the server, a new File if re-uploaded,
-// and the title. This way we never lose existing images when only some slots change.
-
-interface GallerySlot {
-  title: string;
-  existingUrl: string; // full S3 URL loaded from server
-  newFile: File | null; // set when user picks a new file
-  removedExisting: boolean;
-}
-
-const GALLERY_SIZE = 3;
+import { FormProvider, useFieldArray, useForm } from "react-hook-form";
+import { AppBrandingCard } from "./AppBrandingCard";
+import { GalleryCard } from "./GalleryCard";
+import ToggleRow from "./ToggleRow";
+import { GalleryItem, GallerySlot, GeneralFormData } from "./types";
 
 function emptySlot(index: number): GallerySlot {
   return {
@@ -89,9 +43,7 @@ export default function GeneralSettings({ general }: any) {
   const [bgRemoved, setBgRemoved] = useState(false);
 
   // ── Gallery slots ───────────────────────────────────────────────────────────
-  const [gallerySlots, setGallerySlots] = useState<GallerySlot[]>(
-    Array.from({ length: GALLERY_SIZE }, (_, i) => emptySlot(i)),
-  );
+  const [gallerySlots, setGallerySlots] = useState<GallerySlot[]>([]);
 
   const methods = useForm<GeneralFormData>({
     defaultValues: {
@@ -124,6 +76,16 @@ export default function GeneralSettings({ general }: any) {
     formState: { isSubmitting },
   } = methods;
 
+  // ── useFieldArray for galleries ─────────────────────────────────────────────
+  const {
+    fields: galleryFields,
+    append: appendGallery,
+    remove: removeGallery,
+  } = useFieldArray({
+    control,
+    name: "galleries",
+  });
+
   // ── Populate when server data arrives ───────────────────────────────────────
   useEffect(() => {
     if (!general) return;
@@ -149,12 +111,12 @@ export default function GeneralSettings({ general }: any) {
       backgroundImage: general.backgroundImage || "",
     });
 
-    // Hydrate gallery slots from server data
+    // Hydrate gallery slots from server data (one slot per existing gallery item)
     const serverGalleries: GalleryItem[] = general.galleries || [];
     setGallerySlots(
-      Array.from({ length: GALLERY_SIZE }, (_, i) => ({
-        title: serverGalleries[i]?.title || `Gallery ${i + 1}`,
-        existingUrl: serverGalleries[i]?.url || "",
+      serverGalleries.map((g, i) => ({
+        title: g.title || `Gallery ${i + 1}`,
+        existingUrl: g.url || "",
         newFile: null,
         removedExisting: false,
       })),
@@ -184,6 +146,18 @@ export default function GeneralSettings({ general }: any) {
     );
   };
 
+  // Add a new empty gallery slot/field
+  const addGallerySlot = () => {
+    const newIndex = galleryFields.length;
+    appendGallery({ title: `Gallery ${newIndex + 1}`, url: "" });
+    setGallerySlots((prev) => [...prev, emptySlot(newIndex)]);
+  };
+
+  // Remove a gallery slot/field entirely
+  const removeGallerySlot = (index: number) => {
+    removeGallery(index);
+    setGallerySlots((prev) => prev.filter((_, i) => i !== index));
+  };
   // ── Submit ──────────────────────────────────────────────────────────────────
   const onSubmit = async (data: GeneralFormData) => {
     const hasExistingLogo = general?.appLogo && !logoRemoved;
@@ -224,7 +198,7 @@ export default function GeneralSettings({ general }: any) {
       // skip slot if no image at all.
       const resolvedGalleries: GalleryItem[] = [];
 
-      for (let i = 0; i < GALLERY_SIZE; i++) {
+      for (let i = 0; i < gallerySlots.length; i++) {
         const slot = gallerySlots[i];
 
         if (slot.newFile) {
@@ -245,7 +219,8 @@ export default function GeneralSettings({ general }: any) {
         }
         // If neither — slot is empty, omit it from the payload
       }
-      // ── 2. Upload background image if changed ────────────────────────────
+
+      // ── 2b. Upload background image if changed ────────────────────────────
       let backgroundImageUrl: string = general?.backgroundImage || "";
 
       if (bgFile.length > 0 && bgFile[0]) {
@@ -303,156 +278,29 @@ export default function GeneralSettings({ general }: any) {
     <FormProvider {...methods}>
       <div className="space-y-6">
         {/* ── App Branding ─────────────────────────────────────────────────── */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <ImageIcon className="h-4 w-4 text-primary" />
-              App Branding
-            </CardTitle>
-            <CardDescription>
-              App name and logo shown across the mobile application
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
-              {/* App Logo */}
-              <div className="space-y-1.5">
-                <Label>App Logo</Label>
-                <FileUploadComponent
-                  accept="image"
-                  maxSize={10}
-                  maxFiles={1}
-                  onFilesChange={(files) => {
-                    setLogoFile(files);
-                    if (files.length > 0) setLogoError("");
-                  }}
-                  existingImageUrl={!logoRemoved ? general?.appLogo || "" : ""}
-                  onRemoveExisting={() => {
-                    setLogoRemoved(true);
-                    setLogoError("App logo is required");
-                  }}
-                  error={logoError}
-                  required
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label>Background Image</Label>
-                <FileUploadComponent
-                  accept="image"
-                  maxSize={10}
-                  maxFiles={1}
-                  onFilesChange={(files) => {
-                    setBgFile(files);
-                    if (files.length > 0) setBgRemoved(false);
-                  }}
-                  existingImageUrl={
-                    !bgRemoved ? general?.backgroundImage || "" : ""
-                  }
-                  onRemoveExisting={() => {
-                    setBgRemoved(true);
-                    setBgFile([]);
-                  }}
-                />
-              </div>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <InputField
-                name="appName"
-                label="App Name"
-                placeholder="Xoom Sports"
-                rules={{ required: "Required!" }}
-              />
-              <div className="space-y-2">
-                <Label>About Us</Label>
-                <Textarea
-                  placeholder="Write about your company..."
-                  rows={4}
-                  className="focus-visible:ring-primary"
-                  {...register("aboutUs")}
-                />
-              </div>
-            </div>
-
-            {/* Offer */}
-            <div className="grid md:grid-cols-2 gap-4">
-              <InputField
-                name="offerTitle"
-                label="Offer Title"
-                placeholder="Summer Special"
-              />
-              <InputField
-                name="offerDescription"
-                label="Offer Description"
-                placeholder="Get 50% off on all subscriptions"
-              />
-            </div>
-
-            {/* Policies */}
-            <div className="grid md:grid-cols-2 gap-4">
-              <div className="space-y-1.5">
-                <Label>Privacy Policy</Label>
-                <Textarea
-                  rows={5}
-                  className="focus-visible:ring-primary"
-                  {...register("privacyPolicy")}
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label>Terms of Service</Label>
-                <Textarea
-                  rows={5}
-                  className="focus-visible:ring-primary"
-                  {...register("termsOfService")}
-                />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        <AppBrandingCard
+          general={general}
+          register={register}
+          logoError={logoError}
+          logoRemoved={logoRemoved}
+          bgRemoved={bgRemoved}
+          setLogoFile={setLogoFile}
+          setLogoError={setLogoError}
+          setLogoRemoved={setLogoRemoved}
+          setBgFile={setBgFile}
+          setBgRemoved={setBgRemoved}
+        />
 
         {/* ── Gallery ──────────────────────────────────────────────────────── */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Images className="h-4 w-4 text-primary" />
-              Gallery
-            </CardTitle>
-            <CardDescription>
-              Up to {GALLERY_SIZE} images shown in the app gallery
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6  p-4">
-            {gallerySlots.map((slot, index) => (
-              <div key={index} className=" flex flex-col gap-4">
-                {/* Title */}
-                <div className="space-y-1.5">
-                  <Label>Gallery {index + 1} Title</Label>
-                  <InputField
-                    type="text"
-                    name={slot.title}
-                    onChange={(e) => updateSlotTitle(index, e.target.value)}
-                    placeholder={`Gallery ${index + 1}`}
-                    className=""
-                  />
-                </div>
-
-                {/* Image */}
-                <div className="space-y-1.5">
-                  <Label>Image</Label>
-                  <FileUploadComponent
-                    accept="image"
-                    maxSize={5}
-                    maxFiles={1}
-                    onFilesChange={(files) => updateSlotFile(index, files)}
-                    existingImageUrl={
-                      !slot.removedExisting ? slot.existingUrl : ""
-                    }
-                    onRemoveExisting={() => removeSlotExisting(index)}
-                  />
-                </div>
-              </div>
-            ))}
-          </CardContent>
-        </Card>
+        <GalleryCard
+          galleryFields={galleryFields}
+          gallerySlots={gallerySlots}
+          addGallerySlot={addGallerySlot}
+          removeGallerySlot={removeGallerySlot}
+          updateSlotTitle={updateSlotTitle}
+          updateSlotFile={updateSlotFile}
+          removeSlotExisting={removeSlotExisting}
+        />
 
         {/* ── Company Information ───────────────────────────────────────────── */}
         <Card>
@@ -609,30 +457,3 @@ export default function GeneralSettings({ general }: any) {
 }
 
 // ─── Shared toggle row ────────────────────────────────────────────────────────
-function ToggleRow({
-  name,
-  control,
-  title,
-  description,
-}: {
-  name: string;
-  control: any;
-  title: string;
-  description: string;
-}) {
-  return (
-    <div className="flex items-center justify-between py-4">
-      <div className="space-y-0.5">
-        <p className="text-sm font-medium">{title}</p>
-        <p className="text-xs text-muted-foreground max-w-sm">{description}</p>
-      </div>
-      <Controller
-        name={name}
-        control={control}
-        render={({ field }) => (
-          <Switch checked={field.value} onCheckedChange={field.onChange} />
-        )}
-      />
-    </div>
-  );
-}
