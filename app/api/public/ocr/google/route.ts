@@ -5,25 +5,6 @@ import { NextRequest } from "next/server";
 import path from "path";
 
 // ─────────────────────────────────────────────
-// Save Base64 Image (debug)
-// ─────────────────────────────────────────────
-function saveBase64Image(base64Image: string) {
-  const base64 = base64Image.replace(/^data:.+;base64,/, "");
-  const buffer = Buffer.from(base64, "base64");
-
-  const filePath = path.join(
-    process.cwd(),
-    "debug-images",
-    `${Date.now()}.jpg`,
-  );
-
-  fs.mkdirSync(path.dirname(filePath), { recursive: true });
-  fs.writeFileSync(filePath, buffer);
-
-  return { filePath, base64 };
-}
-
-// ─────────────────────────────────────────────
 // Clean OCR text
 // ─────────────────────────────────────────────
 function cleanText(text: string): string {
@@ -153,8 +134,7 @@ export const POST = asyncHandler(async (req: NextRequest) => {
     return apiResponse(false, 400, "Image is required!");
   }
 
-  // Save debug image
-  const { filePath, base64 } = saveBase64Image(image);
+  const base64 = image.replace(/^data:.+;base64,/, "");
 
   let extractedText = "";
   let engine = "google-vision";
@@ -197,9 +177,13 @@ export const POST = asyncHandler(async (req: NextRequest) => {
   }
 
   // ────────────────
-  // No text found
+  // No text found — save debug image
   // ────────────────
   if (!extractedText) {
+    const filePath = path.join(process.cwd(), "debug", `${Date.now()}.jpg`);
+    fs.mkdirSync(path.dirname(filePath), { recursive: true });
+    fs.writeFileSync(filePath, Buffer.from(base64, "base64"));
+
     return apiResponse(false, 404, "No text found in image!");
   }
 
@@ -222,6 +206,5 @@ export const POST = asyncHandler(async (req: NextRequest) => {
     emails,
     phones,
     engine,
-    debugImage: filePath,
   });
 });
