@@ -82,6 +82,7 @@ export function asyncHandler<T, P = Record<string, string>>(
             },
             {} as Record<string, string>,
           );
+          console.log(error);
 
           return apiResponse(false, 400, "Request validation failed!", details);
         }
@@ -89,6 +90,7 @@ export function asyncHandler<T, P = Record<string, string>>(
         if (error instanceof JsonWebTokenError) {
           return apiResponse(false, 401, "Unauthorized Token!");
         }
+        console.log(error);
 
         return apiResponse(false, 500, "Something went wrong!");
       }

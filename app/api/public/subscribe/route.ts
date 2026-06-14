@@ -22,7 +22,11 @@ export const POST = asyncHandler(createSubscribeSchema, async (req, data) => {
       const geoip = await import("geoip-lite");
       const geo = geoip.default.lookup(userIP);
       if (geo) {
-        deviceInfoEntry.location = { city: geo.city, region: geo.region, country: geo.country };
+        deviceInfoEntry.location = {
+          city: geo.city,
+          region: geo.region,
+          country: geo.country,
+        };
         if (geo.ll) {
           deviceInfoEntry.location.lat = geo.ll[0];
           deviceInfoEntry.location.lng = geo.ll[1];
