@@ -53,7 +53,7 @@ export const columns: ColumnDef<Subscribe>[] = [
           {Object.entries(device).map(([key, value]) => (
             <div key={key}>
               <span className="font-medium capitalize">{key.replace(/([A-Z])/g, " $1")}:</span>{" "}
-              <span>{String(value)}</span>
+              <span>{typeof value === "object" && value !== null ? JSON.stringify(value) : String(value)}</span>
             </div>
           ))}
         </div>
