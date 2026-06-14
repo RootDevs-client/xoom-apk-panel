@@ -6,11 +6,7 @@ import moment from "moment-timezone";
 import { CancelSubscriptionCell } from "./CancelSubscriptionCell";
 
 // Define the type based on API response
-export type DeviceInfo = {
-  browser: string;
-  os: string;
-  ip: string;
-};
+export type DeviceInfo = Record<string, any>;
 
 // Define the type based on API response
 export type Subscribe = {
@@ -53,11 +49,13 @@ export const columns: ColumnDef<Subscribe>[] = [
       }
 
       return (
-        <div className="text-sm leading-tight">
-          <div>
-            {device.browser} / {device.os}
-          </div>
-          <div className="text-muted-foreground text-xs"> Ip: {device.ip}</div>
+        <div className="text-sm leading-tight space-y-0.5">
+          {Object.entries(device).map(([key, value]) => (
+            <div key={key}>
+              <span className="font-medium capitalize">{key.replace(/([A-Z])/g, " $1")}:</span>{" "}
+              <span>{String(value)}</span>
+            </div>
+          ))}
         </div>
       );
     },

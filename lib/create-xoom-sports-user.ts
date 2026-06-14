@@ -16,7 +16,9 @@ export async function createXoomSportsUser({
   platform,
 }: CreateXoomSportsUserParams) {
   try {
-    const settings = await Settings.findOne({}).select("general.xoomSportsUrl").lean();
+    const settings = await Settings.findOne({})
+      .select("general.xoomSportsUrl")
+      .lean();
     const baseUrl = settings?.general?.xoomSportsUrl;
     if (!baseUrl) return null;
 
@@ -29,8 +31,11 @@ export async function createXoomSportsUser({
     url.searchParams.set("Platform", platform);
 
     const res = await fetch(url.toString(), { method: "GET" });
-    return await res.json();
+    console.log(res);
+    // return await res.json();
+    return true;
   } catch (error) {
+    console.log(error);
     return null;
   }
 }
