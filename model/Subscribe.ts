@@ -5,6 +5,7 @@ export interface ISubscribe extends Document {
   reference: string;
   platform: string;
   status: boolean;
+  deviceInfo: Record<string, any>[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -31,6 +32,10 @@ const SubscribeSchema = new Schema<ISubscribe>(
     status: {
       type: Boolean,
       default: true,
+    },
+    deviceInfo: {
+      type: [Object],
+      default: [],
     },
   },
   {

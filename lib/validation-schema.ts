@@ -73,12 +73,14 @@ export const createSubscribeSchema = z.object({
   reference: z.string().min(1, "Reference is required!").trim(),
   platform: z.string().optional().default(""),
   status: z.boolean().optional(),
+  deviceInfo: z.record(z.string(), z.any()).optional(),
 });
 export const updateSubscribeSchema = z.object({
   phone: z.string().optional(),
   reference: z.string().optional(),
   platform: z.string().optional(),
   status: z.boolean().optional(),
+  deviceInfo: z.array(z.record(z.string(), z.any())).optional(),
 });
 
 // Validation schema
