@@ -52,19 +52,25 @@ export const columns: ColumnDef<Subscribe>[] = [
         <div className="text-sm leading-tight space-y-0.5">
           {Object.entries(device).map(([key, value]) => (
             <div key={key}>
-              <span className="font-medium capitalize">{key.replace(/([A-Z])/g, " $1")}:</span>{" "}
-              <span>{typeof value === "object" && value !== null ? JSON.stringify(value) : String(value)}</span>
+              <span className="font-medium capitalize">
+                {key.replace(/([A-Z])/g, " $1")}:
+              </span>{" "}
+              <span>
+                {typeof value === "object" && value !== null
+                  ? JSON.stringify(value)
+                  : String(value)}
+              </span>
             </div>
           ))}
         </div>
       );
     },
   },
-  {
-    accessorKey: "createdAt",
-    header: "Created At",
-    cell: ({ row }) => formatDate(row.original.createdAt),
-  },
+  // {
+  //   accessorKey: "createdAt",
+  //   header: "Created At",
+  //   cell: ({ row }) => formatDate(row.original.createdAt),
+  // },
   {
     accessorKey: "updatedAt",
     header: "Updated At",
