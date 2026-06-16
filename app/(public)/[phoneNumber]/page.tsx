@@ -1,6 +1,6 @@
 import { SubscriptionPage } from "@/components/evina-components/SubscriptionPage";
 
-const Home = () => {
+const PhoneNumberPage = () => {
   return (
     <div>
       <SubscriptionPage />
@@ -8,4 +8,4 @@ const Home = () => {
   );
 };
 
-export default Home;
+export default PhoneNumberPage;

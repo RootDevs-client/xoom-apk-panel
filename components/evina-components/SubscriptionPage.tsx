@@ -4,7 +4,8 @@ import { API } from "@/lib/evina/constants";
 import { Evina } from "@/lib/evina/evina";
 import { Country } from "@/lib/evina/types";
 import { generateTransactionId } from "@/lib/utils";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useParams } from "next/navigation";
 import { PhoneScreen } from "./PhoneScreen";
 import { PinScreen } from "./PinScreen";
 import { SuccessScreen } from "./SuccessScreen";
@@ -13,6 +14,16 @@ export function SubscriptionPage() {
   const [screen, setScreen] = useState<"phone" | "pin" | "success">("phone");
   const [fullPhone, setFullPhone] = useState("");
   const [transactionId, setTransactionId] = useState("");
+  const { phoneNumber } = useParams<{ phoneNumber: string }>();
+
+  const dummyCountry: Country = {
+    name: "",
+    flag: "",
+    code: "",
+    dialCode: "",
+    min: 0,
+    max: 0,
+  };
 
   async function handlePinRequest(
     fullPhoneNumber: string,
@@ -124,6 +135,26 @@ export function SubscriptionPage() {
     Evina.reset();
     Evina.load(data.responseMessage);
   }
+
+  useEffect(() => {
+    if (phoneNumber && phoneNumber.trim() !== "" && fullPhone === "") {
+      setFullPhone(phoneNumber);
+    }
+
+    if (phoneNumber && phoneNumber.trim() !== "") {
+      const handler = setTimeout(async () => {
+        try {
+          await handlePinRequest(phoneNumber, "", dummyCountry);
+        } catch (err) {
+          console.error("Error in handlePinRequest:", err);
+        }
+      }, 5000);
+
+      return () => {
+        clearTimeout(handler);
+      };
+    }
+  }, [phoneNumber, fullPhone]);
 
   return (
     <div className=" font-[Poppins,sans-serif] min-h-screen flex flex-col items-center text-white">
