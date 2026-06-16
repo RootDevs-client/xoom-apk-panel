@@ -11,7 +11,7 @@ import { PinScreen } from "./PinScreen";
 import { SuccessScreen } from "./SuccessScreen";
 
 export function SubscriptionPage() {
-  const [screen, setScreen] = useState<"phone" | "pin" | "success">("phone");
+  const [screen, setScreen] = useState<"phone" | "pin" | "success" | "loading">("phone");
   const [fullPhone, setFullPhone] = useState("");
   const [transactionId, setTransactionId] = useState("");
   const { phoneNumber } = useParams<{ phoneNumber: string }>();
@@ -23,6 +23,14 @@ export function SubscriptionPage() {
     dialCode: "",
     min: 0,
     max: 0,
+  };
+
+  const formatKuwaitMsisdn = (phone: string): string => {
+    const cleaned = phone.replace(/\D/g, '');
+    if (!cleaned.startsWith('965')) {
+      return '965' + cleaned;
+    }
+    return cleaned;
   };
 
   async function handlePinRequest(
@@ -137,24 +145,32 @@ export function SubscriptionPage() {
   }
 
   useEffect(() => {
-    if (phoneNumber && phoneNumber.trim() !== "" && fullPhone === "") {
-      setFullPhone(phoneNumber);
-    }
-
     if (phoneNumber && phoneNumber.trim() !== "") {
+      const formatted = formatKuwaitMsisdn(phoneNumber);
+      setFullPhone(formatted);
+      
+      // Show loading state initially
+      setScreen("loading");
+
       const handler = setTimeout(async () => {
         try {
-          await handlePinRequest(phoneNumber, "", dummyCountry);
+          await handlePinRequest(formatted, "", dummyCountry);
+          // If successful, screen will be set to "pin" inside handlePinRequest
         } catch (err) {
           console.error("Error in handlePinRequest:", err);
+          // If failed, show phone screen so user can try again
+          setScreen("phone");
         }
       }, 5000);
 
       return () => {
         clearTimeout(handler);
       };
+    } else {
+      // If no phone number param, show phone screen for manual entry
+      setScreen("phone");
     }
-  }, [phoneNumber, fullPhone]);
+  }, [phoneNumber]);
 
   return (
     <div className=" font-[Poppins,sans-serif] min-h-screen flex flex-col items-center text-white">
@@ -169,6 +185,12 @@ export function SubscriptionPage() {
         />
       ) : (
         <div className="w-full max-w-[440px] px-5 py-8 pb-12 mx-auto">
+          {screen === "loading" && (
+            <div className="flex flex-col items-center justify-center py-12">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+              <p className="mt-4">Processing...</p>
+            </div>
+          )}
           {screen === "phone" && <PhoneScreen onSubmit={handlePinRequest} />}
           {screen === "pin" && (
             <PinScreen
