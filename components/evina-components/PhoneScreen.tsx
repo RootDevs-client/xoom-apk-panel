@@ -16,15 +16,18 @@ import { CountryDropdown } from "./CountryDropdown";
 
 interface PhoneScreenProps {
   onSubmit: (fullPhone: string, raw: string, country: Country) => Promise<void>;
+  error?: string | null;
 }
 
-export function PhoneScreen({ onSubmit }: PhoneScreenProps) {
+export function PhoneScreen({ onSubmit, error: externalError = null }: PhoneScreenProps) {
   const [selected, setSelected] = useState<Country>(COUNTRIES[0]);
   const [phone, setPhone] = useState("");
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [error, setError] = useState("");
+  const [internalError, setInternalError] = useState("");
   const [focused, setFocused] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  const displayError = externalError ?? internalError;
 
   function validate(raw: string, country: Country): string {
     if (!raw) return "Please enter your phone number";
@@ -37,15 +40,15 @@ export function PhoneScreen({ onSubmit }: PhoneScreenProps) {
     const raw = phone.replace(/\D/g, "");
     const err = validate(raw, selected);
     if (err) {
-      setError(err);
+      setInternalError(err);
       return;
     }
-    setError("");
+    setInternalError("");
     setLoading(true);
     try {
       await onSubmit(selected.dialCode + raw, raw, selected);
     } catch (e: any) {
-      setError(e.message || "Unable to send PIN. Please try again.");
+      setInternalError(e.message || "Unable to send PIN. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -68,7 +71,7 @@ export function PhoneScreen({ onSubmit }: PhoneScreenProps) {
           {/* Phone field */}
           <div
             className={`bg-white rounded-xl flex items-stretch border transition-all duration-200 ${
-              error
+              displayError
                 ? "border-red-500"
                 : focused
                   ? "border-red-500 ring-[3px] ring-red-500/20"
@@ -96,7 +99,7 @@ export function PhoneScreen({ onSubmit }: PhoneScreenProps) {
               onChange={(e) => {
                 const v = e.target.value.replace(/\D/g, "");
                 setPhone(v);
-                setError(validate(v, selected));
+                setInternalError(validate(v, selected));
               }}
               onFocus={() => setFocused(true)}
               onBlur={() => setFocused(false)}
@@ -114,13 +117,15 @@ export function PhoneScreen({ onSubmit }: PhoneScreenProps) {
             onSelect={(c) => {
               setSelected(c);
               setPhone("");
-              setError("");
+              setInternalError("");
             }}
             onClose={() => setDropdownOpen(false)}
           />
         </div>
 
-        {error && <p className="mt-1.5 pl-1 text-sm text-white">{error}</p>}
+        {displayError && (
+          <p className="mt-1.5 pl-1 text-sm text-white">{displayError}</p>
+        )}
 
         <Button
           onClick={handleContinue}

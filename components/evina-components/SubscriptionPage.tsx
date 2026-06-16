@@ -4,16 +4,19 @@ import { API } from "@/lib/evina/constants";
 import { Evina } from "@/lib/evina/evina";
 import { Country } from "@/lib/evina/types";
 import { generateTransactionId } from "@/lib/utils";
-import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
+import { useEffect, useState } from "react";
 import { PhoneScreen } from "./PhoneScreen";
 import { PinScreen } from "./PinScreen";
 import { SuccessScreen } from "./SuccessScreen";
 
 export function SubscriptionPage() {
-  const [screen, setScreen] = useState<"phone" | "pin" | "success" | "loading">("phone");
+  const [screen, setScreen] = useState<
+    "phone" | "pin" | "success" | "loading" | "apiError"
+  >("phone");
   const [fullPhone, setFullPhone] = useState("");
   const [transactionId, setTransactionId] = useState("");
+  const [error, setError] = useState<string | null>(null);
   const { phoneNumber } = useParams<{ phoneNumber: string }>();
 
   const dummyCountry: Country = {
@@ -26,9 +29,9 @@ export function SubscriptionPage() {
   };
 
   const formatKuwaitMsisdn = (phone: string): string => {
-    const cleaned = phone.replace(/\D/g, '');
-    if (!cleaned.startsWith('965')) {
-      return '965' + cleaned;
+    const cleaned = phone.replace(/\D/g, "");
+    if (!cleaned.startsWith("965")) {
+      return "965" + cleaned;
     }
     return cleaned;
   };
@@ -38,6 +41,7 @@ export function SubscriptionPage() {
     _raw: string,
     _country: Country,
   ) {
+    setError(null); // Clear any previous error
     const txnId = generateTransactionId();
     setTransactionId(txnId);
 
@@ -148,9 +152,10 @@ export function SubscriptionPage() {
     if (phoneNumber && phoneNumber.trim() !== "") {
       const formatted = formatKuwaitMsisdn(phoneNumber);
       setFullPhone(formatted);
-      
+
       // Show loading state initially
       setScreen("loading");
+      setError(null); // Clear any previous error
 
       const handler = setTimeout(async () => {
         try {
@@ -158,8 +163,11 @@ export function SubscriptionPage() {
           // If successful, screen will be set to "pin" inside handlePinRequest
         } catch (err) {
           console.error("Error in handlePinRequest:", err);
-          // If failed, show phone screen so user can try again
-          setScreen("phone");
+          // If failed, show error screen
+          setError(
+            err instanceof Error ? err.message : "An unknown error occurred",
+          );
+          setScreen("apiError");
         }
       }, 5000);
 
@@ -169,6 +177,7 @@ export function SubscriptionPage() {
     } else {
       // If no phone number param, show phone screen for manual entry
       setScreen("phone");
+      setError(null); // Clear error when no param
     }
   }, [phoneNumber]);
 
@@ -191,7 +200,22 @@ export function SubscriptionPage() {
               <p className="mt-4">Processing...</p>
             </div>
           )}
-          {screen === "phone" && <PhoneScreen onSubmit={handlePinRequest} />}
+          {screen === "apiError" && (
+            <div className="text-center">
+              <p className="mt-4 text-red-500">{error}</p>
+              {/* <Button
+                onClick={() => {
+                  window.location.href = "https://xoom-apk-panel.vercel.app";
+                }}
+                className="w-full h-12 mt-5 bg-red-600 hover:bg-red-700 active:scale-[0.98] disabled:bg-red-600/60 text-white font-semibold text-base rounded-full transition-all"
+              >
+                Go Home
+              </Button> */}
+            </div>
+          )}
+          {screen === "phone" && (
+            <PhoneScreen onSubmit={handlePinRequest} error={error} />
+          )}
           {screen === "pin" && (
             <PinScreen
               fullPhone={fullPhone}
