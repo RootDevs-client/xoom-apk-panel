@@ -31,11 +31,9 @@ export async function createXoomSportsUser({
     url.searchParams.set("Platform", platform);
 
     const res = await fetch(url.toString(), { method: "GET" });
-    console.log(res);
-    // return await res.json();
-    return true;
+    return await res.json();
+    // return true;
   } catch (error) {
-    console.log(error);
     return null;
   }
 }

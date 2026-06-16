@@ -474,3 +474,9 @@ export const generateSlug = (text: string): string => {
     .replace(/\s+/g, "-")
     .replace(/-+/g, "-");
 };
+
+// evina
+
+export function generateTransactionId(): string {
+  return "txn_" + Date.now() + "_" + Math.random().toString(36).substr(2, 8);
+}

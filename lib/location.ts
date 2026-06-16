@@ -8,7 +8,6 @@ export async function getLocationFromIP(ip: string) {
       region: data.regionName || "Region",
     };
   } catch (e) {
-    console.log(e);
     return {
       country: "Unknown",
       city: "Unknown",

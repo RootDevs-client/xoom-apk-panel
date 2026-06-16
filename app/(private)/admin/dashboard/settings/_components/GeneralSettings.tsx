@@ -117,8 +117,6 @@ export default function GeneralSettings({ general }: any) {
     );
   }, [general, reset]);
 
-  console.log("general", general);
-
   // ── Gallery slot helpers ────────────────────────────────────────────────────
   const updateSlotTitle = (index: number, title: string) => {
     setGallerySlots((prev) =>

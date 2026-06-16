@@ -1,7 +1,9 @@
+import { SubscriptionPage } from "@/components/evina-components/SubscriptionPage";
+
 const Home = () => {
   return (
     <div>
-      <h1>xoom sport</h1>
+      <SubscriptionPage />
     </div>
   );
 };

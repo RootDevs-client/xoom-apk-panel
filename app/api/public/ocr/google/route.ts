@@ -72,7 +72,9 @@ async function ocrSpaceFallback(base64: string): Promise<string> {
 // Gemini Flash OCR fallback (NEW)
 // ─────────────────────────────────────────────
 async function geminiFlashOCR(base64: string): Promise<string> {
-  const settings = await Settings.findOne({}).select("general.geminiApiKey").lean();
+  const settings = await Settings.findOne({})
+    .select("general.geminiApiKey")
+    .lean();
   const apiKey = settings?.general?.geminiApiKey;
   if (!apiKey) throw new Error("Gemini API key not configured");
   const res = await fetch(
@@ -104,7 +106,6 @@ async function geminiFlashOCR(base64: string): Promise<string> {
   );
 
   const data = await res.json();
-  console.log(data);
   if (data?.error) {
     throw new Error(JSON.stringify(data.error));
   }
@@ -132,36 +133,28 @@ export const POST = asyncHandler(async (req: NextRequest) => {
   // ────────────────
   try {
     extractedText = await googleVisionOCR(base64);
-  } catch (err) {
-    console.log("Google Vision failed:", err);
-  }
+  } catch (err) {}
 
   // ────────────────
   // 2. OCR.space
   // ────────────────
   if (!extractedText || extractedText.trim().length < 3) {
-    console.log("Using OCR.space fallback...");
     engine = "ocr-space";
 
     try {
       extractedText = await ocrSpaceFallback(base64);
-    } catch (err) {
-      console.log("OCR.space failed:", err);
-    }
+    } catch (err) {}
   }
 
   // ────────────────
   // 3. Gemini Flash OCR (NEW)
   // ────────────────
   if (!extractedText || extractedText.trim().length < 3) {
-    console.log("Using Gemini Flash fallback...");
     engine = "gemini-flash";
 
     try {
       extractedText = await geminiFlashOCR(base64);
-    } catch (err) {
-      console.log("Gemini OCR failed:", err);
-    }
+    } catch (err) {}
   }
 
   // ────────────────

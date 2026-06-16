@@ -8,15 +8,15 @@ export default auth((req) => {
   const isAdminRoute =
     pathname.startsWith("/admin") && pathname !== "/admin/login";
 
-  if (pathname === "/") {
-    if (!token) {
-      return NextResponse.redirect(new URL("/admin/login", req.url));
-    } else {
-      return NextResponse.redirect(
-        new URL(routes.privateRoutes.admin.dashboard, req.url),
-      );
-    }
-  }
+  // if (pathname === "/") {
+  //   if (!token) {
+  //     return NextResponse.redirect(new URL("/admin/login", req.url));
+  //   } else {
+  //     return NextResponse.redirect(
+  //       new URL(routes.privateRoutes.admin.dashboard, req.url),
+  //     );
+  //   }
+  // }
 
   if (isAdminRoute && !token) {
     return NextResponse.redirect(new URL("/admin/login", req.url));

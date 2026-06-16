@@ -43,7 +43,6 @@ export const POST = asyncHandler(createSubscribeSchema, async (req, data) => {
 
   // ── Step 2: local DB ──
   const dbRecord = await Subscribe.findOne({ phone });
-  console.log(dbRecord);
   // ═══════════════════════════════════════════════════════
   // CASE 1: External Active
 
@@ -54,7 +53,6 @@ export const POST = asyncHandler(createSubscribeSchema, async (req, data) => {
     reference,
     platform,
   });
-  console.log(re, "debug");
   // ═══════════════════════════════════════════════════════
   if (isExtActive) {
     // ── DB not found → create new ──
@@ -65,9 +63,7 @@ export const POST = asyncHandler(createSubscribeSchema, async (req, data) => {
       reference,
       platform,
     });
-    console.log(re, "debug");
     if (!dbRecord) {
-      console.log(re, "debug");
       const newRecord = await Subscribe.create({
         phone,
         reference,

@@ -83,7 +83,6 @@ export function asyncHandler<T, P = Record<string, string>>(
             },
             {} as Record<string, string>,
           );
-          console.log(error);
 
           return apiResponse(false, 400, "Request validation failed!", details);
         }
@@ -98,10 +97,12 @@ export function asyncHandler<T, P = Record<string, string>>(
             "code" in error &&
             (error as any).code === 11000)
         ) {
-          return apiResponse(false, 409, "Duplicate entry! This reference already exists.");
+          return apiResponse(
+            false,
+            409,
+            "Duplicate entry! This reference already exists.",
+          );
         }
-
-        console.log(error);
 
         return apiResponse(false, 500, "Something went wrong!");
       }
@@ -139,11 +140,13 @@ export function asyncHandler<T, P = Record<string, string>>(
 
       if (
         err instanceof mongoose.Error.ValidationError ||
-        (err instanceof Error &&
-          "code" in err &&
-          (err as any).code === 11000)
+        (err instanceof Error && "code" in err && (err as any).code === 11000)
       ) {
-        return apiResponse(false, 409, "Duplicate entry! This reference already exists.");
+        return apiResponse(
+          false,
+          409,
+          "Duplicate entry! This reference already exists.",
+        );
       }
 
       console.error(err);
