@@ -91,3 +91,19 @@ export const updateSubscribeSchema = z.object({
 export const unsubscribeSchema = z.object({
   phone: z.string().min(1, "Phone number is required!"),
 });
+
+export const createEventSchema = z.object({
+  deviceId: z.string().min(1, "deviceId is required!"),
+  userId: z.string().optional().nullable(),
+  sessionId: z.string().optional(),
+  event: z.enum(["firstopen", "appopen", "appclose"]),
+  eventData: z.record(z.string(), z.any()).optional(),
+  ip: z.string().optional(),
+  country: z.string().optional(),
+  city: z.string().optional(),
+  appVersion: z.string().optional(),
+  os: z.string().optional(),
+  osVersion: z.string().optional(),
+  deviceBrand: z.string().optional(),
+  deviceModel: z.string().optional(),
+});
