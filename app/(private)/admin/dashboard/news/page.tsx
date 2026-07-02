@@ -1,5 +1,5 @@
 import NewsList from "./_components/NewsList";
 
-export default function NewsPage() {
+export default async function NewsPage() {
   return <NewsList />;
 }

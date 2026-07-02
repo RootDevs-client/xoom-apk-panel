@@ -80,6 +80,24 @@ export async function updateNews(id: string, data: Partial<NewsFormData>) {
   }
 }
 
+export async function getNewsById(id: string) {
+  try {
+    const res = await apiClient(`/api/admin/news/${id}`, {
+      method: "GET",
+    });
+    return res;
+  } catch (error: any) {
+    if (error?.digest?.startsWith("NEXT_REDIRECT")) {
+      throw error;
+    }
+    return {
+      ok: false,
+      message:
+        error instanceof Error ? error.message : "Failed to get news",
+    };
+  }
+}
+
 export async function deleteNews(id: string) {
   try {
     const res = await apiClient(`/api/admin/news/${id}`, {

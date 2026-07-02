@@ -27,23 +27,33 @@ export default function DeleteNewsCell({ row, onSuccess }: Props) {
 
   const handleConfirm = async () => {
     setLoading(true);
+    const loadingToast = ToastMessage.loading({ title: "Deleteing....." });
 
     try {
       const res = await deleteNews(row._id);
 
       if (res?.status) {
-        ToastMessage.success({
-          title: res?.message || "News deleted successfully!",
-        });
+        ToastMessage.success(
+          {
+            title: res?.message || "News deleted successfully!",
+          },
+          { id: loadingToast },
+        );
         setOpen(false);
         onSuccess();
       } else {
-        ToastMessage.error({
-          title: res?.message || "Failed to delete news",
-        });
+        ToastMessage.error(
+          {
+            title: res?.message || "Failed to delete news",
+          },
+          { id: loadingToast },
+        );
       }
     } catch {
-      ToastMessage.error({ title: "Something went wrong" });
+      ToastMessage.error(
+        { title: "Something went wrong" },
+        { id: loadingToast },
+      );
     } finally {
       setLoading(false);
     }
@@ -53,11 +63,11 @@ export default function DeleteNewsCell({ row, onSuccess }: Props) {
     <>
       <Button
         variant="outline"
-        size="sm"
-        className="h-7 border-red-200 text-xs text-red-600 hover:border-red-300 hover:bg-red-50 hover:text-red-700"
+        size="icon"
+        className="h-8 border-red-200 cursor-alias text-xs text-red-600 hover:border-red-300 hover:bg-red-50 hover:text-red-700"
         onClick={() => setOpen(true)}
       >
-        <Trash2 className="size-3" />
+        <Trash2 className="size-4" />
       </Button>
 
       <Dialog open={open} onOpenChange={(v) => !loading && setOpen(v)}>
@@ -66,9 +76,7 @@ export default function DeleteNewsCell({ row, onSuccess }: Props) {
             <DialogTitle>Delete News</DialogTitle>
             <DialogDescription>
               Are you sure you want to delete{" "}
-              <span className="font-semibold text-foreground">
-                {row.title}
-              </span>
+              <span className="font-semibold text-foreground">{row.title}</span>
               ? This action cannot be undone.
             </DialogDescription>
           </DialogHeader>
@@ -76,9 +84,7 @@ export default function DeleteNewsCell({ row, onSuccess }: Props) {
           <div className="space-y-1.5 rounded-lg border bg-muted/40 px-4 py-3 text-sm">
             <div className="flex items-center justify-between">
               <span className="text-muted-foreground">Title</span>
-              <span className="font-medium max-w-48 truncate">
-                {row.title}
-              </span>
+              <span className="font-medium max-w-48 truncate">{row.title}</span>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-muted-foreground">Published</span>
@@ -101,9 +107,7 @@ export default function DeleteNewsCell({ row, onSuccess }: Props) {
               onClick={handleConfirm}
               disabled={loading}
             >
-              {loading && (
-                <ImSpinner9 className="mr-2 h-3 w-3 animate-spin" />
-              )}
+              {loading && <ImSpinner9 className="mr-2 h-3 w-3 animate-spin" />}
               Delete
             </Button>
           </DialogFooter>
