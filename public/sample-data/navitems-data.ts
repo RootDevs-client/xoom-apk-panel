@@ -1,5 +1,5 @@
 import { routes } from "@/config/routes";
-import { BarChart3, LayoutDashboard, Settings2, User } from "lucide-react";
+import { BarChart3, LayoutDashboard, Settings2, Tags, User } from "lucide-react";
 import { FaFootball } from "react-icons/fa6";
 
 export const adminDashboardMenu = {
@@ -22,6 +22,11 @@ export const adminDashboardMenu = {
       icon: LayoutDashboard,
     },
 
+    {
+      title: "Categories",
+      url: routes.privateRoutes.admin.categories,
+      icon: Tags,
+    },
     {
       title: "Subscription",
       url: routes.privateRoutes.admin.subscription,

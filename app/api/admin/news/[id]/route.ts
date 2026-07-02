@@ -4,9 +4,21 @@ import "@/model/Category";
 import { News } from "@/model/News";
 import { NextRequest } from "next/server";
 
+export const GET = asyncHandler(
+  async (req: NextRequest, { id }: { id: string }) => {
+    const news = await News.findById(id).populate("categories").lean();
+
+    if (!news) {
+      return apiResponse(false, 404, "News not found.");
+    }
+
+    return apiResponse(true, 200, "News fetched successfully.", news);
+  },
+  true,
+);
+
 export const PATCH = asyncHandler(
-  async (req: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
-    const { id } = await params;
+  async (req: NextRequest, { id }: { id: string }) => {
     const { title, description, image, categories, topics, publishedDate } =
       await req.json();
 
@@ -43,8 +55,7 @@ export const PATCH = asyncHandler(
 );
 
 export const DELETE = asyncHandler(
-  async (req: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
-    const { id } = await params;
+  async (req: NextRequest, { id }: { id: string }) => {
 
     const news = await News.findByIdAndDelete(id);
 

@@ -20,6 +20,7 @@ export const routes = {
       settings: `/admin/dashboard/settings`,
       subscription: `/admin/dashboard/subscription`,
       analytics: `/admin/dashboard/analytics`,
+      categories: `/admin/dashboard/categories`,
     },
   },
 };

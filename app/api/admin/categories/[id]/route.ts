@@ -13,8 +13,7 @@ const generateSlug = (text: string) =>
 
 // Update Category
 export const PATCH = asyncHandler(
-  async (req: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
-    const { id } = await params;
+  async (req: NextRequest, { id }: { id: string }) => {
     const { name } = await req.json();
 
     if (!name?.trim()) {
@@ -55,9 +54,7 @@ export const PATCH = asyncHandler(
 
 // Delete Category
 export const DELETE = asyncHandler(
-  async (req: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
-    const { id } = await params;
-
+  async (req: NextRequest, { id }: { id: string }) => {
     const category = await Category.findByIdAndDelete(id);
 
     if (!category) {
