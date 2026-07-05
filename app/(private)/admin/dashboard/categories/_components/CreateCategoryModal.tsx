@@ -42,7 +42,6 @@ export default function CreateCategoryModal({
 
     try {
       const res = await createCategory(name.trim());
-      console.log("res", res);
 
       if (res?.status) {
         ToastMessage.success({

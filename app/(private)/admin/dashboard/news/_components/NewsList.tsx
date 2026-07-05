@@ -21,7 +21,6 @@ export default function NewsList() {
       setIsLoading(true);
 
       const result = await getNewsList(page, limit, search);
-      console.log("result", result);
 
       if (result?.status) {
         setData(result.data.news || []);
