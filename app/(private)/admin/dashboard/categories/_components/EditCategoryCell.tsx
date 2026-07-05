@@ -1,6 +1,7 @@
 "use client";
 
 import { updateCategory } from "@/actions/category/categoryActions";
+import FileUploadComponent from "@/components/custom/FileUploadComponent";
 import { ToastMessage } from "@/components/custom/ToastMessage";
 import { Button } from "@/components/ui/button";
 import {
@@ -12,6 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { uploadSingleFile } from "@/lib/fileUpload";
 import { Edit } from "lucide-react";
 import { useState } from "react";
 import { ImSpinner9 } from "react-icons/im";
@@ -25,6 +27,11 @@ interface Props {
 export default function EditCategoryCell({ row, onSuccess }: Props) {
   const [open, setOpen] = useState(false);
   const [name, setName] = useState(row.name);
+
+  const [iconFile, setIconFile] = useState<File | null>(null);
+  const [iconRemoved, setIconRemoved] = useState(false);
+  const [iconUploading, setIconUploading] = useState(false);
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -39,7 +46,28 @@ export default function EditCategoryCell({ row, onSuccess }: Props) {
     setError("");
 
     try {
-      const res = await updateCategory(row._id, name.trim());
+      let iconUrl: string | null | undefined = row.icon;
+
+      if (iconRemoved) {
+        iconUrl = null;
+      } else if (iconFile) {
+        setIconUploading(true);
+        const uploaded = await uploadSingleFile(iconFile);
+        if (uploaded?.url) {
+          iconUrl = uploaded.url;
+        } else {
+          setError("Failed to upload icon");
+          setLoading(false);
+          setIconUploading(false);
+          return;
+        }
+        setIconUploading(false);
+      }
+
+      const res = await updateCategory(row._id, {
+        name: name.trim(),
+        icon: iconUrl || undefined,
+      });
 
       if (res?.status) {
         ToastMessage.success({
@@ -56,7 +84,6 @@ export default function EditCategoryCell({ row, onSuccess }: Props) {
       setLoading(false);
     }
   };
-
   return (
     <>
       <Button
@@ -65,6 +92,8 @@ export default function EditCategoryCell({ row, onSuccess }: Props) {
         className="h-8 w-8 cursor-pointer"
         onClick={() => {
           setName(row.name);
+          setIconFile(null);
+          setIconRemoved(false);
           setError("");
           setOpen(true);
         }}
@@ -79,7 +108,7 @@ export default function EditCategoryCell({ row, onSuccess }: Props) {
               <DialogTitle>Edit Category</DialogTitle>
             </DialogHeader>
 
-            <div className="py-4 space-y-3">
+            <div className="py-4 space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="edit-name">Category Name</Label>
                 <Input
@@ -93,6 +122,22 @@ export default function EditCategoryCell({ row, onSuccess }: Props) {
                   autoFocus
                 />
               </div>
+
+              <div className="space-y-1.5">
+                <Label className="text-sm font-medium">Category Icon</Label>
+                <FileUploadComponent
+                  accept="image"
+                  maxSize={5}
+                  maxFiles={1}
+                  onFilesChange={(files) => setIconFile(files[0] || null)}
+                  existingImageUrl={!iconRemoved ? row.icon || "" : ""}
+                  onRemoveExisting={() => {
+                    setIconRemoved(true);
+                    setIconFile(null);
+                  }}
+                />
+              </div>
+
               {error && <p className="text-sm text-red-500">{error}</p>}
             </div>
 
@@ -105,8 +150,8 @@ export default function EditCategoryCell({ row, onSuccess }: Props) {
               >
                 Cancel
               </Button>
-              <Button type="submit" disabled={loading}>
-                {loading && (
+              <Button type="submit" disabled={loading || iconUploading}>
+                {(loading || iconUploading) && (
                   <ImSpinner9 className="mr-2 h-3 w-3 animate-spin" />
                 )}
                 Save

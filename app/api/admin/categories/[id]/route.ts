@@ -1,5 +1,5 @@
 import { asyncHandler } from "@/lib/async-handler";
-import { apiResponse } from "@/lib/server.utils";
+import { apiResponse, prependAwsBaseUrl } from "@/lib/server.utils";
 import { Category } from "@/model/Category";
 import { NextRequest } from "next/server";
 
@@ -14,7 +14,8 @@ const generateSlug = (text: string) =>
 // Update Category
 export const PATCH = asyncHandler(
   async (req: NextRequest, { id }: { id: string }) => {
-    const { name } = await req.json();
+    const body = await req.json();
+    const { name, icon } = body;
 
     if (!name?.trim()) {
       return apiResponse(false, 400, "Category name is required.");
@@ -31,23 +32,37 @@ export const PATCH = asyncHandler(
       return apiResponse(false, 409, "Category already exists.");
     }
 
-    const category = await Category.findByIdAndUpdate(
-      id,
-      {
-        name: name.trim(),
-        slug,
-      },
-      {
-        new: true,
-        runValidators: true,
-      },
-    );
+    const updateData: Record<string, any> = {
+      name: name.trim(),
+      slug,
+    };
+
+    // Only touch icon if the client explicitly sent it
+    // (string = new icon, null = remove icon, key omitted = leave unchanged)
+    if (icon !== undefined) {
+      updateData.icon = icon;
+    }
+
+    const category = await Category.findByIdAndUpdate(id, updateData, {
+      new: true,
+      runValidators: true,
+    });
 
     if (!category) {
       return apiResponse(false, 404, "Category not found.");
     }
 
-    return apiResponse(true, 200, "Category updated successfully.", category);
+    const updatedCategory = {
+      ...(category.toObject ? category.toObject() : category),
+      icon: prependAwsBaseUrl(category.icon),
+    };
+
+    return apiResponse(
+      true,
+      200,
+      "Category updated successfully.",
+      updatedCategory,
+    );
   },
   true,
 );

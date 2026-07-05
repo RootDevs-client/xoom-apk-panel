@@ -1,5 +1,5 @@
 import { asyncHandler } from "@/lib/async-handler";
-import { apiResponse } from "@/lib/server.utils";
+import { apiResponse, prependAwsBaseUrl } from "@/lib/server.utils";
 import { Category } from "@/model/Category";
 import { NextRequest } from "next/server";
 
@@ -18,11 +18,14 @@ export const GET = asyncHandler(async (req: NextRequest) => {
     filter.slug = slug;
   }
 
-  const categories = await Category.find(filter)
-    .sort({ createdAt: -1 })
-    .lean();
+  const categories = await Category.find(filter).sort({ createdAt: -1 }).lean();
+
+  const mappedCategories = categories.map((item: Record<string, any>) => ({
+    ...item,
+    icon: prependAwsBaseUrl(item.icon),
+  }));
 
   return apiResponse(true, 200, "Categories fetched successfully.", {
-    categories,
+    categories: mappedCategories,
   });
 });

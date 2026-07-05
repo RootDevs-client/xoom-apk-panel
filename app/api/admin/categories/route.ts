@@ -1,5 +1,5 @@
 import { asyncHandler } from "@/lib/async-handler";
-import { apiResponse } from "@/lib/server.utils";
+import { apiResponse, prependAwsBaseUrl } from "@/lib/server.utils";
 import { Category } from "@/model/Category";
 import { NextRequest } from "next/server";
 
@@ -14,7 +14,7 @@ const generateSlug = (text: string) =>
 export const POST = asyncHandler(async (req: NextRequest) => {
   const body = await req.json();
 
-  const { name } = body;
+  const { name, icon } = body;
 
   if (!name?.trim()) {
     return apiResponse(false, 400, "Category name is required.");
@@ -32,9 +32,19 @@ export const POST = asyncHandler(async (req: NextRequest) => {
   const category = await Category.create({
     name: name.trim(),
     slug,
+    icon: icon || null,
   });
+  const createdCategory = {
+    ...(category.toObject ? category.toObject() : category),
+    icon: prependAwsBaseUrl(category.icon),
+  };
 
-  return apiResponse(true, 201, "Category created successfully.", category);
+  return apiResponse(
+    true,
+    201,
+    "Category created successfully.",
+    createdCategory,
+  );
 }, true);
 
 export const GET = asyncHandler(async (req: NextRequest) => {
@@ -63,8 +73,13 @@ export const GET = asyncHandler(async (req: NextRequest) => {
     Category.countDocuments(filter),
   ]);
 
+  const mappedCategories = categories.map((item: Record<string, any>) => ({
+    ...item,
+    icon: prependAwsBaseUrl(item.icon),
+  }));
+
   return apiResponse(true, 200, "Categories fetched successfully.", {
-    categories,
+    categories: mappedCategories,
     pagination: {
       total,
       page,

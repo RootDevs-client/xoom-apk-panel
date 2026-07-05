@@ -3,6 +3,7 @@ import mongoose, { Document, Schema } from "mongoose";
 export interface ICategory extends Document {
   name: string;
   slug: string;
+  icon?: string | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -13,6 +14,10 @@ const CategorySchema = new Schema<ICategory>(
       type: String,
       required: true,
       trim: true,
+    },
+    icon: {
+      type: String,
+      default: null,
     },
     slug: {
       type: String,

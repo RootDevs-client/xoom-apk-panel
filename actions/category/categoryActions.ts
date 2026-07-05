@@ -2,6 +2,11 @@
 
 import { apiClient } from "@/lib/api-client";
 
+export interface CategoryFormData {
+  name: string;
+  icon?: string | null;
+}
+
 export async function getCategoryList(
   page: number,
   limit: number,
@@ -33,11 +38,11 @@ export async function getCategoryList(
   }
 }
 
-export async function createCategory(name: string) {
+export async function createCategory(data: CategoryFormData) {
   try {
     const res = await apiClient("/api/admin/categories", {
       method: "POST",
-      body: { name },
+      body: data,
     });
     return res;
   } catch (error: any) {
@@ -52,11 +57,11 @@ export async function createCategory(name: string) {
   }
 }
 
-export async function updateCategory(id: string, name: string) {
+export async function updateCategory(id: string, data: CategoryFormData) {
   try {
     const res = await apiClient(`/api/admin/categories/${id}`, {
       method: "PATCH",
-      body: { name },
+      body: data,
     });
     return res;
   } catch (error: any) {
