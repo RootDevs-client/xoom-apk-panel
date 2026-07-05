@@ -11,7 +11,12 @@ export const GET = asyncHandler(
       return apiResponse(false, 404, "Promotion method not found.");
     }
 
-    return apiResponse(true, 200, "Promotion method fetched successfully.", promotionMethod);
+    return apiResponse(
+      true,
+      200,
+      "Promotion method fetched successfully.",
+      promotionMethod,
+    );
   },
   true,
 );
@@ -20,7 +25,7 @@ export const PATCH = asyncHandler(
   async (req: NextRequest, { id }: { id: string }) => {
     const body = await req.json();
 
-    const { operator, promotional, non_promotional, is_active } = body;
+    const { operator, is_active } = body;
 
     if (operator !== undefined && !operator?.trim()) {
       return apiResponse(false, 400, "Operator name cannot be empty.");
@@ -39,8 +44,7 @@ export const PATCH = asyncHandler(
 
     const updateData: Record<string, any> = {};
     if (operator !== undefined) updateData.operator = operator.trim();
-    if (promotional !== undefined) updateData.promotional = promotional;
-    if (non_promotional !== undefined) updateData.non_promotional = non_promotional;
+
     if (is_active !== undefined) updateData.is_active = is_active;
 
     const promotionMethod = await PromotionMethod.findByIdAndUpdate(
@@ -56,7 +60,12 @@ export const PATCH = asyncHandler(
       return apiResponse(false, 404, "Promotion method not found.");
     }
 
-    return apiResponse(true, 200, "Promotion method updated successfully.", promotionMethod);
+    return apiResponse(
+      true,
+      200,
+      "Promotion method updated successfully.",
+      promotionMethod,
+    );
   },
   true,
 );

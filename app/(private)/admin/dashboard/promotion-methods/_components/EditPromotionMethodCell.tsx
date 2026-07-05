@@ -2,6 +2,7 @@
 
 import { updatePromotionMethod } from "@/actions/promotion-method/promotionMethodActions";
 import { ToastMessage } from "@/components/custom/ToastMessage";
+import InputField from "@/components/form/InputField";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -10,11 +11,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Pencil } from "lucide-react";
 import { useState } from "react";
+import { Controller, FormProvider, useForm } from "react-hook-form";
 import { ImSpinner9 } from "react-icons/im";
 import { type PromotionMethod } from "./columns";
 
@@ -23,31 +24,31 @@ interface Props {
   onSuccess: () => void;
 }
 
+interface FormValues {
+  operator: string;
+  is_active: boolean;
+}
+
 export default function EditPromotionMethodCell({ row, onSuccess }: Props) {
   const [open, setOpen] = useState(false);
-  const [operator, setOperator] = useState(row.operator);
-  const [promotional, setPromotional] = useState(row.promotional);
-  const [nonPromotional, setNonPromotional] = useState(row.non_promotional);
-  const [isActive, setIsActive] = useState(row.is_active);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!operator.trim()) {
-      setError("Operator name is required.");
-      return;
-    }
+  const methods = useForm<FormValues>({
+    defaultValues: {
+      operator: row.operator,
+      is_active: row.is_active,
+    },
+  });
 
+  const handleSubmit = methods.handleSubmit(async (values) => {
     setLoading(true);
     setError("");
 
     try {
       const res = await updatePromotionMethod(row._id, {
-        operator: operator.trim(),
-        promotional,
-        non_promotional: nonPromotional,
-        is_active: isActive,
+        operator: values.operator.trim(),
+        is_active: values.is_active,
       });
 
       if (res?.status) {
@@ -64,7 +65,7 @@ export default function EditPromotionMethodCell({ row, onSuccess }: Props) {
     } finally {
       setLoading(false);
     }
-  };
+  });
 
   return (
     <>
@@ -73,10 +74,10 @@ export default function EditPromotionMethodCell({ row, onSuccess }: Props) {
         size="sm"
         className="h-7 text-xs"
         onClick={() => {
-          setOperator(row.operator);
-          setPromotional(row.promotional);
-          setNonPromotional(row.non_promotional);
-          setIsActive(row.is_active);
+          methods.reset({
+            operator: row.operator,
+            is_active: row.is_active,
+          });
           setError("");
           setOpen(true);
         }}
@@ -86,73 +87,64 @@ export default function EditPromotionMethodCell({ row, onSuccess }: Props) {
 
       <Dialog open={open} onOpenChange={(v) => !loading && setOpen(v)}>
         <DialogContent className="max-w-sm">
-          <form onSubmit={handleSubmit}>
-            <DialogHeader>
-              <DialogTitle>Edit Promotion Method</DialogTitle>
-            </DialogHeader>
+          <FormProvider {...methods}>
+            <form onSubmit={handleSubmit}>
+              <DialogHeader>
+                <DialogTitle>Edit Conversion</DialogTitle>
+              </DialogHeader>
 
-            <div className="py-4 space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="edit-operator">Operator</Label>
-                <Input
-                  id="edit-operator"
-                  placeholder="Enter operator name"
-                  value={operator}
-                  onChange={(e) => {
-                    setOperator(e.target.value);
-                    if (error) setError("");
-                  }}
-                  autoFocus
-                />
+              <div className="py-4 space-y-4">
+                <div className="space-y-2">
+                  <InputField
+                    type="text"
+                    label="Conversion name"
+                    name="operator"
+                    placeholder="Enter Conversion name"
+                    required
+                  />
+                </div>
+
+                <div className="flex items-center justify-between bg-gray-100 px-4 py-3 rounded-md">
+                  <Label
+                    htmlFor="edit-is-active"
+                    className="text-lg font-dm-sans font-medium block"
+                  >
+                    Active
+                  </Label>
+                  <Controller
+                    control={methods.control}
+                    name="is_active"
+                    render={({ field }) => (
+                      <Switch
+                        id="edit-is-active"
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    )}
+                  />
+                </div>
+
+                {error && <p className="text-sm text-red-500">{error}</p>}
               </div>
 
-              <div className="flex items-center justify-between">
-                <Label htmlFor="edit-promotional">Promotional</Label>
-                <Switch
-                  id="edit-promotional"
-                  checked={promotional}
-                  onCheckedChange={setPromotional}
-                />
-              </div>
-
-              <div className="flex items-center justify-between">
-                <Label htmlFor="edit-non-promotional">Non-Promotional</Label>
-                <Switch
-                  id="edit-non-promotional"
-                  checked={nonPromotional}
-                  onCheckedChange={setNonPromotional}
-                />
-              </div>
-
-              <div className="flex items-center justify-between">
-                <Label htmlFor="edit-is-active">Active</Label>
-                <Switch
-                  id="edit-is-active"
-                  checked={isActive}
-                  onCheckedChange={setIsActive}
-                />
-              </div>
-
-              {error && <p className="text-sm text-red-500">{error}</p>}
-            </div>
-
-            <DialogFooter>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setOpen(false)}
-                disabled={loading}
-              >
-                Cancel
-              </Button>
-              <Button type="submit" disabled={loading}>
-                {loading && (
-                  <ImSpinner9 className="mr-2 h-3 w-3 animate-spin" />
-                )}
-                Save
-              </Button>
-            </DialogFooter>
-          </form>
+              <DialogFooter>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setOpen(false)}
+                  disabled={loading}
+                >
+                  Cancel
+                </Button>
+                <Button type="submit" disabled={loading}>
+                  {loading && (
+                    <ImSpinner9 className="mr-2 h-3 w-3 animate-spin" />
+                  )}
+                  Save
+                </Button>
+              </DialogFooter>
+            </form>
+          </FormProvider>
         </DialogContent>
       </Dialog>
     </>

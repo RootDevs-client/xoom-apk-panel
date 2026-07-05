@@ -6,7 +6,7 @@ import { NextRequest } from "next/server";
 export const POST = asyncHandler(async (req: NextRequest) => {
   const body = await req.json();
 
-  const { operator, promotional, non_promotional, is_active } = body;
+  const { operator, is_active } = body;
 
   if (!operator?.trim()) {
     return apiResponse(false, 400, "Operator name is required.");
@@ -22,12 +22,15 @@ export const POST = asyncHandler(async (req: NextRequest) => {
 
   const promotionMethod = await PromotionMethod.create({
     operator: operator.trim(),
-    promotional: promotional ?? false,
-    non_promotional: non_promotional ?? false,
     is_active: is_active ?? true,
   });
 
-  return apiResponse(true, 201, "Promotion method created successfully.", promotionMethod);
+  return apiResponse(
+    true,
+    201,
+    "Promotion method created successfully.",
+    promotionMethod,
+  );
 }, true);
 
 export const GET = asyncHandler(async (req: NextRequest) => {
@@ -40,9 +43,7 @@ export const GET = asyncHandler(async (req: NextRequest) => {
   const filter: Record<string, any> = {};
 
   if (search) {
-    filter.$or = [
-      { operator: { $regex: search, $options: "i" } },
-    ];
+    filter.$or = [{ operator: { $regex: search, $options: "i" } }];
   }
 
   const [promotionMethods, total] = await Promise.all([

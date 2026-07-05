@@ -16,14 +16,6 @@ const PromotionMethodSchema = new Schema<IPromotionMethod>(
       required: true,
       trim: true,
     },
-    promotional: {
-      type: Boolean,
-      default: false,
-    },
-    non_promotional: {
-      type: Boolean,
-      default: false,
-    },
     is_active: {
       type: Boolean,
       default: true,
