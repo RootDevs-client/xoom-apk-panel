@@ -1,5 +1,5 @@
 import { asyncHandler } from "@/lib/async-handler";
-import { apiResponse } from "@/lib/server.utils";
+import { apiResponse, prependAwsBaseUrl } from "@/lib/server.utils";
 import { Category } from "@/model/Category";
 import { News } from "@/model/News";
 import mongoose from "mongoose";
@@ -8,7 +8,7 @@ import { NextRequest } from "next/server";
 export const POST = asyncHandler(async (req: NextRequest) => {
   const body = await req.json();
 
-  const { title, description, image, categories, topics, publishedDate } = body;
+  const { title, description, image, icon, categories, topics, publishedDate } = body;
 
   if (!title?.trim()) {
     return apiResponse(false, 400, "Title is required.");
@@ -34,12 +34,19 @@ export const POST = asyncHandler(async (req: NextRequest) => {
     title: title.trim(),
     description: description.trim(),
     image: image || null,
+    icon: icon || null,
     categories,
     topics: normalizedTopics,
     publishedDate,
   });
 
-  return apiResponse(true, 201, "News created successfully.", news);
+  const createdNews = {
+    ...(news.toObject ? news.toObject() : news),
+    icon: prependAwsBaseUrl(news.icon),
+    image: prependAwsBaseUrl(news.image),
+  };
+
+  return apiResponse(true, 201, "News created successfully.", createdNews);
 }, true);
 
 export const GET = asyncHandler(async (req: NextRequest) => {
@@ -97,8 +104,14 @@ export const GET = asyncHandler(async (req: NextRequest) => {
     News.countDocuments(filter),
   ]);
 
+  const mappedNews = news.map((item: Record<string, any>) => ({
+    ...item,
+    icon: prependAwsBaseUrl(item.icon),
+    image: prependAwsBaseUrl(item.image),
+  }));
+
   return apiResponse(true, 200, "News fetched successfully.", {
-    news,
+    news: mappedNews,
     pagination: {
       total,
       page,

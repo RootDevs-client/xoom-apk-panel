@@ -1,5 +1,5 @@
 import { asyncHandler } from "@/lib/async-handler";
-import { apiResponse } from "@/lib/server.utils";
+import { apiResponse, prependAwsBaseUrl } from "@/lib/server.utils";
 import "@/model/Category";
 import { News } from "@/model/News";
 import { NextRequest } from "next/server";
@@ -12,14 +12,19 @@ export const GET = asyncHandler(
       return apiResponse(false, 404, "News not found.");
     }
 
-    return apiResponse(true, 200, "News fetched successfully.", news);
+    const newsWithUrl = {
+      ...news,
+      icon: prependAwsBaseUrl(news.icon),
+      image: prependAwsBaseUrl(news.image),
+    };
+    return apiResponse(true, 200, "News fetched successfully.", newsWithUrl);
   },
   true,
 );
 
 export const PATCH = asyncHandler(
   async (req: NextRequest, { id }: { id: string }) => {
-    const { title, description, image, categories, topics, publishedDate } =
+    const { title, description, image, icon, categories, topics, publishedDate } =
       await req.json();
 
     const updateData: Record<string, any> = {};
@@ -27,6 +32,7 @@ export const PATCH = asyncHandler(
     if (title?.trim()) updateData.title = title.trim();
     if (description?.trim()) updateData.description = description.trim();
     if (image !== undefined) updateData.image = image || null;
+    if (icon !== undefined) updateData.icon = icon || null;
     if (categories !== undefined) {
       if (!Array.isArray(categories) || categories.length === 0) {
         return apiResponse(false, 400, "At least one category is required.");
@@ -49,7 +55,12 @@ export const PATCH = asyncHandler(
       return apiResponse(false, 404, "News not found.");
     }
 
-    return apiResponse(true, 200, "News updated successfully.", news);
+    const updatedNews = {
+      ...(news.toObject ? news.toObject() : news),
+      icon: prependAwsBaseUrl(news.icon),
+      image: prependAwsBaseUrl(news.image),
+    };
+    return apiResponse(true, 200, "News updated successfully.", updatedNews);
   },
   true,
 );

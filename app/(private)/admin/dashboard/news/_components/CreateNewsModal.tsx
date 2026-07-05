@@ -1,8 +1,10 @@
 "use client";
 
 import { getCategoryList } from "@/actions/category/categoryActions";
+import { getTopicList } from "@/actions/topic/topicActions";
 import { createNews, type NewsFormData } from "@/actions/news/newsActions";
 import { ToastMessage } from "@/components/custom/ToastMessage";
+import FileUploadComponent from "@/components/custom/FileUploadComponent";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -22,9 +24,16 @@ import FlatpickrInput from "@/components/form/FlatpickrInput";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { uploadSingleFile } from "@/lib/fileUpload";
 import { useEffect, useState } from "react";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuCheckboxItem,
+} from "@/components/ui/dropdown-menu";
 import { ImSpinner9 } from "react-icons/im";
-import { X } from "lucide-react";
+import { ChevronDown, X } from "lucide-react";
 
 interface Props {
   open: boolean;
@@ -41,9 +50,17 @@ export default function CreateNewsModal({
   const [description, setDescription] = useState("");
   const [image, setImage] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("");
-  const [topics, setTopics] = useState<string[]>([]);
-  const [topicInput, setTopicInput] = useState("");
+  const [topicOptions, setTopicOptions] = useState<
+    { _id: string; name: string }[]
+  >([]);
+  const [selectedTopicIds, setSelectedTopicIds] = useState<string[]>([]);
   const [publishedDate, setPublishedDate] = useState("");
+
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imageUploading, setImageUploading] = useState(false);
+
+  const [iconFile, setIconFile] = useState<File | null>(null);
+  const [iconUploading, setIconUploading] = useState(false);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -54,6 +71,7 @@ export default function CreateNewsModal({
   useEffect(() => {
     if (open) {
       loadCategories();
+      loadTopics();
     }
   }, [open]);
 
@@ -61,6 +79,13 @@ export default function CreateNewsModal({
     const res = await getCategoryList(1, 100, "");
     if (res?.status) {
       setCategoryOptions(res.data.categories || []);
+    }
+  };
+
+  const loadTopics = async () => {
+    const res = await getTopicList(1, 100, "");
+    if (res?.status) {
+      setTopicOptions(res.data.topics || []);
     }
   };
 
@@ -87,12 +112,46 @@ export default function CreateNewsModal({
     setError("");
 
     try {
+      let imageUrl: string | undefined;
+      let iconUrl: string | undefined;
+
+      if (imageFile) {
+        setImageUploading(true);
+        const uploaded = await uploadSingleFile(imageFile);
+        if (uploaded?.url) {
+          imageUrl = uploaded.url;
+        } else {
+          setError("Failed to upload image");
+          setLoading(false);
+          setImageUploading(false);
+          return;
+        }
+        setImageUploading(false);
+      }
+
+      if (iconFile) {
+        setIconUploading(true);
+        const uploaded = await uploadSingleFile(iconFile);
+        if (uploaded?.url) {
+          iconUrl = uploaded.url;
+        } else {
+          setError("Failed to upload icon");
+          setLoading(false);
+          setIconUploading(false);
+          return;
+        }
+        setIconUploading(false);
+      }
+
       const data: NewsFormData = {
         title: title.trim(),
         description: description.trim(),
-        image: image.trim() || undefined,
+        image: imageUrl,
+        icon: iconUrl,
         categories: [selectedCategory],
-        topics,
+        topics: selectedTopicIds
+          .map((id) => topicOptions.find((t) => t._id === id)?.name)
+          .filter((n): n is string => !!n),
         publishedDate,
       };
 
@@ -105,9 +164,10 @@ export default function CreateNewsModal({
         setTitle("");
         setDescription("");
         setImage("");
+        setImageFile(null);
+        setIconFile(null);
         setSelectedCategory("");
-        setTopics([]);
-        setTopicInput("");
+        setSelectedTopicIds([]);
         setPublishedDate("");
         onOpenChange(false);
         onSuccess();
@@ -121,27 +181,8 @@ export default function CreateNewsModal({
     }
   };
 
-  const addTopic = () => {
-    const trimmed = topicInput.trim();
-    if (trimmed && !topics.includes(trimmed)) {
-      setTopics([...topics, trimmed]);
-    }
-    setTopicInput("");
-  };
-
-  const removeTopic = (index: number) => {
-    setTopics(topics.filter((_, i) => i !== index));
-  };
-
-  const handleTopicKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter" || e.key === "Tab") {
-      e.preventDefault();
-      addTopic();
-    }
-  };
-
   return (
-    <Dialog open={open} onOpenChange={(v) => !loading && onOpenChange(v)}>
+      <Dialog open={open} onOpenChange={(v) => !loading && !imageUploading && !iconUploading && onOpenChange(v)}>
       <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
@@ -177,13 +218,23 @@ export default function CreateNewsModal({
               />
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="image">Image URL</Label>
-              <Input
-                id="image"
-                placeholder="https://example.com/image.jpg"
-                value={image}
-                onChange={(e) => setImage(e.target.value)}
+            <div className="space-y-1.5">
+              <Label>Image</Label>
+              <FileUploadComponent
+                accept="image"
+                maxSize={5}
+                maxFiles={1}
+                onFilesChange={(files) => setImageFile(files[0] || null)}
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label>Icon</Label>
+              <FileUploadComponent
+                accept="image"
+                maxSize={5}
+                maxFiles={1}
+                onFilesChange={(files) => setIconFile(files[0] || null)}
               />
             </div>
 
@@ -215,31 +266,76 @@ export default function CreateNewsModal({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="topicInput">Topics</Label>
-              <Input
-                id="topicInput"
-                placeholder="Type a topic and press Enter or Tab"
-                value={topicInput}
-                onChange={(e) => setTopicInput(e.target.value)}
-                onKeyDown={handleTopicKeyDown}
-              />
-              {topics.length > 0 && (
-                <div className="flex flex-wrap gap-1.5 mt-2">
-                  {topics.map((topic, idx) => (
-                    <span
-                      key={idx}
-                      className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary"
-                    >
-                      {topic}
-                      <button
-                        type="button"
-                        onClick={() => removeTopic(idx)}
-                        className="inline-flex items-center justify-center rounded-full hover:bg-primary/20 transition-colors"
-                      >
-                        <X className="size-3" />
-                      </button>
+              <Label>Topics</Label>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button
+                    type="button"
+                    className="border-input data-[placeholder]:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:bg-input/30 dark:hover:bg-input/50 flex w-full items-center justify-between gap-2 rounded-md border bg-transparent px-3 py-2 text-sm whitespace-nowrap shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 data-[size=default]:h-9"
+                  >
+                    <span className="text-muted-foreground">
+                      {selectedTopicIds.length > 0
+                        ? `${selectedTopicIds.length} topic${selectedTopicIds.length > 1 ? "s" : ""} selected`
+                        : "Select topics"}
                     </span>
-                  ))}
+                    <ChevronDown className="size-4 opacity-50" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  className="w-full min-w-0 max-h-60 overflow-y-auto"
+                  align="start"
+                >
+                  {topicOptions.length === 0 ? (
+                    <div className="px-2 py-1.5 text-sm text-muted-foreground">
+                      No topics found
+                    </div>
+                  ) : (
+                    topicOptions.map((topic) => {
+                      const isSelected = selectedTopicIds.includes(topic._id);
+                      return (
+                        <DropdownMenuCheckboxItem
+                          key={topic._id}
+                          checked={isSelected}
+                          onCheckedChange={() => {
+                            setSelectedTopicIds((prev) =>
+                              isSelected
+                                ? prev.filter((id) => id !== topic._id)
+                                : [...prev, topic._id],
+                            );
+                          }}
+                        >
+                          {topic.name}
+                        </DropdownMenuCheckboxItem>
+                      );
+                    })
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
+              {selectedTopicIds.length > 0 && (
+                <div className="flex flex-wrap gap-1.5 mt-2">
+                  {selectedTopicIds.map((id) => {
+                    const topic = topicOptions.find((t) => t._id === id);
+                    if (!topic) return null;
+                    return (
+                      <span
+                        key={id}
+                        className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary"
+                      >
+                        {topic.name}
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setSelectedTopicIds((prev) =>
+                              prev.filter((tid) => tid !== id),
+                            )
+                          }
+                          className="inline-flex items-center justify-center rounded-full hover:bg-primary/20 transition-colors"
+                        >
+                          <X className="size-3" />
+                        </button>
+                      </span>
+                    );
+                  })}
                 </div>
               )}
             </div>
@@ -267,12 +363,12 @@ export default function CreateNewsModal({
               type="button"
               variant="outline"
               onClick={() => onOpenChange(false)}
-              disabled={loading}
+              disabled={loading || imageUploading || iconUploading}
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={loading}>
-              {loading && (
+            <Button type="submit" disabled={loading || imageUploading || iconUploading}>
+              {(loading || imageUploading || iconUploading) && (
                 <ImSpinner9 className="mr-2 h-3 w-3 animate-spin" />
               )}
               Create

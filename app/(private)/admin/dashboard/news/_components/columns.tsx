@@ -2,6 +2,7 @@
 
 import { ColumnDef } from "@tanstack/react-table";
 import moment from "moment-timezone";
+import Image from "next/image";
 import DeleteNewsCell from "./DeleteNewsCell";
 import EditNewsCell from "./EditNewsCell";
 
@@ -15,12 +16,11 @@ export type NewsItem = {
   publishedDate: string;
   createdAt: string;
   updatedAt: string;
+  icon?: string;
 };
 
 const formatDate = (date: string) => {
-  return moment(date)
-    .tz("Asia/Dhaka")
-    .format("DD MMM YYYY, HH:mm [hrs]");
+  return moment(date).tz("Asia/Dhaka").format("DD MMM YYYY, HH:mm [hrs]");
 };
 
 export const columns = ({
@@ -29,12 +29,28 @@ export const columns = ({
   onSuccess: () => void;
 }): ColumnDef<NewsItem>[] => [
   {
+    accessorKey: "icon",
+    header: "Icon",
+    cell: ({ row }) =>
+      row.original.icon ? (
+        <div className="max-w-xs truncate font-medium">
+          <Image
+            src={row.original.icon}
+            alt="Icon"
+            width={50}
+            height={50}
+            className="object-contain w-12 h-12"
+          />
+        </div>
+      ) : (
+        ""
+      ),
+  },
+  {
     accessorKey: "title",
     header: "Title",
     cell: ({ row }) => (
-      <div className="max-w-xs truncate font-medium">
-        {row.original.title}
-      </div>
+      <div className="max-w-xs truncate font-medium">{row.original.title}</div>
     ),
   },
   {

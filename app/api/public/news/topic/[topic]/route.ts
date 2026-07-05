@@ -1,5 +1,5 @@
 import { asyncHandler } from "@/lib/async-handler";
-import { apiResponse } from "@/lib/server.utils";
+import { apiResponse, prependAwsBaseUrl } from "@/lib/server.utils";
 import "@/model/Category";
 import { News } from "@/model/News";
 import { NextRequest } from "next/server";
@@ -32,8 +32,14 @@ export const GET = asyncHandler(
       News.countDocuments(filter),
     ]);
 
+    const mappedNews = news.map((item: Record<string, any>) => ({
+      ...item,
+      icon: prependAwsBaseUrl(item.icon),
+      image: prependAwsBaseUrl(item.image),
+    }));
+
     return apiResponse(true, 200, "News fetched successfully.", {
-      news,
+      news: mappedNews,
       pagination: {
         total,
         page,

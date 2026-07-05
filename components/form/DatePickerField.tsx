@@ -72,12 +72,12 @@ export default function DatePickerField<T extends FieldValues>({
   return (
     <div className={containerClassName}>
       {label && (
-        <Label
-          className={` font-medium font-dm-sans mb-1.5 block ${labelClassName}`}
-        >
+        <Label className={` text-sm font-dm-sans font-medium mb-1 block`}>
           {label}
           {required && (
-            <span className="text-red-500 ml-0.5  font-bold">*</span>
+            <span className="text-red-500 ml-0.5 font-dm-sans font-bold">
+              *
+            </span>
           )}
         </Label>
       )}

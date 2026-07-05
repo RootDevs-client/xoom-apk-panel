@@ -1,5 +1,5 @@
 import { asyncHandler } from "@/lib/async-handler";
-import { apiResponse } from "@/lib/server.utils";
+import { apiResponse, prependAwsBaseUrl } from "@/lib/server.utils";
 import "@/model/Category";
 import { News } from "@/model/News";
 import { NextRequest } from "next/server";
@@ -15,6 +15,11 @@ export const GET = asyncHandler(
       return apiResponse(false, 404, "News not found.");
     }
 
-    return apiResponse(true, 200, "News fetched successfully.", news);
+    const newsWithUrl = {
+      ...news,
+      icon: prependAwsBaseUrl(news.icon),
+      image: prependAwsBaseUrl(news.image),
+    };
+    return apiResponse(true, 200, "News fetched successfully.", newsWithUrl);
   },
 );

@@ -6,6 +6,7 @@ export interface NewsFormData {
   title: string;
   description: string;
   image?: string;
+  icon?: string;
   categories: string[];
   topics: string[];
   publishedDate: string;

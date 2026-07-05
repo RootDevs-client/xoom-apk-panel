@@ -4,6 +4,7 @@ export interface INews extends Document {
   title: string;
   description: string;
   image?: string;
+  icon?: string;
   categories: mongoose.Types.ObjectId[];
   topics: string[];
   publishedDate: Date;
@@ -24,6 +25,10 @@ const NewsSchema = new Schema<INews>(
       trim: true,
     },
     image: {
+      type: String,
+      default: null,
+    },
+    icon: {
       type: String,
       default: null,
     },

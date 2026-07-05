@@ -36,6 +36,7 @@ export default async function EditNewsPage({ params }: Props) {
           title: news.title,
           description: news.description,
           image: news.image,
+          icon: news.icon,
           categories: news.categories,
           topics: news.topics,
           publishedDate: news.publishedDate,

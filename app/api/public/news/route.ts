@@ -1,5 +1,5 @@
 import { asyncHandler } from "@/lib/async-handler";
-import { apiResponse } from "@/lib/server.utils";
+import { apiResponse, prependAwsBaseUrl } from "@/lib/server.utils";
 import { Category } from "@/model/Category";
 import { News } from "@/model/News";
 import mongoose from "mongoose";
@@ -12,7 +12,8 @@ export const GET = asyncHandler(async (req: NextRequest) => {
   const limit = Math.max(Number(searchParams.get("limit")) || 10, 1);
   const search = searchParams.get("search")?.trim() || "";
   const category = searchParams.get("category");
-  const topic = searchParams.get("topic");
+  const topic = searchParams.get("topics");
+  const newsId = searchParams.get("newsId");
   const sort = searchParams.get("sort") || "newest";
 
   const filter: Record<string, any> = {};
@@ -49,6 +50,16 @@ export const GET = asyncHandler(async (req: NextRequest) => {
     filter.topics = { $regex: `^${topic.trim()}$`, $options: "i" };
   }
 
+  if (newsId) {
+    const ids = newsId
+      .split(",")
+      .map((id) => id.trim())
+      .filter((id) => mongoose.Types.ObjectId.isValid(id));
+    if (ids.length > 0) {
+      filter._id = { $in: ids };
+    }
+  }
+
   const sortOption =
     sort === "oldest"
       ? { publishedDate: 1 as const }
@@ -65,8 +76,14 @@ export const GET = asyncHandler(async (req: NextRequest) => {
     News.countDocuments(filter),
   ]);
 
+  const mappedNews = news.map((item: Record<string, any>) => ({
+    ...item,
+    icon: prependAwsBaseUrl(item.icon),
+    image: prependAwsBaseUrl(item.image),
+  }));
+
   return apiResponse(true, 200, "News fetched successfully.", {
-    news,
+    news: mappedNews,
     pagination: {
       total,
       page,

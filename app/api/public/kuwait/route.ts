@@ -10,7 +10,6 @@ import path from "path";
 export const GET = async (req: NextRequest) => {
   const { searchParams } = new URL(req.url);
   const number = searchParams.get("number");
-  console.log(number, "number");
   if (!number) {
     const filePath = path.join(process.cwd(), "templates", "kuwait.html");
     const html = fs.readFileSync(filePath, "utf-8");
