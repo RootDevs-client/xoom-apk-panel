@@ -21,6 +21,7 @@ export const routes = {
       subscription: `/admin/dashboard/subscription`,
       analytics: `/admin/dashboard/analytics`,
       categories: `/admin/dashboard/categories`,
+      topics: `/admin/dashboard/topics`,
       news: `/admin/dashboard/news`,
       promotionMethods: `/admin/dashboard/promotion-methods`,
     },

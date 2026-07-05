@@ -1,6 +1,6 @@
 import { asyncHandler } from "@/lib/async-handler";
 import { apiResponse } from "@/lib/server.utils";
-import { Category } from "@/model/Category";
+import { Topic } from "@/model/Topic";
 import { NextRequest } from "next/server";
 
 export const GET = asyncHandler(async (req: NextRequest) => {
@@ -18,11 +18,11 @@ export const GET = asyncHandler(async (req: NextRequest) => {
     filter.slug = slug;
   }
 
-  const categories = await Category.find(filter)
+  const topics = await Topic.find(filter)
     .sort({ createdAt: -1 })
     .lean();
 
-  return apiResponse(true, 200, "Categories fetched successfully.", {
-    categories,
+  return apiResponse(true, 200, "Topics fetched successfully.", {
+    topics,
   });
 });
