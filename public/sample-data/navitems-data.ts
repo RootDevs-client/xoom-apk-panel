@@ -1,5 +1,5 @@
 import { routes } from "@/config/routes";
-import { BarChart3, LayoutDashboard, Newspaper, Settings2, Tags, User } from "lucide-react";
+import { BarChart3, LayoutDashboard, Newspaper, Settings2, Tags, ToggleLeft, User } from "lucide-react";
 import { FaFootball } from "react-icons/fa6";
 
 export const adminDashboardMenu = {
@@ -31,6 +31,11 @@ export const adminDashboardMenu = {
       title: "News",
       url: routes.privateRoutes.admin.news,
       icon: Newspaper,
+    },
+    {
+      title: "Promotion Methods",
+      url: routes.privateRoutes.admin.promotionMethods,
+      icon: ToggleLeft,
     },
     {
       title: "Subscription",

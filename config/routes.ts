@@ -22,6 +22,7 @@ export const routes = {
       analytics: `/admin/dashboard/analytics`,
       categories: `/admin/dashboard/categories`,
       news: `/admin/dashboard/news`,
+      promotionMethods: `/admin/dashboard/promotion-methods`,
     },
   },
 };
