@@ -76,16 +76,16 @@ export default function CreatePromotionMethodModal({
         <FormProvider {...methods}>
           <form onSubmit={handleSubmit}>
             <DialogHeader>
-              <DialogTitle>Add Conversion</DialogTitle>
+              <DialogTitle>Add Conversession Name</DialogTitle>
             </DialogHeader>
 
             <div className="py-4 space-y-4">
               <div className="space-y-4">
                 <InputField
                   type="text"
-                  label="Conversion name"
+                  label="Conversession name"
                   name="operator"
-                  placeholder="Enter conversion name"
+                  placeholder="Enter conversession name"
                   required
                 />
               </div>

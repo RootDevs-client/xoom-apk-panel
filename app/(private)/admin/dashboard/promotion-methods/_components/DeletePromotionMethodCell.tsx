@@ -63,7 +63,7 @@ export default function DeletePromotionMethodCell({ row, onSuccess }: Props) {
       <Dialog open={open} onOpenChange={(v) => !loading && setOpen(v)}>
         <DialogContent className="max-w-sm">
           <DialogHeader>
-            <DialogTitle>Delete Conversion Method</DialogTitle>
+            <DialogTitle>Delete Conversession Name</DialogTitle>
             <DialogDescription>
               Are you sure you want to delete{" "}
               <span className="font-semibold text-foreground">

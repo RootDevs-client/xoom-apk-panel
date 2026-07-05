@@ -90,16 +90,16 @@ export default function EditPromotionMethodCell({ row, onSuccess }: Props) {
           <FormProvider {...methods}>
             <form onSubmit={handleSubmit}>
               <DialogHeader>
-                <DialogTitle>Edit Conversion</DialogTitle>
+                <DialogTitle>Edit Conversession Name</DialogTitle>
               </DialogHeader>
 
               <div className="py-4 space-y-4">
                 <div className="space-y-2">
                   <InputField
                     type="text"
-                    label="Conversion name"
+                    label="Conversession name"
                     name="operator"
-                    placeholder="Enter Conversion name"
+                    placeholder="Enter conversession name"
                     required
                   />
                 </div>

@@ -16,7 +16,7 @@ export interface ToolbarProps {
 
 const breadcrumbItems = [
   { label: "Dashboard", href: "/admin/dashboard" },
-  { label: "Conversion Methods" },
+  { label: "Conversession" },
 ];
 
 export default function PromotionMethodToolbar({
@@ -52,7 +52,7 @@ export default function PromotionMethodToolbar({
           <div className="mb-2 flex items-start justify-between flex-wrap space-y-2">
             <div>
               <h2 className="font-dm-sans font-medium text-lg">
-                Manage Conversion
+                Manage Conversession Name
               </h2>
               <DynamicBreadcrumb items={breadcrumbItems} />
             </div>
@@ -62,7 +62,7 @@ export default function PromotionMethodToolbar({
               onClick={() => setCreateOpen(true)}
             >
               <Plus className="size-4" />
-              Add Conversion
+              Add Conversession
             </Button>
           </div>
           <div className="flex items-center gap-4 flex-wrap">

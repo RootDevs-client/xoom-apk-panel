@@ -47,7 +47,7 @@ export const adminDashboardMenu = {
       icon: Newspaper,
     },
     {
-      title: "Conversion Methods",
+      title: "Conversessions",
       url: routes.privateRoutes.admin.promotionMethods,
       icon: ToggleLeft,
     },
