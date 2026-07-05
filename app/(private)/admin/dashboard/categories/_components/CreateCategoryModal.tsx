@@ -42,6 +42,7 @@ export default function CreateCategoryModal({
 
     try {
       const res = await createCategory(name.trim());
+      console.log("res", res);
 
       if (res?.status) {
         ToastMessage.success({
@@ -82,9 +83,7 @@ export default function CreateCategoryModal({
                 autoFocus
               />
             </div>
-            {error && (
-              <p className="text-sm text-red-500">{error}</p>
-            )}
+            {error && <p className="text-sm text-red-500">{error}</p>}
           </div>
 
           <DialogFooter>
@@ -97,9 +96,7 @@ export default function CreateCategoryModal({
               Cancel
             </Button>
             <Button type="submit" disabled={loading}>
-              {loading && (
-                <ImSpinner9 className="mr-2 h-3 w-3 animate-spin" />
-              )}
+              {loading && <ImSpinner9 className="mr-2 h-3 w-3 animate-spin" />}
               Create
             </Button>
           </DialogFooter>

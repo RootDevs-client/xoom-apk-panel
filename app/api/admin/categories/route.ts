@@ -15,6 +15,7 @@ export const POST = asyncHandler(async (req: NextRequest) => {
   const body = await req.json();
 
   const { name } = body;
+  console.log("name", name);
 
   if (!name?.trim()) {
     return apiResponse(false, 400, "Category name is required.");
@@ -22,6 +23,7 @@ export const POST = asyncHandler(async (req: NextRequest) => {
 
   const slug = generateSlug(name);
 
+  console.log("slug", slug);
   const exists = await Category.findOne({
     $or: [{ name: name.trim() }, { slug }],
   });
@@ -34,6 +36,7 @@ export const POST = asyncHandler(async (req: NextRequest) => {
     name: name.trim(),
     slug,
   });
+  console.log("category", category);
 
   return apiResponse(true, 201, "Category created successfully.", category);
 }, true);
