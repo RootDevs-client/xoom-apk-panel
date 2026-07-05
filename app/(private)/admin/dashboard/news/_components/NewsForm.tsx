@@ -7,6 +7,7 @@ import {
   type NewsFormData,
 } from "@/actions/news/newsActions";
 import { ToastMessage } from "@/components/custom/ToastMessage";
+import DatePickerField from "@/components/form/DatePickerField";
 import InputField from "@/components/form/InputField";
 import SunEditorField from "@/components/form/SunEditorField";
 import { Button } from "@/components/ui/button";
@@ -83,16 +84,13 @@ export default function NewsForm({ mode, initialData }: Props) {
       description: initialData?.description || "",
       image: initialData?.image || "",
       category: initialData?.categories?.[0]?._id || "",
-      publishedDate: initialData?.publishedDate
-        ? new Date(initialData.publishedDate).toISOString().split("T")[0]
-        : "",
+      publishedDate: initialData?.publishedDate || "",
     },
   });
 
   const {
     handleSubmit,
     control,
-    register,
     formState: { errors },
   } = methods;
 
@@ -115,7 +113,7 @@ export default function NewsForm({ mode, initialData }: Props) {
         image: values.image?.trim() || undefined,
         categories: [values.category],
         topics,
-        publishedDate: new Date(values.publishedDate).toISOString(),
+        publishedDate: values.publishedDate,
       };
 
       const res = isEdit
@@ -179,6 +177,7 @@ export default function NewsForm({ mode, initialData }: Props) {
           placeholder="Write your news content here..."
           required
           height="320"
+          maxLength={5000}
         />
 
         {/* Image URL */}
@@ -265,33 +264,13 @@ export default function NewsForm({ mode, initialData }: Props) {
         </div>
 
         {/* Published Date */}
-        <div className="space-y-1">
-          <Label
-            htmlFor="publishedDate"
-            className="text-sm font-dm-sans font-medium"
-          >
-            Published Date{" "}
-            <span className="text-red-500 ml-0.5 font-bold">*</span>
-          </Label>
-          <Input
-            id="publishedDate"
-            type="date"
-            {...register("publishedDate")}
-            className={
-              errors.publishedDate
-                ? "border-red-400 focus-visible:ring-red-400"
-                : ""
-            }
-          />
-          {errors.publishedDate && (
-            <div className="flex items-center gap-1 mt-1">
-              <BadgeAlert className="text-red-500 h-4 w-4" />
-              <p className="text-red-500 text-xs font-dm-sans font-medium">
-                {errors.publishedDate.message}
-              </p>
-            </div>
-          )}
-        </div>
+        <DatePickerField<NewsFormValues>
+          name="publishedDate"
+          control={control}
+          label="Published Date"
+          required
+          error={errors.publishedDate}
+        />
 
         {/* Server-side error */}
         {serverError && (

@@ -18,6 +18,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import FlatpickrInput from "@/components/form/FlatpickrInput";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -92,7 +93,7 @@ export default function CreateNewsModal({
         image: image.trim() || undefined,
         categories: [selectedCategory],
         topics,
-        publishedDate: new Date(publishedDate).toISOString(),
+        publishedDate,
       };
 
       const res = await createNews(data);
@@ -245,11 +246,14 @@ export default function CreateNewsModal({
 
             <div className="space-y-2">
               <Label htmlFor="publishedDate">Published Date</Label>
-              <Input
+              <FlatpickrInput
                 id="publishedDate"
-                type="date"
                 value={publishedDate}
-                onChange={(e) => setPublishedDate(e.target.value)}
+                onChange={(v) => {
+                  setPublishedDate(v);
+                  if (error) setError("");
+                }}
+                placeholder="Select published date"
               />
             </div>
 

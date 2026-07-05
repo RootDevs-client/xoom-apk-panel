@@ -54,6 +54,26 @@ export const columns = ({
     ),
   },
   {
+    accessorKey: "topics",
+    header: "Topics",
+    cell: ({ row }) => (
+      <div className="flex flex-wrap gap-1">
+        {row.original.topics?.length ? (
+          row.original.topics.map((topic, i) => (
+            <span
+              key={i}
+              className="inline-flex items-center rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground"
+            >
+              {topic}
+            </span>
+          ))
+        ) : (
+          <span className="text-xs text-muted-foreground">—</span>
+        )}
+      </div>
+    ),
+  },
+  {
     accessorKey: "publishedDate",
     header: "Published",
     cell: ({ row }) => formatDate(row.original.publishedDate),
