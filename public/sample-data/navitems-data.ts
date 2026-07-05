@@ -1,5 +1,14 @@
 import { routes } from "@/config/routes";
-import { BarChart3, LayoutDashboard, Newspaper, Settings2, Tags, ToggleLeft, User, Hash } from "lucide-react";
+import {
+  BarChart3,
+  Hash,
+  LayoutDashboard,
+  Newspaper,
+  Settings2,
+  Tags,
+  ToggleLeft,
+  User,
+} from "lucide-react";
 import { FaFootball } from "react-icons/fa6";
 
 export const adminDashboardMenu = {
@@ -38,7 +47,7 @@ export const adminDashboardMenu = {
       icon: Newspaper,
     },
     {
-      title: "Promotion Methods",
+      title: "Conversion Methods",
       url: routes.privateRoutes.admin.promotionMethods,
       icon: ToggleLeft,
     },

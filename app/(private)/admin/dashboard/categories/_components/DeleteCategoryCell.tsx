@@ -53,11 +53,11 @@ export default function DeleteCategoryCell({ row, onSuccess }: Props) {
     <>
       <Button
         variant="outline"
-        size="sm"
-        className="h-7 border-red-200 text-xs text-red-600 hover:border-red-300 hover:bg-red-50 hover:text-red-700"
+        size="icon"
+        className="h-8 w-8 cursor-pointer border-red-200 text-red-600 hover:border-red-300 hover:bg-red-50 hover:text-red-700"
         onClick={() => setOpen(true)}
       >
-        <Trash2 className="size-3" />
+        <Trash2 className="size-4" />
       </Button>
 
       <Dialog open={open} onOpenChange={(v) => !loading && setOpen(v)}>
@@ -66,10 +66,8 @@ export default function DeleteCategoryCell({ row, onSuccess }: Props) {
             <DialogTitle>Delete Category</DialogTitle>
             <DialogDescription>
               Are you sure you want to delete{" "}
-              <span className="font-semibold text-foreground">
-                {row.name}
-              </span>
-              ? This action cannot be undone.
+              <span className="font-semibold text-foreground">{row.name}</span>?
+              This action cannot be undone.
             </DialogDescription>
           </DialogHeader>
 
@@ -97,9 +95,7 @@ export default function DeleteCategoryCell({ row, onSuccess }: Props) {
               onClick={handleConfirm}
               disabled={loading}
             >
-              {loading && (
-                <ImSpinner9 className="mr-2 h-3 w-3 animate-spin" />
-              )}
+              {loading && <ImSpinner9 className="mr-2 h-3 w-3 animate-spin" />}
               Delete
             </Button>
           </DialogFooter>

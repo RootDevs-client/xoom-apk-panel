@@ -5,9 +5,9 @@ import { Button } from "@/components/ui/button";
 import { useTableState } from "@/store/useTableStore";
 import { Plus, X } from "lucide-react";
 import { useState } from "react";
+import SearchBar from "../../categories/_components/SearchBar";
 import { DynamicBreadcrumb } from "../../settings/_components/DynamicBreadcrumb";
 import CreatePromotionMethodModal from "./CreatePromotionMethodModal";
-import SearchBar from "../../categories/_components/SearchBar";
 
 export interface ToolbarProps {
   tableId: string;
@@ -16,7 +16,7 @@ export interface ToolbarProps {
 
 const breadcrumbItems = [
   { label: "Dashboard", href: "/admin/dashboard" },
-  { label: "Promotion Methods" },
+  { label: "Conversion Methods" },
 ];
 
 export default function PromotionMethodToolbar({
@@ -52,17 +52,17 @@ export default function PromotionMethodToolbar({
           <div className="mb-2 flex items-start justify-between flex-wrap space-y-2">
             <div>
               <h2 className="font-dm-sans font-medium text-lg">
-                Manage Promotion Methods
+                Manage Conversion
               </h2>
               <DynamicBreadcrumb items={breadcrumbItems} />
             </div>
             <Button
               size="sm"
-              className="gap-1.5"
+              className="gap-1.5 cursor-pointer text-white"
               onClick={() => setCreateOpen(true)}
             >
               <Plus className="size-4" />
-              Add Operator
+              Add Conversion
             </Button>
           </div>
           <div className="flex items-center gap-4 flex-wrap">

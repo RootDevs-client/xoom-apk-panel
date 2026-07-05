@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { Pencil } from "lucide-react";
+import { Edit } from "lucide-react";
 import { useState } from "react";
 import { Controller, FormProvider, useForm } from "react-hook-form";
 import { ImSpinner9 } from "react-icons/im";
@@ -71,8 +71,8 @@ export default function EditPromotionMethodCell({ row, onSuccess }: Props) {
     <>
       <Button
         variant="outline"
-        size="sm"
-        className="h-7 text-xs"
+        size="icon"
+        className="h-8 w-8 cursor-pointer"
         onClick={() => {
           methods.reset({
             operator: row.operator,
@@ -82,7 +82,7 @@ export default function EditPromotionMethodCell({ row, onSuccess }: Props) {
           setOpen(true);
         }}
       >
-        <Pencil className="size-3" />
+        <Edit className="size-4" />
       </Button>
 
       <Dialog open={open} onOpenChange={(v) => !loading && setOpen(v)}>

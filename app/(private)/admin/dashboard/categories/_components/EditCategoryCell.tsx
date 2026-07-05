@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Pencil } from "lucide-react";
+import { Edit } from "lucide-react";
 import { useState } from "react";
 import { ImSpinner9 } from "react-icons/im";
 import { type Category } from "./columns";
@@ -61,15 +61,15 @@ export default function EditCategoryCell({ row, onSuccess }: Props) {
     <>
       <Button
         variant="outline"
-        size="sm"
-        className="h-7 text-xs"
+        size="icon"
+        className="h-8 w-8 cursor-pointer"
         onClick={() => {
           setName(row.name);
           setError("");
           setOpen(true);
         }}
       >
-        <Pencil className="size-3" />
+        <Edit className="size-4" />
       </Button>
 
       <Dialog open={open} onOpenChange={(v) => !loading && setOpen(v)}>

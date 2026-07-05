@@ -53,17 +53,17 @@ export default function DeletePromotionMethodCell({ row, onSuccess }: Props) {
     <>
       <Button
         variant="outline"
-        size="sm"
-        className="h-7 border-red-200 text-xs text-red-600 hover:border-red-300 hover:bg-red-50 hover:text-red-700"
+        size="icon"
+        className="h-8 w-8 cursor-pointer bg-red-50 text-red-500 hover:bg-red-100 hover:text-red-600"
         onClick={() => setOpen(true)}
       >
-        <Trash2 className="size-3" />
+        <Trash2 className="size-4" />
       </Button>
 
       <Dialog open={open} onOpenChange={(v) => !loading && setOpen(v)}>
         <DialogContent className="max-w-sm">
           <DialogHeader>
-            <DialogTitle>Delete Promotion Method</DialogTitle>
+            <DialogTitle>Delete Conversion Method</DialogTitle>
             <DialogDescription>
               Are you sure you want to delete{" "}
               <span className="font-semibold text-foreground">
@@ -77,14 +77,6 @@ export default function DeletePromotionMethodCell({ row, onSuccess }: Props) {
             <div className="flex items-center justify-between">
               <span className="text-muted-foreground">Operator</span>
               <span className="font-medium">{row.operator}</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-muted-foreground">Promotional</span>
-              <span>{row.promotional ? "Yes" : "No"}</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-muted-foreground">Non-Promotional</span>
-              <span>{row.non_promotional ? "Yes" : "No"}</span>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-muted-foreground">Active</span>
@@ -105,9 +97,7 @@ export default function DeletePromotionMethodCell({ row, onSuccess }: Props) {
               onClick={handleConfirm}
               disabled={loading}
             >
-              {loading && (
-                <ImSpinner9 className="mr-2 h-3 w-3 animate-spin" />
-              )}
+              {loading && <ImSpinner9 className="mr-2 h-3 w-3 animate-spin" />}
               Delete
             </Button>
           </DialogFooter>
