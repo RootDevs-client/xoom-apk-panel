@@ -80,6 +80,12 @@ export const GET = asyncHandler(async (req: NextRequest) => {
     ...item,
     icon: prependAwsBaseUrl(item.icon),
     image: prependAwsBaseUrl(item.image),
+    categories: Array.isArray(item.categories)
+      ? item.categories.map((cat: Record<string, any>) => ({
+          ...cat,
+          icon: prependAwsBaseUrl(cat.icon),
+        }))
+      : item.categories,
   }));
 
   return apiResponse(true, 200, "News fetched successfully.", {
