@@ -66,7 +66,7 @@ export default function EditCategoryCell({ row, onSuccess }: Props) {
 
       const res = await updateCategory(row._id, {
         name: name.trim(),
-        icon: iconUrl || undefined,
+        icon: iconUrl,
       });
 
       if (res?.status) {
