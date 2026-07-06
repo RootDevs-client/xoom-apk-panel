@@ -1,6 +1,10 @@
 "use server";
 
 import { apiClient } from "@/lib/api-client";
+export interface TopicsFormData {
+  name: string;
+  icon?: string | null;
+}
 
 export async function getTopicList(
   page: number,
@@ -33,11 +37,11 @@ export async function getTopicList(
   }
 }
 
-export async function createTopic(name: string) {
+export async function createTopic(data: TopicsFormData) {
   try {
     const res = await apiClient("/api/admin/topics", {
       method: "POST",
-      body: { name },
+      body: data,
     });
     return res;
   } catch (error: any) {
@@ -52,11 +56,11 @@ export async function createTopic(name: string) {
   }
 }
 
-export async function updateTopic(id: string, name: string) {
+export async function updateTopic(id: string, data: TopicsFormData) {
   try {
     const res = await apiClient(`/api/admin/topics/${id}`, {
       method: "PATCH",
-      body: { name },
+      body: data,
     });
     return res;
   } catch (error: any) {

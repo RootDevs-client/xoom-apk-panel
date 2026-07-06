@@ -1,5 +1,5 @@
 import { asyncHandler } from "@/lib/async-handler";
-import { apiResponse } from "@/lib/server.utils";
+import { apiResponse, prependAwsBaseUrl } from "@/lib/server.utils";
 import { Topic } from "@/model/Topic";
 import { NextRequest } from "next/server";
 
@@ -13,7 +13,7 @@ const generateSlug = (text: string) =>
 
 export const POST = asyncHandler(async (req: NextRequest) => {
   const body = await req.json();
-  const { name } = body;
+  const { name, icon } = body;
 
   if (!name?.trim()) {
     return apiResponse(false, 400, "Topic name is required.");
@@ -31,9 +31,14 @@ export const POST = asyncHandler(async (req: NextRequest) => {
   const topic = await Topic.create({
     name: name.trim(),
     slug,
+    icon: icon || null,
   });
+  const createdTopic = {
+    ...(topic.toObject ? topic.toObject() : topic),
+    icon: prependAwsBaseUrl(topic.icon),
+  };
 
-  return apiResponse(true, 201, "Topic created successfully.", topic);
+  return apiResponse(true, 201, "Topic created successfully.", createdTopic);
 }, true);
 
 export const GET = asyncHandler(async (req: NextRequest) => {
@@ -60,9 +65,12 @@ export const GET = asyncHandler(async (req: NextRequest) => {
       .lean(),
     Topic.countDocuments(filter),
   ]);
-
+  const formattedTopics = topics.map((item: Record<string, any>) => ({
+    ...item,
+    icon: prependAwsBaseUrl(item.icon),
+  }));
   return apiResponse(true, 200, "Topics fetched successfully.", {
-    topics,
+    topics: formattedTopics,
     pagination: {
       total,
       page,

@@ -2,6 +2,7 @@
 
 import { ColumnDef } from "@tanstack/react-table";
 import moment from "moment-timezone";
+import Image from "next/image";
 import DeleteTopicCell from "./DeleteTopicCell";
 import EditTopicCell from "./EditTopicCell";
 
@@ -11,6 +12,7 @@ export type Topic = {
   slug: string;
   createdAt: string;
   updatedAt: string;
+  icon?: string;
 };
 
 const formatDate = (date: string) => {
@@ -24,6 +26,24 @@ export const columns = ({
 }: {
   onSuccess: () => void;
 }): ColumnDef<Topic>[] => [
+  {
+    accessorKey: "icon",
+    header: "Icon",
+    cell: ({ row }) =>
+      row.original.icon ? (
+        <Image
+          src={row.original.icon}
+          alt={row.original.name}
+          width={40}
+          height={40}
+          className="h-10 w-10 rounded object-cover"
+        />
+      ) : (
+        <div className="h-10 w-10 rounded bg-muted flex items-center justify-center text-xs text-muted-foreground">
+          N/A
+        </div>
+      ),
+  },
   {
     accessorKey: "name",
     header: "Name",

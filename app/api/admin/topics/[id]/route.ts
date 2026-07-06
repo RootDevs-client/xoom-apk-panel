@@ -1,5 +1,5 @@
 import { asyncHandler } from "@/lib/async-handler";
-import { apiResponse } from "@/lib/server.utils";
+import { apiResponse, prependAwsBaseUrl } from "@/lib/server.utils";
 import { Topic } from "@/model/Topic";
 import { NextRequest } from "next/server";
 
@@ -13,7 +13,7 @@ const generateSlug = (text: string) =>
 
 export const PATCH = asyncHandler(
   async (req: NextRequest, { id }: { id: string }) => {
-    const { name } = await req.json();
+    const { name, icon } = await req.json();
 
     if (!name?.trim()) {
       return apiResponse(false, 400, "Topic name is required.");
@@ -35,18 +35,23 @@ export const PATCH = asyncHandler(
       {
         name: name.trim(),
         slug,
+        icon: icon || null,
       },
       {
         new: true,
         runValidators: true,
       },
     );
+    const updatedTopic = {
+      ...(topic.toObject ? topic.toObject() : topic),
+      icon: prependAwsBaseUrl(topic.icon),
+    };
 
     if (!topic) {
       return apiResponse(false, 404, "Topic not found.");
     }
 
-    return apiResponse(true, 200, "Topic updated successfully.", topic);
+    return apiResponse(true, 200, "Topic updated successfully.", updatedTopic);
   },
   true,
 );

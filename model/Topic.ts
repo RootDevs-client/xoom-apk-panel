@@ -5,6 +5,7 @@ export interface ITopic extends Document {
   slug: string;
   createdAt: Date;
   updatedAt: Date;
+  icon?: string;
 }
 
 const TopicSchema = new Schema<ITopic>(
@@ -21,6 +22,10 @@ const TopicSchema = new Schema<ITopic>(
       lowercase: true,
       trim: true,
     },
+    icon: {
+      type: String,
+      default: null,
+    },
   },
   {
     versionKey: false,
@@ -29,5 +34,4 @@ const TopicSchema = new Schema<ITopic>(
 );
 
 export const Topic =
-  mongoose.models.Topic ||
-  mongoose.model<ITopic>("Topic", TopicSchema);
+  mongoose.models.Topic || mongoose.model<ITopic>("Topic", TopicSchema);
