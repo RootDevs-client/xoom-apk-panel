@@ -58,7 +58,7 @@ export default function CategoryToolbar({
             </div>
             <Button
               size="sm"
-              className="gap-1.5"
+              className="gap-1.5 text-white cursor-pointer"
               onClick={() => setCreateOpen(true)}
             >
               <Plus className="size-4" />

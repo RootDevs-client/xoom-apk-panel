@@ -2,6 +2,7 @@
 
 import { createCategory } from "@/actions/category/categoryActions";
 import FileUploadComponent from "@/components/custom/FileUploadComponent";
+import InputField from "@/components/form/InputField";
 import { ToastMessage } from "@/components/custom/ToastMessage";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,10 +12,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { uploadSingleFile } from "@/lib/fileUpload";
 import { useState } from "react";
+import { FormProvider, useForm } from "react-hook-form";
 import { ImSpinner9 } from "react-icons/im";
 
 interface Props {
@@ -23,32 +24,33 @@ interface Props {
   onSuccess: () => void;
 }
 
+interface FormValues {
+  name: string;
+}
+
 export default function CreateCategoryModal({
   open,
   onOpenChange,
   onSuccess,
 }: Props) {
-  const [name, setName] = useState("");
   const [iconFile, setIconFile] = useState<File | null>(null);
   const [iconUploading, setIconUploading] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+
+  const form = useForm<FormValues>({
+    defaultValues: { name: "" },
+  });
+
+  const { handleSubmit, setError, reset, formState } = form;
 
   const resetForm = () => {
-    setName("");
     setIconFile(null);
-    setError("");
+    reset({ name: "" });
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!name.trim()) {
-      setError("Category name is required.");
-      return;
-    }
-
+  const onSubmit = async (data: FormValues) => {
     setLoading(true);
-    setError("");
+    const loadingToast = ToastMessage.loading({ title: "Creating category..." });
 
     try {
       let iconUrl: string | undefined;
@@ -59,7 +61,7 @@ export default function CreateCategoryModal({
         if (uploaded?.url) {
           iconUrl = uploaded.url;
         } else {
-          setError("Failed to upload icon");
+          setError("root", { message: "Failed to upload icon" });
           setLoading(false);
           setIconUploading(false);
           return;
@@ -68,24 +70,38 @@ export default function CreateCategoryModal({
       }
 
       const res = await createCategory({
-        name: name.trim(),
-        icon: iconUrl,
+        name: data.name.trim(),
+        icon: iconUrl || "",
       });
 
       if (res?.status) {
-        ToastMessage.success({
-          title: res?.message || "Category created successfully!",
-        });
+        ToastMessage.success(
+          {
+            title: res?.message || "Category created successfully!",
+          },
+          { id: loadingToast },
+        );
         resetForm();
         onOpenChange(false);
         onSuccess();
       } else {
-        setError(res?.message || "Failed to create category");
+        ToastMessage.error(
+          {
+            title: res?.message || "Failed to create category",
+          },
+          { id: loadingToast },
+        );
       }
     } catch {
-      setError("Something went wrong");
+      ToastMessage.error(
+        {
+          title: "Something went wrong",
+        },
+        { id: loadingToast },
+      );
     } finally {
       setLoading(false);
+      setIconUploading(false);
     }
   };
 
@@ -99,56 +115,59 @@ export default function CreateCategoryModal({
       }}
     >
       <DialogContent className="max-w-sm">
-        <form onSubmit={handleSubmit}>
-          <DialogHeader>
-            <DialogTitle>Create Category</DialogTitle>
-          </DialogHeader>
+        <FormProvider {...form}>
+          <form onSubmit={handleSubmit(onSubmit)}>
+            <DialogHeader>
+              <DialogTitle>Create Category</DialogTitle>
+            </DialogHeader>
 
-          <div className="py-4 space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="name">Category Name</Label>
-              <Input
-                id="name"
+            <div className="py-4 space-y-4">
+              <InputField
+                name="name"
+                label="Category Name"
                 placeholder="Enter category name"
-                value={name}
-                onChange={(e) => {
-                  setName(e.target.value);
-                  if (error) setError("");
-                }}
-                autoFocus
+                required
               />
-            </div>
 
-            <div className="space-y-1.5">
-              <Label className="text-sm font-medium">Category Icon</Label>
-              <FileUploadComponent
-                accept="image"
-                maxSize={5}
-                maxFiles={1}
-                onFilesChange={(files) => setIconFile(files[0] || null)}
-              />
-            </div>
+              <div className="space-y-1.5">
+                <Label className="text-sm font-medium">Category Icon</Label>
+                <FileUploadComponent
+                  accept="image"
+                  maxSize={5}
+                  maxFiles={1}
+                  onFilesChange={(files) => setIconFile(files[0] || null)}
+                />
+              </div>
 
-            {error && <p className="text-sm text-red-500">{error}</p>}
-          </div>
-
-          <DialogFooter>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-              disabled={loading}
-            >
-              Cancel
-            </Button>
-            <Button type="submit" disabled={loading || iconUploading}>
-              {(loading || iconUploading) && (
-                <ImSpinner9 className="mr-2 h-3 w-3 animate-spin" />
+              {formState.errors.root && (
+                <p className="text-sm text-red-500">
+                  {formState.errors.root.message}
+                </p>
               )}
-              Create
-            </Button>
-          </DialogFooter>
-        </form>
+            </div>
+
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => onOpenChange(false)}
+                disabled={loading}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                disabled={loading || iconUploading}
+                className="text-white cursor-pointer"
+              >
+                {(loading || iconUploading) && (
+                  <ImSpinner9 className="mr-2 h-3 w-3 animate-spin" />
+                )}
+                Create
+              </Button>
+            </DialogFooter>
+          </form>
+        </FormProvider>
       </DialogContent>
     </Dialog>
   );

@@ -46,6 +46,7 @@ export default function CreatePromotionMethodModal({
   const handleSubmit = methods.handleSubmit(async (values) => {
     setLoading(true);
     setError("");
+    const toastId = ToastMessage.loading({ title: "Conversession creatimg.." });
 
     try {
       const res = await createPromotionMethod({
@@ -54,17 +55,31 @@ export default function CreatePromotionMethodModal({
       });
 
       if (res?.status) {
-        ToastMessage.success({
-          title: res?.message || "Promotion method created successfully!",
-        });
+        ToastMessage.success(
+          {
+            title: res?.message || "Promotion method created successfully!",
+          },
+          { id: toastId },
+        );
         methods.reset();
         onOpenChange(false);
         onSuccess();
       } else {
         setError(res?.message || "Failed to create promotion method");
+        ToastMessage.error(
+          {
+            title: res?.message || "Failed to create promotion method",
+          },
+          { id: toastId },
+        );
       }
     } catch {
-      setError("Something went wrong");
+      ToastMessage.error(
+        {
+          title: "Failed to create promotion method",
+        },
+        { id: toastId },
+      );
     } finally {
       setLoading(false);
     }
@@ -121,7 +136,11 @@ export default function CreatePromotionMethodModal({
               >
                 Cancel
               </Button>
-              <Button type="submit" disabled={loading}>
+              <Button
+                type="submit"
+                disabled={loading}
+                className="text-white cursor-pointer"
+              >
                 {loading && (
                   <ImSpinner9 className="mr-2 h-3 w-3 animate-spin" />
                 )}

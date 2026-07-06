@@ -3,6 +3,7 @@
 import { updateTopic } from "@/actions/topic/topicActions";
 import FileUploadComponent from "@/components/custom/FileUploadComponent";
 import { ToastMessage } from "@/components/custom/ToastMessage";
+import InputField from "@/components/form/InputField";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -11,11 +12,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { uploadSingleFile } from "@/lib/fileUpload";
 import { Edit } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { FormProvider, useForm } from "react-hook-form";
 import { ImSpinner9 } from "react-icons/im";
 import { type Topic } from "./columns";
 
@@ -24,27 +25,33 @@ interface Props {
   onSuccess: () => void;
 }
 
+interface FormValues {
+  name: string;
+}
+
 export default function EditTopicCell({ row, onSuccess }: Props) {
   const [open, setOpen] = useState(false);
-  const [name, setName] = useState(row.name);
-
   const [iconFile, setIconFile] = useState<File | null>(null);
   const [iconRemoved, setIconRemoved] = useState(false);
   const [iconUploading, setIconUploading] = useState(false);
-
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!name.trim()) {
-      setError("Topic name is required.");
-      return;
+  const form = useForm<FormValues>({
+    defaultValues: { name: row.name },
+  });
+
+  const { handleSubmit, setError, reset, formState } = form;
+
+  useEffect(() => {
+    if (open) {
+      reset({ name: row.name });
     }
+  }, [open, row.name, reset]);
 
+  const onSubmit = async (data: FormValues) => {
     setLoading(true);
-    setError("");
 
+    const loadingId = ToastMessage.loading({ title: "Updating topic..." });
     try {
       let iconUrl: string | null | undefined = row.icon;
 
@@ -56,7 +63,7 @@ export default function EditTopicCell({ row, onSuccess }: Props) {
         if (uploaded?.url) {
           iconUrl = uploaded.url;
         } else {
-          setError("Failed to upload icon");
+          setError("root", { message: "Failed to upload icon" });
           setLoading(false);
           setIconUploading(false);
           return;
@@ -65,23 +72,37 @@ export default function EditTopicCell({ row, onSuccess }: Props) {
       }
 
       const res = await updateTopic(row._id, {
-        name: name.trim(),
+        name: data.name.trim(),
         icon: iconUrl,
       });
 
       if (res?.status) {
-        ToastMessage.success({
-          title: res?.message || "Topic updated successfully!",
-        });
+        ToastMessage.success(
+          {
+            title: res?.message || "Topic updated successfully!",
+          },
+          { id: loadingId },
+        );
         setOpen(false);
         onSuccess();
       } else {
-        setError(res?.message || "Failed to update topic");
+        ToastMessage.error(
+          {
+            title: res?.message || "Failed to update topic",
+          },
+          { id: loadingId },
+        );
       }
     } catch {
-      setError("Something went wrong");
+      ToastMessage.error(
+        {
+          title: "Something went wrong",
+        },
+        { id: loadingId },
+      );
     } finally {
       setLoading(false);
+      setIconUploading(false);
     }
   };
 
@@ -92,10 +113,8 @@ export default function EditTopicCell({ row, onSuccess }: Props) {
         size="icon"
         className="h-8 w-8 cursor-pointer"
         onClick={() => {
-          setName(row.name);
           setIconFile(null);
           setIconRemoved(false);
-          setError("");
           setOpen(true);
         }}
       >
@@ -104,61 +123,64 @@ export default function EditTopicCell({ row, onSuccess }: Props) {
 
       <Dialog open={open} onOpenChange={(v) => !loading && setOpen(v)}>
         <DialogContent className="max-w-sm">
-          <form onSubmit={handleSubmit}>
-            <DialogHeader>
-              <DialogTitle>Edit Topic</DialogTitle>
-            </DialogHeader>
+          <FormProvider {...form}>
+            <form onSubmit={handleSubmit(onSubmit)}>
+              <DialogHeader>
+                <DialogTitle>Edit Topic</DialogTitle>
+              </DialogHeader>
 
-            <div className="py-4 space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="edit-name">Topic Name</Label>
-                <Input
-                  id="edit-name"
+              <div className="py-4 space-y-4">
+                <InputField
+                  name="name"
+                  label="Topic Name"
                   placeholder="Enter topic name"
-                  value={name}
-                  onChange={(e) => {
-                    setName(e.target.value);
-                    if (error) setError("");
-                  }}
-                  autoFocus
+                  required
                 />
-              </div>
 
-              <div className="space-y-1.5">
-                <Label className="text-sm font-medium">Topic Icon</Label>
-                <FileUploadComponent
-                  accept="image"
-                  maxSize={5}
-                  maxFiles={1}
-                  onFilesChange={(files) => setIconFile(files[0] || null)}
-                  existingImageUrl={!iconRemoved ? row.icon || "" : ""}
-                  onRemoveExisting={() => {
-                    setIconRemoved(true);
-                    setIconFile(null);
-                  }}
-                />
-              </div>
+                <div className="space-y-1.5">
+                  <Label className="text-sm font-medium">Topic Icon</Label>
+                  <FileUploadComponent
+                    accept="image"
+                    maxSize={5}
+                    maxFiles={1}
+                    onFilesChange={(files) => setIconFile(files[0] || null)}
+                    existingImageUrl={!iconRemoved ? row.icon || "" : ""}
+                    onRemoveExisting={() => {
+                      setIconRemoved(true);
+                      setIconFile(null);
+                    }}
+                  />
+                </div>
 
-              {error && <p className="text-sm text-red-500">{error}</p>}
-            </div>
-
-            <DialogFooter>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setOpen(false)}
-                disabled={loading}
-              >
-                Cancel
-              </Button>
-              <Button type="submit" disabled={loading || iconUploading}>
-                {(loading || iconUploading) && (
-                  <ImSpinner9 className="mr-2 h-3 w-3 animate-spin" />
+                {formState.errors.root && (
+                  <p className="text-sm text-red-500">
+                    {formState.errors.root.message}
+                  </p>
                 )}
-                Save
-              </Button>
-            </DialogFooter>
-          </form>
+              </div>
+
+              <DialogFooter>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setOpen(false)}
+                  disabled={loading}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={loading || iconUploading}
+                  className="text-white cursor-pointer"
+                >
+                  {(loading || iconUploading) && (
+                    <ImSpinner9 className="mr-2 h-3 w-3 animate-spin" />
+                  )}
+                  Save
+                </Button>
+              </DialogFooter>
+            </form>
+          </FormProvider>
         </DialogContent>
       </Dialog>
     </>

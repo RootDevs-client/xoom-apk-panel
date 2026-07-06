@@ -44,6 +44,9 @@ export default function EditPromotionMethodCell({ row, onSuccess }: Props) {
   const handleSubmit = methods.handleSubmit(async (values) => {
     setLoading(true);
     setError("");
+    const toastId = ToastMessage.loading({
+      title: "Conversession updating...",
+    });
 
     try {
       const res = await updatePromotionMethod(row._id, {
@@ -52,16 +55,29 @@ export default function EditPromotionMethodCell({ row, onSuccess }: Props) {
       });
 
       if (res?.status) {
-        ToastMessage.success({
-          title: res?.message || "Promotion method updated successfully!",
-        });
+        ToastMessage.success(
+          {
+            title: res?.message || "Promotion method updated successfully!",
+          },
+          { id: toastId },
+        );
         setOpen(false);
         onSuccess();
       } else {
-        setError(res?.message || "Failed to update promotion method");
+        ToastMessage.error(
+          {
+            title: res?.message || "Failed to update promotion method",
+          },
+          { id: toastId },
+        );
       }
     } catch {
-      setError("Something went wrong");
+      ToastMessage.error(
+        {
+          title: "Failed to update promotion method",
+        },
+        { id: toastId },
+      );
     } finally {
       setLoading(false);
     }
@@ -136,7 +152,11 @@ export default function EditPromotionMethodCell({ row, onSuccess }: Props) {
                 >
                   Cancel
                 </Button>
-                <Button type="submit" disabled={loading}>
+                <Button
+                  type="submit"
+                  disabled={loading}
+                  className="text-white cursor-pointer"
+                >
                   {loading && (
                     <ImSpinner9 className="mr-2 h-3 w-3 animate-spin" />
                   )}
