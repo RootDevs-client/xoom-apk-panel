@@ -38,6 +38,30 @@ export default function TabsSettings({
     <div className="min-h-screen p-4 md:p-8">
       <div className="w-full">
         <div className="flex flex-col lg:flex-row gap-6">
+          {/* Mobile Tab Bar */}
+          <div className="flex lg:hidden justify-between gap-1 bg-white dark:bg-gray-800 rounded-lg shadow p-1">
+            {tabs.map((tab) => {
+              const Icon = tab.icon;
+              return (
+                <button
+                  key={tab.id}
+                  title={tab.label}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`flex items-center justify-center px-4 py-2 rounded-sm transition-colors cursor-pointer ${
+                    activeTab === tab.id
+                      ? "bg-primary text-white"
+                      : "text-gray-700 dark:text-gray-300 hover:bg-primary dark:hover:bg-primary hover:text-white"
+                  }`}
+                >
+                  <div className="flex flex-col items-center gap-1">
+                    <Icon className="h-4 w-4" />
+                    <span className="text-[11px]">{tab.label}</span>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+
           {/* Sidebar Navigation - Desktop */}
           <aside className="hidden lg:block lg:w-72 shrink-0">
             <nav className="space-y-1 bg-white dark:bg-gray-800 rounded-lg shadow p-2">
