@@ -1,6 +1,5 @@
-import dbConnect from "@/config/database";
+import { getOpenSettings } from "@/actions/settings/settingsActions";
 import { prependAwsBaseUrl } from "@/lib/server.utils";
-import Settings from "@/model/Settings";
 import type React from "react";
 import PublicFooter from "./_components/PublicFooter";
 import PublicNavbar from "./_components/PublicNavbar";
@@ -10,16 +9,15 @@ export default async function PublicLayout({
 }: {
   children: React.ReactNode;
 }) {
-  await dbConnect();
-  const doc = await Settings.findOne({}).select("general").lean();
+  const setting = await getOpenSettings();
 
-  const appName = doc?.general?.appName || "Xoom Sports";
-  const rawLogo = doc?.general?.appLogo;
+  const appName = setting?.data?.appName || "Xoom Sports";
+  const rawLogo = setting?.data?.appLogo;
   const appLogo = rawLogo ? prependAwsBaseUrl(rawLogo) : null;
-  const companyName = doc?.general?.companyName || appName;
-  const aboutUs = doc?.general?.aboutUs || "";
-  const supportEmail = doc?.general?.supportEmail || "";
-  const companyAddress = doc?.general?.companyAddress || "";
+  const companyName = setting?.data?.companyName || appName;
+  const aboutUs = setting?.data?.aboutUs || "";
+  const supportEmail = setting?.data?.supportEmail || "";
+  const companyAddress = setting?.data?.companyAddress || "";
 
   return (
     <div className="min-h-screen flex flex-col bg-white text-gray-900 antialiased selection:bg-primary selection:text-white font-dmSans">

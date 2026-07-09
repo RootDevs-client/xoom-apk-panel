@@ -1,3 +1,4 @@
+import { getOpenSettings } from "@/actions/settings/settingsActions";
 import dbConnect from "@/config/database";
 import { prependAwsBaseUrl } from "@/lib/server.utils";
 import Settings from "@/model/Settings";
@@ -21,18 +22,16 @@ export async function generateMetadata() {
 }
 
 export default async function HomePage() {
-  await dbConnect();
-  const doc = await Settings.findOne({}).select("general").lean();
+  const setting = await getOpenSettings();
 
-  const appName = doc?.general?.appName || "Xoom Sports";
-  const rawBg = doc?.general?.backgroundImage;
+  const appName = setting?.data?.appName || "Xoom Sports";
+  const rawBg = setting?.data?.backgroundImage;
   const bgImage = rawBg ? prependAwsBaseUrl(rawBg) : null;
-  const aboutUs = doc?.general?.aboutUs || "";
-  const rawGalleries: { title: string; url: string }[] =
-    doc?.general?.galleries || [];
+  const aboutUs = setting?.data?.aboutUs || "";
+  const rawGalleries: string[] = setting?.data?.galleries || [];
   const galleries = rawGalleries
-    .map((g) => ({ ...g, url: prependAwsBaseUrl(g.url) || g.url }))
-    .filter((g) => g.url);
+    .map((url) => prependAwsBaseUrl(url) || url)
+    .filter(Boolean);
 
   return (
     <>
@@ -170,24 +169,17 @@ export default async function HomePage() {
               </div>
 
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                {galleries.map((g, i) => (
+                {galleries?.slice(0, 3)?.map((url, i) => (
                   <div
                     key={i}
                     className="group relative aspect-video rounded-2xl overflow-hidden border border-gray-100 shadow-sm bg-gray-50"
                   >
                     <Image
-                      src={g.url}
-                      alt={g.title || `Gallery ${i + 1}`}
+                      src={url}
+                      alt={`Gallery ${i + 1}`}
                       fill
                       className="object-cover group-hover:scale-105 transition-transform duration-500"
                     />
-                    {g.title && (
-                      <div className="absolute inset-x-0 bottom-0 bg-linear-to-t from-black/60 to-transparent p-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <p className="text-white text-sm font-semibold truncate">
-                          {g.title}
-                        </p>
-                      </div>
-                    )}
                   </div>
                 ))}
               </div>

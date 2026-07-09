@@ -1,3 +1,4 @@
+import { getOpenSettings } from "@/actions/settings/settingsActions";
 import PrivacyContent from "@/components/terms-policy/privacy-content";
 import dbConnect from "@/config/database";
 import Settings from "@/model/Settings";
@@ -20,14 +21,11 @@ export async function generateMetadata() {
 }
 
 export default async function PrivacyPolicyPage() {
-  await dbConnect();
-  const doc = await Settings.findOne({})
-    .select("privacyPolicy updatedAt")
-    .lean();
+  const setting = await getOpenSettings();
 
-  const privacyContent = doc?.privacyPolicy?.content || "";
-  const updatedAt = doc?.updatedAt
-    ? new Date(doc.updatedAt).toISOString()
+  const privacyContent = setting?.data?.privacyPolicy || "";
+  const updatedAt = setting?.data?.updatedAt
+    ? new Date(setting.data.updatedAt).toISOString()
     : null;
 
   return <PrivacyContent html={privacyContent} updatedAtISO={updatedAt} />;

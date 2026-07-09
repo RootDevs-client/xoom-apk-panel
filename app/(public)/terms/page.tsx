@@ -1,12 +1,10 @@
+import { getOpenSettings } from "@/actions/settings/settingsActions";
 import TermsContent from "@/components/terms-policy/terms-content";
-import dbConnect from "@/config/database";
-import Settings from "@/model/Settings";
 
 export async function generateMetadata() {
   try {
-    await dbConnect();
-    const settings = await Settings.findOne({}).select("general").lean();
-    const appName = settings?.general?.appName || "Xoom Sports";
+    const setting = await getOpenSettings();
+    const appName = setting?.data?.appName || "Xoom Sports";
     return {
       title: `Terms & Conditions | ${appName}`,
       description: `Read the terms and conditions for using ${appName}.`,
@@ -20,15 +18,10 @@ export async function generateMetadata() {
 }
 
 export default async function TermsPage() {
-  await dbConnect();
-  const doc = await Settings.findOne({})
-    .select("termsOfService updatedAt")
-    .lean();
+  const setting = await getOpenSettings();
 
-  const termsContent = doc?.termsOfService?.content || "";
-  const updatedAt = doc?.updatedAt
-    ? new Date(doc.updatedAt).toISOString()
-    : null;
+  const termsContent = setting?.data?.termsOfService || "";
+  const updatedAt = setting?.data?.updatedAt || null;
 
   return <TermsContent html={termsContent} updatedAtISO={updatedAt} />;
 }

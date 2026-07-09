@@ -186,3 +186,47 @@ export async function getAllSettingsDetails(context: string) {
     };
   }
 }
+export async function getPublicSettingsDetails() {
+  try {
+    const res = await apiClient(`/api/public/settings`, {
+      method: "GET",
+      tags: ["settings"],
+      cache: "force-cache",
+    });
+    return res;
+  } catch (error: any) {
+    if (error?.digest?.startsWith("NEXT_REDIRECT")) {
+      throw error;
+    }
+    return {
+      ok: false,
+      message:
+        error instanceof Error
+          ? error.message
+          : "Failed to get general setting data",
+      data: null,
+    };
+  }
+}
+
+export async function getOpenSettings() {
+  try {
+    const baseURL = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+    const res = await fetch(`${baseURL}/api/settings/public`, {
+      method: "GET",
+    });
+    return res.json();
+  } catch (error: any) {
+    if (error?.digest?.startsWith("NEXT_REDIRECT")) {
+      throw error;
+    }
+    return {
+      ok: false,
+      message:
+        error instanceof Error
+          ? error.message
+          : "Failed to get settings data",
+      data: null,
+    };
+  }
+}
