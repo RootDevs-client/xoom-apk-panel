@@ -33,6 +33,12 @@ export interface ITermsPolicy {
   terms: string;
   policy: string;
 }
+export interface IPrivacyPolicy {
+  content?: string;
+}
+export interface ITermsService {
+  content?: string;
+}
 export interface IGalleryItem {
   title: string;
   url: string;
@@ -64,12 +70,12 @@ export interface IGeneral extends Document {
   offerTitle?: string;
   offerDescription?: string;
 
-  privacyPolicy?: string;
-  termsOfService?: string;
   aboutUs?: string;
 }
 export interface ISettings extends Document {
   general: IGeneral;
+  privacyPolicy: IPrivacyPolicy;
+  termsOfService: ITermsService;
   createdAt?: Date;
   updatedAt?: Date;
 }

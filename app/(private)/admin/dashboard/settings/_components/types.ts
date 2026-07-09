@@ -23,8 +23,6 @@ export interface GeneralFormData {
   aboutUs: string;
   offerTitle: string;
   offerDescription: string;
-  privacyPolicy: string;
-  termsOfService: string;
   galleries: GalleryItem[];
   backgroundImage: string;
 }

@@ -58,6 +58,112 @@ export async function updateGeneralSettings(data: any) {
   }
 }
 
+// privacy policy
+export async function getPrivacyPolicy() {
+  try {
+    const res = await apiClient(`/api/admin/settings/privacy-policy`, {
+      method: "GET",
+      tags: ["settings"],
+      cache: "force-cache",
+    });
+
+    return res;
+  } catch (error: any) {
+    if (error?.digest?.startsWith("NEXT_REDIRECT")) {
+      throw error;
+    }
+    return {
+      ok: false,
+      message:
+        error instanceof Error ? error.message : "Failed to get privacy policy",
+      data: null,
+    };
+  }
+}
+
+export async function updatePrivacyPolicy(data: any) {
+  try {
+    const endpoint = `/api/admin/settings/privacy-policy`;
+
+    const res = await apiClient(endpoint, {
+      method: "PUT",
+      body: data,
+    });
+
+    if (res?.status) {
+      updateTag("settings");
+    }
+
+    return res;
+  } catch (error: any) {
+    if (error?.digest?.startsWith("NEXT_REDIRECT")) {
+      throw error;
+    }
+    return {
+      status: false,
+      message:
+        error instanceof Error
+          ? error.message
+          : "Failed to save privacy policy",
+      data: null,
+    };
+  }
+}
+
+// terms & conditions
+export async function getTerms() {
+  try {
+    const res = await apiClient(`/api/admin/settings/terms`, {
+      method: "GET",
+      tags: ["settings"],
+      cache: "force-cache",
+    });
+
+    return res;
+  } catch (error: any) {
+    if (error?.digest?.startsWith("NEXT_REDIRECT")) {
+      throw error;
+    }
+    return {
+      ok: false,
+      message:
+        error instanceof Error
+          ? error.message
+          : "Failed to get terms & conditions",
+      data: null,
+    };
+  }
+}
+
+export async function updateTerms(data: any) {
+  try {
+    const endpoint = `/api/admin/settings/terms`;
+
+    const res = await apiClient(endpoint, {
+      method: "PUT",
+      body: data,
+    });
+
+    if (res?.status) {
+      updateTag("settings");
+    }
+
+    return res;
+  } catch (error: any) {
+    if (error?.digest?.startsWith("NEXT_REDIRECT")) {
+      throw error;
+    }
+    return {
+      status: false,
+      message:
+        error instanceof Error
+          ? error.message
+          : "Failed to save terms & conditions",
+      data: null,
+    };
+  }
+}
+
 export async function getAllSettingsDetails(context: string) {
   try {
     const res = await apiClient(`/api/settings?context=${context}`, {

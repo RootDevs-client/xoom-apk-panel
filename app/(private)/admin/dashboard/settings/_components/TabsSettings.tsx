@@ -1,16 +1,30 @@
 "use client";
 import { useState } from "react";
-import { FaSlidersH } from "react-icons/fa";
+import { FaBalanceScale, FaShieldAlt, FaSlidersH } from "react-icons/fa";
 import GeneralSettings from "./GeneralSettings";
+import PrivacyPolicySettings from "./PrivacyPolicySettings";
+import TermsSettings from "./TermsSettings";
 
-export default function TabsSettings({ generalSettings }: any) {
+export default function TabsSettings({
+  generalSettings,
+  privacySettings,
+  termsSettings,
+}: any) {
   const [activeTab, setActiveTab] = useState("general");
-  const tabs = [{ id: "general", label: "General", icon: FaSlidersH }];
+  const tabs = [
+    { id: "general", label: "General", icon: FaSlidersH },
+    { id: "privacy", label: "Privacy Policy", icon: FaShieldAlt },
+    { id: "terms", label: "Terms & Conditions", icon: FaBalanceScale },
+  ];
 
   const renderContent = () => {
     switch (activeTab) {
       case "general":
         return <GeneralSettings general={generalSettings} />;
+      case "privacy":
+        return <PrivacyPolicySettings privacySettings={privacySettings} />;
+      case "terms":
+        return <TermsSettings termsSettings={termsSettings} />;
       default:
         return (
           <div>
@@ -25,7 +39,7 @@ export default function TabsSettings({ generalSettings }: any) {
       <div className="w-full">
         <div className="flex flex-col lg:flex-row gap-6">
           {/* Sidebar Navigation - Desktop */}
-          {/* <aside className="hidden lg:block lg:w-72 shrink-0">
+          <aside className="hidden lg:block lg:w-72 shrink-0">
             <nav className="space-y-1 bg-white dark:bg-gray-800 rounded-lg shadow p-2">
               {tabs.map((tab) => {
                 const Icon = tab.icon;
@@ -39,42 +53,13 @@ export default function TabsSettings({ generalSettings }: any) {
                         : "text-gray-700 dark:text-gray-300 hover:bg-primary dark:hover:bg-primary hover:text-white"
                     }`}
                   >
+                    <Icon className="h-4 w-4" />
                     <span className="font-medium">{tab.label}</span>
                   </button>
                 );
               })}
             </nav>
-          </aside> */}
-
-          {/* Mobile Navigation - Icons Only with Tooltips */}
-          {/* <TooltipProvider>
-            <div className="lg:hidden bg-white dark:bg-gray-800 rounded-lg shadow mb-4 overflow-x-scroll scrollbar scrollbar-thumb-gray-400 scrollbar-track-transparent scrollbar-thin">
-              <nav className="flex items-center gap-2 p-2 min-w-max">
-                {tabs.map((tab) => {
-                  const Icon = tab.icon;
-                  return (
-                    <Tooltip key={tab.id}>
-                      <TooltipTrigger asChild>
-                        <button
-                          onClick={() => setActiveTab(tab.id)}
-                          className={`shrink-0 p-3 rounded-sm transition-colors ${
-                            activeTab === tab.id
-                              ? "bg-primary text-white"
-                              : "text-gray-700 dark:text-gray-300 hover:bg-primary dark:hover:bg-primary hover:text-white"
-                          }`}
-                        >
-                          <Icon className="h-5 w-5" />
-                        </button>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>{tab.label}</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  );
-                })}
-              </nav>
-            </div>
-          </TooltipProvider> */}
+          </aside>
 
           {/* Content Area */}
           <main className="flex-1">{renderContent()}</main>

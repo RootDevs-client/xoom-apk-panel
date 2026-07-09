@@ -5,8 +5,8 @@ import { DataTableWithPagination } from "@/components/custom/data-table/DataTabl
 import { Card, CardContent } from "@/components/ui/card";
 import { useTableState } from "@/store/useTableStore";
 import { useEffect, useState } from "react";
-import { columns } from "./columns";
 import CategoryToolbar from "./CategoryToolbar";
+import { columns } from "./columns";
 
 export default function CategoryLists() {
   const tableId = "categories";

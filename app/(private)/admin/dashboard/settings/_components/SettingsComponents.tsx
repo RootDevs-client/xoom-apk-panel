@@ -1,4 +1,4 @@
-import { getGeneralSettings } from "@/actions/settings/settingsActions";
+import { getGeneralSettings, getPrivacyPolicy, getTerms } from "@/actions/settings/settingsActions";
 import { DynamicBreadcrumb } from "./DynamicBreadcrumb";
 import TabsSettings from "./TabsSettings";
 
@@ -8,7 +8,11 @@ const breadcrumbItems = [
 ];
 
 export default async function SettingsComponents() {
-  const generalSettings = await getGeneralSettings();
+  const [generalSettings, privacySettings, termsSettings] = await Promise.all([
+    getGeneralSettings(),
+    getPrivacyPolicy(),
+    getTerms(),
+  ]);
 
   return (
     <div className="space-y-3">
@@ -19,7 +23,11 @@ export default async function SettingsComponents() {
         </div>
       </div>
 
-      <TabsSettings generalSettings={generalSettings?.data || []} />
+      <TabsSettings
+        generalSettings={generalSettings?.data || {}}
+        privacySettings={privacySettings?.data || {}}
+        termsSettings={termsSettings?.data || {}}
+      />
     </div>
   );
 }

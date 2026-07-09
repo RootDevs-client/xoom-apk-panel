@@ -111,25 +111,6 @@ export function AppBrandingCard({
           />
         </div>
 
-        {/* Policies */}
-        <div className="grid md:grid-cols-2 gap-4">
-          <div className="space-y-1.5">
-            <Label>Privacy Policy</Label>
-            <Textarea
-              rows={5}
-              className="focus-visible:ring-primary"
-              {...register("privacyPolicy")}
-            />
-          </div>
-          <div className="space-y-1.5">
-            <Label>Terms of Service</Label>
-            <Textarea
-              rows={5}
-              className="focus-visible:ring-primary"
-              {...register("termsOfService")}
-            />
-          </div>
-        </div>
       </CardContent>
     </Card>
   );

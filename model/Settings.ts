@@ -35,8 +35,6 @@ const general = new mongoose.Schema(
     offerTitle: { type: String, trim: true },
     offerDescription: { type: String, trim: true },
 
-    privacyPolicy: { type: String, default: "" },
-    termsOfService: { type: String, default: "" },
     aboutUs: { type: String, default: "" },
   },
   {
@@ -44,9 +42,25 @@ const general = new mongoose.Schema(
   },
 );
 
+const privacyPolicy = new mongoose.Schema(
+  {
+    content: { type: String, default: "" },
+  },
+  { _id: false },
+);
+
+const termsOfService = new mongoose.Schema(
+  {
+    content: { type: String, default: "" },
+  },
+  { _id: false },
+);
+
 const SettingsSchema: Schema = new mongoose.Schema(
   {
     general,
+    privacyPolicy,
+    termsOfService,
   },
   {
     timestamps: true,
