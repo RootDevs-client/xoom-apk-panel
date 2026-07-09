@@ -23,6 +23,8 @@ export async function generateMetadata() {
 export default async function PrivacyPolicyPage() {
   const setting = await getOpenSettings();
 
+  console.log("settings", setting);
+
   const privacyContent = setting?.data?.privacyPolicy || "";
   const updatedAt = setting?.data?.updatedAt
     ? new Date(setting.data.updatedAt).toISOString()

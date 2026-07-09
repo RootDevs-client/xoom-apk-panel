@@ -19,6 +19,7 @@ export async function generateMetadata() {
 
 export default async function TermsPage() {
   const setting = await getOpenSettings();
+  console.log("terms", setting);
 
   const termsContent = setting?.data?.termsOfService || "";
   const updatedAt = setting?.data?.updatedAt || null;

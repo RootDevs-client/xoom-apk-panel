@@ -211,11 +211,13 @@ export async function getPublicSettingsDetails() {
 
 export async function getOpenSettings() {
   try {
-    const baseURL = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
-    const res = await fetch(`${baseURL}/api/settings/public`, {
+    const res = await apiClient(`/api/settings/public`, {
       method: "GET",
+      // tags: ["settings"],
+      // cache: "force-cache",
     });
-    return res.json();
+    console.log("-----------------", res);
+    return res;
   } catch (error: any) {
     if (error?.digest?.startsWith("NEXT_REDIRECT")) {
       throw error;
@@ -223,9 +225,7 @@ export async function getOpenSettings() {
     return {
       ok: false,
       message:
-        error instanceof Error
-          ? error.message
-          : "Failed to get settings data",
+        error instanceof Error ? error.message : "Failed to get settings data",
       data: null,
     };
   }
