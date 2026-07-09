@@ -13,6 +13,7 @@ export const routes = {
     adminLogin: "/admin/login",
     connect: "/lets-connect",
     terms: "/terms",
+    privacyPolicy: "/privacy-policy",
   },
   privateRoutes: {
     admin: {
