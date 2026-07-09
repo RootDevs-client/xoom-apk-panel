@@ -34,6 +34,7 @@ interface RichTextEditorProps {
   placeholder?: string;
   disabled?: boolean;
   minHeight?: number;
+  maxHeight?: number;
 }
 
 interface ToolbarButtonProps {
@@ -80,6 +81,7 @@ export function RichTextEditor({
   placeholder = "Start typing...",
   disabled = false,
   minHeight = 300,
+  maxHeight = 500,
 }: RichTextEditorProps) {
   const [linkUrl, setLinkUrl] = useState("");
   const [showLinkInput, setShowLinkInput] = useState(false);
@@ -137,8 +139,11 @@ export function RichTextEditor({
   if (!editor) return null;
 
   return (
-    <div className="border rounded-lg overflow-hidden focus-within:ring-1 focus-within:ring-ring">
-      <div className="flex flex-wrap items-center gap-0.5 p-1.5 border-b bg-muted/30">
+    <div
+      className="border rounded-lg focus-within:ring-1 focus-within:ring-ring overflow-y-auto"
+      style={{ maxHeight: maxHeight }}
+    >
+      <div className="flex flex-wrap items-center gap-0.5 p-1.5 border-b bg-muted sticky top-0 z-999">
         <ToolbarButton
           onClick={() => editor.chain().focus().toggleBold().run()}
           isActive={editor.isActive("bold")}
