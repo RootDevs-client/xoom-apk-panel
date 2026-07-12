@@ -4,6 +4,8 @@ import { prependAwsBaseUrl } from "@/lib/server.utils";
 import Settings from "@/model/Settings";
 import { Shield, Star, Zap } from "lucide-react";
 import Image from "next/image";
+import PublicFooter from "./_components/PublicFooter";
+import PublicNavbar from "./_components/PublicNavbar";
 
 export async function generateMetadata() {
   try {
@@ -25,9 +27,14 @@ export default async function HomePage() {
   const setting = await getOpenSettings();
 
   const appName = setting?.data?.appName || "Xoom Sports";
+  const rawLogo = setting?.data?.appLogo;
+  const appLogo = rawLogo ? prependAwsBaseUrl(rawLogo) : null;
+  const companyName = setting?.data?.companyName || appName;
+  const aboutUs = setting?.data?.aboutUs || "";
+  const supportEmail = setting?.data?.supportEmail || "";
+  const companyAddress = setting?.data?.companyAddress || "";
   const rawBg = setting?.data?.backgroundImage;
   const bgImage = rawBg ? prependAwsBaseUrl(rawBg) : null;
-  const aboutUs = setting?.data?.aboutUs || "";
   const rawGalleries: string[] = setting?.data?.galleries || [];
   const galleries = rawGalleries
     .map((url) => prependAwsBaseUrl(url) || url)
@@ -35,6 +42,7 @@ export default async function HomePage() {
 
   return (
     <>
+      <PublicNavbar appName={appName} appLogo={appLogo} />
       {/* ═══ SECTION 1 — HERO ═════════════════════════════════════════════════ */}
       <section className="relative min-h-[85vh] flex items-center overflow-hidden bg-linear-to-br from-gray-50 via-white to-orange-50/30">
         {/* Background image */}
@@ -187,6 +195,15 @@ export default async function HomePage() {
           )}
         </div>
       </section>
+
+      <PublicFooter
+        appName={appName}
+        appLogo={appLogo}
+        companyName={companyName}
+        aboutUs={aboutUs}
+        supportEmail={supportEmail}
+        companyAddress={companyAddress}
+      />
     </>
   );
 }

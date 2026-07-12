@@ -216,7 +216,6 @@ export async function getOpenSettings() {
       // tags: ["settings"],
       // cache: "force-cache",
     });
-    console.log("-----------------", res);
     return res;
   } catch (error: any) {
     if (error?.digest?.startsWith("NEXT_REDIRECT")) {
