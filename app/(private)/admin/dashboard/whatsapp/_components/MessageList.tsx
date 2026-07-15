@@ -11,7 +11,8 @@ import { MessageSquare, Phone, User } from "lucide-react";
 
 interface Conversation {
   _id: string;
-  session: { _id: string; name: string };
+  session: string;
+  sessionName?: string;
   remoteJid: string;
   contactName?: string;
   contactPhone?: string;
@@ -84,8 +85,7 @@ export default function MessageList() {
               <AvatarFallback>
                 <User className="size-5" />
               </AvatarFallback>
-            </Avatar>
-            <div className="flex-1 min-w-0">
+            </Avatar>              <div className="flex-1 min-w-0">
               <div className="flex items-center justify-between">
                 <p className="font-medium text-sm truncate">
                   {conv.contactName || conv.contactPhone || conv.remoteJid.split("@")[0]}
@@ -100,6 +100,12 @@ export default function MessageList() {
                 {conv.lastMessage.fromMe && "You: "}
                 {conv.lastMessage.body || (conv.lastMessage.type !== "conversation" ? `[${conv.lastMessage.type}]` : "")}
               </p>
+              {conv.sessionName && (
+                <p className="text-[10px] text-muted-foreground/60 truncate mt-0.5 flex items-center gap-1">
+                  <span className="inline-block size-1.5 rounded-full bg-primary/60" />
+                  {conv.sessionName}
+                </p>
+              )}
             </div>
             {conv.unreadCount > 0 && (
               <Badge className="rounded-full size-5 p-0 flex items-center justify-center text-[10px]">

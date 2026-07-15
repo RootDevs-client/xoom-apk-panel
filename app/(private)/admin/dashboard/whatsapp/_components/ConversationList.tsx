@@ -8,6 +8,8 @@ import moment from "moment-timezone";
 
 interface Conversation {
   _id: string;
+  session: string;
+  sessionName?: string;
   remoteJid: string;
   contactName?: string;
   contactPhone?: string;
@@ -97,6 +99,12 @@ export default function ConversationList({
                       ? `[${conv.lastMessage.type}]`
                       : "")}
                 </p>
+                {conv.sessionName && (
+                  <p className="text-[10px] text-muted-foreground/60 truncate mt-0.5 flex items-center gap-1">
+                    <span className="inline-block size-1.5 rounded-full bg-primary/60" />
+                    {conv.sessionName}
+                  </p>
+                )}
               </div>
               {conv.unreadCount > 0 && (
                 <Badge className="rounded-full size-5 p-0 flex items-center justify-center text-[10px] shrink-0">

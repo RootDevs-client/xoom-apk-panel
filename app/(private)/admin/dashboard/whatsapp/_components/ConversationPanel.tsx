@@ -26,6 +26,8 @@ interface Session {
 
 interface Conversation {
   _id: string;
+  session: string;
+  sessionName?: string;
   remoteJid: string;
   contactName?: string;
   contactPhone?: string;

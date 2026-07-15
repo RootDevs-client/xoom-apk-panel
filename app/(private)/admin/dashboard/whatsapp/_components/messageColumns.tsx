@@ -6,7 +6,8 @@ import moment from "moment-timezone";
 
 export type WhatsAppMessage = {
   _id: string;
-  session: { _id: string; name: string; phoneNumber?: string };
+  session: string;
+  sessionName?: string;
   waMessageId: string;
   from: string;
   to: string;
@@ -40,7 +41,7 @@ export const columns: ColumnDef<WhatsAppMessage>[] = [
     accessorKey: "session",
     header: "Channel",
     cell: ({ row }) => (
-      <span className="text-sm">{row.original.session?.name || "—"}</span>
+      <span className="text-sm">{row.original.sessionName || "—"}</span>
     ),
   },
   {
