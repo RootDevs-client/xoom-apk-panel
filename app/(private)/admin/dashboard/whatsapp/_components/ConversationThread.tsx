@@ -36,6 +36,7 @@ interface Props {
   messages: Message[];
   isLoading: boolean;
   onMessageSent: (message: Message) => void;
+  onMessageDeleted: (messageId: string) => void;
 }
 
 export default function ConversationThread({
@@ -45,6 +46,7 @@ export default function ConversationThread({
   messages,
   isLoading,
   onMessageSent,
+  onMessageDeleted,
 }: Props) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -100,7 +102,11 @@ export default function ConversationThread({
           </div>
         ) : (
           messages.map((msg) => (
-            <MessageBubble key={msg.keyId} message={msg} />
+            <MessageBubble
+              key={msg.keyId}
+              message={msg}
+              onDeleted={onMessageDeleted}
+            />
           ))
         )}
         <div ref={messagesEndRef} />

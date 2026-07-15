@@ -189,6 +189,21 @@ export default function ConversationPanel() {
     });
   }, []);
 
+  const handleMessageDeleted = useCallback((messageId: string) => {
+    setMessages((prev) => prev.filter((m) => m._id !== messageId));
+  }, []);
+
+  const handleConversationDeleted = useCallback(
+    (convId: string) => {
+      setConversations((prev) => prev.filter((c) => c._id !== convId));
+      if (selectedConversation?._id === convId) {
+        setSelectedConversation(null);
+        setMessages([]);
+      }
+    },
+    [selectedConversation],
+  );
+
   if (isLoadingSessions) {
     return (
       <Card>
@@ -235,6 +250,7 @@ export default function ConversationPanel() {
             selectedId={selectedConversation?._id || null}
             isLoading={isLoadingConversations}
             onSelect={handleSelectConversation}
+            onDeleted={handleConversationDeleted}
           />
         </div>
 
@@ -248,6 +264,7 @@ export default function ConversationPanel() {
             messages={messages}
             isLoading={isLoadingMessages}
             onMessageSent={handleMessageSent}
+            onMessageDeleted={handleMessageDeleted}
           />
         </div>
       </div>
