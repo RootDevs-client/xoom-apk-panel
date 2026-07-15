@@ -3,6 +3,7 @@ import {
   BarChart3,
   Hash,
   LayoutDashboard,
+  MessageCircle,
   Newspaper,
   Settings2,
   Tags,
@@ -50,6 +51,11 @@ export const adminDashboardMenu = {
       title: "Conversessions",
       url: routes.privateRoutes.admin.promotionMethods,
       icon: ToggleLeft,
+    },
+    {
+      title: "WhatsApp",
+      url: routes.privateRoutes.admin.whatsapp,
+      icon: MessageCircle,
     },
     {
       title: "Subscription",

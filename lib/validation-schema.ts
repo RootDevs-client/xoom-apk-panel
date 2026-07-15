@@ -98,6 +98,20 @@ export const unsubscribeSchema = z.object({
   phone: z.string().min(1, "Phone number is required!"),
 });
 
+export const createBaileysChannelSchema = z.object({
+  name: z.string().min(1, "Channel name is required!").trim(),
+});
+
+export const updateBaileysChannelSchema = z.object({
+  name: z.string().min(1, "Channel name is required!").trim().optional(),
+});
+
+export const sendBaileysMessageSchema = z.object({
+  sessionId: z.string().min(1, "Session ID is required!"),
+  remoteJid: z.string().min(1, "Recipient JID is required!"),
+  body: z.string().min(1, "Message body is required!"),
+});
+
 export const createEventSchema = z.object({
   deviceId: z.string().min(1, "deviceId is required!"),
   userId: z.string().optional().nullable(),

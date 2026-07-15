@@ -3,8 +3,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { FormInputProps } from "@/lib/types";
 import { cn } from "@/lib/utils";
-import { BadgeAlert } from "lucide-react";
+import { BadgeAlert, Info } from "lucide-react";
 import { FieldError, FieldValues, get, useFormContext } from "react-hook-form";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 // ✅ Extend FormInputProps inline or update your types file
 type ExtendedInputProps<TFieldValues extends FieldValues> =
@@ -14,6 +19,7 @@ type ExtendedInputProps<TFieldValues extends FieldValues> =
     max?: number;
     minLength?: number;
     maxLength?: number;
+    tooltip?: string;
   };
 
 export default function InputField<TFieldValues extends FieldValues>({
@@ -31,6 +37,7 @@ export default function InputField<TFieldValues extends FieldValues>({
   max,
   minLength,
   maxLength,
+  tooltip,
 }: ExtendedInputProps<TFieldValues>) {
   const {
     register,
@@ -94,18 +101,35 @@ export default function InputField<TFieldValues extends FieldValues>({
   return (
     <div className="w-full relative z-0!">
       {label && (
-        <Label
-          htmlFor={id || name}
-          className="text-sm font-dm-sans font-medium mb-1 block"
-        >
-          {label}
-          {/*  Show * if required */}
-          {required && (
-            <span className="text-red-500 ml-0.5 font-dm-sans font-bold">
-              *
-            </span>
+        <div className="flex items-center gap-1.5 mb-1">
+          <Label
+            htmlFor={id || name}
+            className="text-sm font-dm-sans font-medium block"
+          >
+            {label}
+            {/*  Show * if required */}
+            {required && (
+              <span className="text-red-500 ml-0.5 font-dm-sans font-bold">
+                *
+              </span>
+            )}
+          </Label>
+          {tooltip && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  type="button"
+                  className="inline-flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  <Info className="size-3.5" />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent side="top" className="max-w-xs">
+                {tooltip}
+              </TooltipContent>
+            </Tooltip>
           )}
-        </Label>
+        </div>
       )}
 
       <div className="relative flex items-center">

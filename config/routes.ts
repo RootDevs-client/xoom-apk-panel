@@ -25,6 +25,7 @@ export const routes = {
       topics: `/admin/dashboard/topics`,
       news: `/admin/dashboard/news`,
       promotionMethods: `/admin/dashboard/promotion-methods`,
+      whatsapp: `/admin/dashboard/whatsapp`,
     },
   },
 };
