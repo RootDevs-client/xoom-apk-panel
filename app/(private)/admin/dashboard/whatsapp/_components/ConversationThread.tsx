@@ -4,7 +4,6 @@ import { useEffect, useRef } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
 import { Loader2, MessageSquare, User } from "lucide-react";
-import { connectSocket, disconnectSocket } from "@/lib/socket-client";
 import MessageBubble from "./MessageBubble";
 import MessageInput from "./MessageInput";
 
@@ -32,6 +31,7 @@ interface Message {
 
 interface Props {
   sessionId: string;
+  sessionName?: string;
   conversation: Conversation | null;
   messages: Message[];
   isLoading: boolean;
@@ -40,6 +40,7 @@ interface Props {
 
 export default function ConversationThread({
   sessionId,
+  sessionName,
   conversation,
   messages,
   isLoading,
@@ -50,34 +51,6 @@ export default function ConversationThread({
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
-
-  useEffect(() => {
-    if (!conversation) return;
-    const socket = connectSocket();
-
-    socket.on("connect", () => {
-      socket.emit("join:session", { sessionId });
-    });
-
-    socket.on(
-      "baileys:message:new",
-      (data: { sessionId: string; conversationId: string; message: any }) => {
-        if (
-          data.conversationId === conversation._id
-        ) {
-          onMessageSent(data.message as Message);
-        }
-      }
-    );
-
-    if (!socket.connected) {
-      socket.connect();
-    }
-
-    return () => {
-      socket.off("baileys:message:new");
-    };
-  }, [conversation, sessionId, onMessageSent]);
 
   if (!conversation) {
     return (
@@ -109,6 +82,8 @@ export default function ConversationThread({
         <div>
           <p className="font-medium text-sm">{contactName}</p>
           <p className="text-[10px] text-muted-foreground">
+            {sessionName && <span className="font-medium">{sessionName}</span>}
+            {sessionName && " · "}
             {conversation.contactPhone || conversation.remoteJid.split("@")[0]}
           </p>
         </div>

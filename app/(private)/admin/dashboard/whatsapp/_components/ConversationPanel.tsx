@@ -1,10 +1,20 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import { getWhatsAppSessions } from "@/actions/whatsapp/whatsappActions";
-import { getWhatsAppConversations, getWhatsAppMessages } from "@/actions/whatsapp/whatsappActions";
+import {
+  getWhatsAppConversations,
+  getWhatsAppMessages,
+  getWhatsAppSessions,
+} from "@/actions/whatsapp/whatsappActions";
 import { Card, CardContent } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { connectSocket } from "@/lib/socket-client";
+import { useCallback, useEffect, useState } from "react";
 import ConversationList from "./ConversationList";
 import ConversationThread from "./ConversationThread";
 
@@ -20,7 +30,12 @@ interface Conversation {
   contactName?: string;
   contactPhone?: string;
   profilePicUrl?: string;
-  lastMessage: { body: string; type: string; timestamp: string; fromMe: boolean };
+  lastMessage: {
+    body: string;
+    type: string;
+    timestamp: string;
+    fromMe: boolean;
+  };
   unreadCount: number;
   lastMessageAt: string;
 }
@@ -40,7 +55,8 @@ export default function ConversationPanel() {
   const [sessions, setSessions] = useState<Session[]>([]);
   const [selectedSessionId, setSelectedSessionId] = useState<string>("");
   const [conversations, setConversations] = useState<Conversation[]>([]);
-  const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
+  const [selectedConversation, setSelectedConversation] =
+    useState<Conversation | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoadingSessions, setIsLoadingSessions] = useState(true);
   const [isLoadingConversations, setIsLoadingConversations] = useState(false);
@@ -50,9 +66,10 @@ export default function ConversationPanel() {
     const fetchSessions = async () => {
       setIsLoadingSessions(true);
       const result = await getWhatsAppSessions(1, 100, "");
+      console.log("result=====", result);
       if (result?.status) {
         const connected = result.data.sessions.filter(
-          (s: Session) => s.connectionStatus === "connected"
+          (s: Session) => s.connectionStatus === "connected",
         );
         setSessions(connected);
         if (connected.length > 0) {
@@ -68,7 +85,12 @@ export default function ConversationPanel() {
     if (!selectedSessionId) return;
     const fetchConversations = async () => {
       setIsLoadingConversations(true);
-      const result = await getWhatsAppConversations(selectedSessionId, 1, 50, "");
+      const result = await getWhatsAppConversations(
+        selectedSessionId,
+        1,
+        50,
+        "",
+      );
       if (result?.status) {
         setConversations(result.data.conversations || []);
       }
@@ -78,6 +100,75 @@ export default function ConversationPanel() {
     setSelectedConversation(null);
     setMessages([]);
   }, [selectedSessionId]);
+
+  useEffect(() => {
+    if (!selectedSessionId) return;
+
+    const socket = connectSocket();
+
+    const handleConnect = () => {
+      socket.emit("join:session", { sessionId: selectedSessionId });
+    };
+
+    const handleConversationUpdate = (data: {
+      sessionId: string;
+      conversation: Conversation;
+    }) => {
+      if (data.sessionId !== selectedSessionId) return;
+      setConversations((prev) => {
+        const idx = prev.findIndex((c) => c._id === data.conversation._id);
+        if (idx >= 0) {
+          const updated = [...prev];
+          updated[idx] = { ...updated[idx], ...data.conversation };
+          updated.sort(
+            (a, b) =>
+              new Date(b.lastMessageAt).getTime() -
+              new Date(a.lastMessageAt).getTime(),
+          );
+          return updated;
+        }
+        return [data.conversation, ...prev].sort(
+          (a, b) =>
+            new Date(b.lastMessageAt).getTime() -
+            new Date(a.lastMessageAt).getTime(),
+        );
+      });
+    };
+
+    const handleMessageNew = (data: {
+      sessionId: string;
+      conversationId: string;
+      message: any;
+    }) => {
+      if (data.sessionId !== selectedSessionId) return;
+      if (
+        selectedConversation &&
+        data.conversationId === selectedConversation._id
+      ) {
+        setMessages((prev) => {
+          if (prev.some((m) => m.keyId === data.message.keyId)) return prev;
+          return [...prev, data.message as Message];
+        });
+      }
+    };
+
+    socket.on("connect", handleConnect);
+    socket.on("baileys:conversation:update", handleConversationUpdate);
+    socket.on("baileys:message:new", handleMessageNew);
+
+    if (socket.connected) {
+      handleConnect();
+    } else {
+      socket.connect();
+    }
+
+    return () => {
+      socket.off("connect", handleConnect);
+      socket.off("baileys:conversation:update", handleConversationUpdate);
+      socket.off("baileys:message:new", handleMessageNew);
+      socket.emit("leave:session", { sessionId: selectedSessionId });
+    };
+  }, [selectedSessionId, selectedConversation]);
 
   const handleSelectConversation = useCallback(async (conv: Conversation) => {
     setSelectedConversation(conv);
@@ -90,7 +181,10 @@ export default function ConversationPanel() {
   }, []);
 
   const handleMessageSent = useCallback((message: Message) => {
-    setMessages((prev) => [...prev, message]);
+    setMessages((prev) => {
+      if (prev.some((m) => m.keyId === message.keyId)) return prev;
+      return [...prev, message];
+    });
   }, []);
 
   if (isLoadingSessions) {
@@ -118,10 +212,7 @@ export default function ConversationPanel() {
   return (
     <div className="flex flex-col gap-4 h-[calc(100vh-12rem)]">
       <div className="w-64">
-        <Select
-          value={selectedSessionId}
-          onValueChange={setSelectedSessionId}
-        >
+        <Select value={selectedSessionId} onValueChange={setSelectedSessionId}>
           <SelectTrigger>
             <SelectValue placeholder="Select channel" />
           </SelectTrigger>
@@ -148,6 +239,9 @@ export default function ConversationPanel() {
         <div className="flex-1">
           <ConversationThread
             sessionId={selectedSessionId}
+            sessionName={
+              sessions.find((s) => s._id === selectedSessionId)?.name
+            }
             conversation={selectedConversation}
             messages={messages}
             isLoading={isLoadingMessages}

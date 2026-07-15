@@ -22,6 +22,8 @@ export const POST = asyncHandler(
       );
     }
 
+    const now = new Date();
+
     let conversation = await BaileysConversation.findOne({
       session: data.sessionId,
       remoteJid: data.remoteJid,
@@ -36,12 +38,21 @@ export const POST = asyncHandler(
         lastMessage: {
           body: data.body,
           type: "conversation",
-          timestamp: new Date(),
+          timestamp: now,
           fromMe: true,
         },
         unreadCount: 0,
-        lastMessageAt: new Date(),
+        lastMessageAt: now,
       });
+    } else {
+      conversation.lastMessage = {
+        body: data.body,
+        type: "conversation",
+        timestamp: now,
+        fromMe: true,
+      };
+      conversation.lastMessageAt = now;
+      await conversation.save();
     }
 
     const message = await WhatsAppMessage.create({
@@ -53,7 +64,7 @@ export const POST = asyncHandler(
       body: data.body,
       type: "conversation",
       status: "pending",
-      timestamp: new Date(),
+      timestamp: now,
     });
 
     return apiResponse(

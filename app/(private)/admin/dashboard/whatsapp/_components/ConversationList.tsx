@@ -45,6 +45,8 @@ export default function ConversationList({
     );
   }
 
+  console.log("conversations", conversations);
+
   if (conversations.length === 0) {
     return (
       <Card className="h-full">
@@ -66,9 +68,7 @@ export default function ConversationList({
               key={conv._id}
               onClick={() => onSelect(conv)}
               className={`flex items-center gap-3 p-3 transition-colors cursor-pointer ${
-                isSelected
-                  ? "bg-primary/10"
-                  : "hover:bg-muted/50"
+                isSelected ? "bg-primary/10" : "hover:bg-muted/50"
               }`}
             >
               <Avatar className="size-10 shrink-0">
