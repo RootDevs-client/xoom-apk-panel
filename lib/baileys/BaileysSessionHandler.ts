@@ -68,13 +68,61 @@ export class BaileysSessionHandler {
     }
   }
 
-  async sendMessage(remoteJid: string, content: string) {
+  async sendMessage(
+    remoteJid: string,
+    content: string,
+    media?: { type: string; url: string; fileName?: string; caption?: string },
+  ) {
     if (!this.sock) {
       throw new Error("Socket not connected");
     }
-    const result = await this.sock.sendMessage(remoteJid, {
-      text: content,
-    });
+
+    let result;
+    if (media) {
+      // Download the media from the URL
+      const mediaRes = await fetch(media.url);
+      const mediaBuffer = Buffer.from(await mediaRes.arrayBuffer());
+
+      switch (media.type) {
+        case "image":
+          result = await this.sock.sendMessage(remoteJid, {
+            image: mediaBuffer,
+            caption: media.caption || "",
+            mimetype: "image/jpeg",
+          } as any);
+          break;
+        case "video":
+          result = await this.sock.sendMessage(remoteJid, {
+            video: mediaBuffer,
+            caption: media.caption || "",
+            mimetype: "video/mp4",
+          } as any);
+          break;
+        case "document":
+          result = await this.sock.sendMessage(remoteJid, {
+            document: mediaBuffer,
+            fileName: media.fileName || "file",
+            caption: media.caption || "",
+            mimetype: "application/octet-stream",
+          } as any);
+          break;
+        case "audio":
+          result = await this.sock.sendMessage(remoteJid, {
+            audio: mediaBuffer,
+            mimetype: "audio/ogg",
+          } as any);
+          break;
+        default:
+          result = await this.sock.sendMessage(remoteJid, {
+            text: content || media.caption || "",
+          });
+      }
+    } else {
+      result = await this.sock.sendMessage(remoteJid, {
+        text: content,
+      });
+    }
+
     return result;
   }
 
@@ -290,9 +338,63 @@ export class BaileysSessionHandler {
       if (!message) return;
 
       const messageType = Object.keys(message)[0] || "unknown";
-      const body = message.conversation ||
-        message.extendedTextMessage?.text ||
-        "";
+
+      // Extract body and media info from different message types
+      let body = "";
+      let mediaUrl: string | undefined;
+      let mimeType: string | undefined;
+      let fileName: string | undefined;
+      let fileSize: number | undefined;
+
+      const mediaContent = (message as any)[messageType];
+
+      switch (messageType) {
+        case "conversation":
+          body = message.conversation || "";
+          break;
+        case "extendedTextMessage":
+          body = message.extendedTextMessage?.text || "";
+          break;
+        case "imageMessage":
+          body = mediaContent?.caption || "";
+          mediaUrl = mediaContent?.url || "";
+          mimeType = mediaContent?.mimetype || "image/jpeg";
+          fileSize = mediaContent?.fileLength || undefined;
+          break;
+        case "videoMessage":
+          body = mediaContent?.caption || "";
+          mediaUrl = mediaContent?.url || "";
+          mimeType = mediaContent?.mimetype || "video/mp4";
+          fileSize = mediaContent?.fileLength || undefined;
+          break;
+        case "documentMessage":
+          body = mediaContent?.caption || "";
+          mediaUrl = mediaContent?.url || "";
+          mimeType = mediaContent?.mimetype || "application/octet-stream";
+          fileName = mediaContent?.fileName || "";
+          fileSize = mediaContent?.fileLength || undefined;
+          break;
+        case "audioMessage":
+          body = "";
+          mediaUrl = mediaContent?.url || "";
+          mimeType = mediaContent?.mimetype || "audio/ogg";
+          fileSize = mediaContent?.fileLength || undefined;
+          break;
+        case "stickerMessage":
+          body = "";
+          mediaUrl = mediaContent?.url || "";
+          mimeType = mediaContent?.mimetype || "image/webp";
+          break;
+        case "locationMessage":
+          body = `📍 Location`;
+          break;
+        default:
+          body = mediaContent?.caption || "";
+          if (!body) {
+            mediaUrl = mediaContent?.url || "";
+            mimeType = mediaContent?.mimetype || "";
+          }
+      }
 
       const timestamp = msg.messageTimestamp
         ? new Date(Number(msg.messageTimestamp) * 1000)
@@ -309,6 +411,8 @@ export class BaileysSessionHandler {
         remoteJid,
       });
 
+      const displayBody = body || `[${messageType}]`;
+
       if (!conversation) {
         const contactName = fromMe ? "You" : pushName || remoteJid.split("@")[0];
         conversation = await BaileysConversation.create({
@@ -317,7 +421,7 @@ export class BaileysSessionHandler {
           contactName,
           contactPhone: remoteJid.split("@")[0],
           lastMessage: {
-            body,
+            body: displayBody,
             type: messageType,
             timestamp,
             fromMe,
@@ -327,7 +431,7 @@ export class BaileysSessionHandler {
         });
       } else {
         conversation.lastMessage = {
-          body,
+          body: displayBody,
           type: messageType,
           timestamp,
           fromMe,
@@ -348,6 +452,10 @@ export class BaileysSessionHandler {
         pushName,
         body,
         type: messageType,
+        mediaUrl: mediaUrl || undefined,
+        mimeType: mimeType || undefined,
+        fileName: fileName || undefined,
+        fileSize: fileSize || undefined,
         status: fromMe ? "sent" : "delivered",
         timestamp,
       });

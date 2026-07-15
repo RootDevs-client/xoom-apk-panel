@@ -117,6 +117,9 @@ export async function sendWhatsAppMessage(data: {
   sessionId: string;
   remoteJid: string;
   body: string;
+  mediaType?: string;
+  mediaUrl?: string;
+  fileName?: string;
 }) {
   try {
     const res = await apiClient("/api/admin/whatsapp/send", {

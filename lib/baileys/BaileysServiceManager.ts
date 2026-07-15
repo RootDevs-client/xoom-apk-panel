@@ -38,12 +38,17 @@ export class BaileysServiceManager {
     }
   }
 
-  async sendMessage(sessionId: string, remoteJid: string, content: string) {
+  async sendMessage(
+    sessionId: string,
+    remoteJid: string,
+    content: string,
+    media?: { type: string; url: string; fileName?: string; caption?: string },
+  ) {
     const handler = this.handlers.get(sessionId);
     if (!handler) {
       throw new Error("Session not found or not running");
     }
-    return handler.sendMessage(remoteJid, content);
+    return handler.sendMessage(remoteJid, content, media);
   }
 
   private async loadExistingSessions() {

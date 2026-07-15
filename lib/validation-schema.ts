@@ -112,6 +112,15 @@ export const sendBaileysMessageSchema = z.object({
   body: z.string().min(1, "Message body is required!"),
 });
 
+export const sendBaileysMediaMessageSchema = z.object({
+  sessionId: z.string().min(1, "Session ID is required!"),
+  remoteJid: z.string().min(1, "Recipient JID is required!"),
+  body: z.string().optional(),
+  mediaType: z.enum(["image", "video", "document", "audio"]),
+  mediaUrl: z.string().url("Invalid media URL!"),
+  fileName: z.string().optional(),
+});
+
 export const createEventSchema = z.object({
   deviceId: z.string().min(1, "deviceId is required!"),
   userId: z.string().optional().nullable(),
