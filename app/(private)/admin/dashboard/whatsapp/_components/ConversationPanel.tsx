@@ -13,6 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { ToastMessage } from "@/components/custom/ToastMessage";
 import { connectSocket } from "@/lib/socket-client";
 import { useCallback, useEffect, useState } from "react";
 import ConversationList from "./ConversationList";
@@ -28,6 +29,7 @@ interface Conversation {
   _id: string;
   session: string;
   sessionName?: string;
+  displayName?: string;
   remoteJid: string;
   contactName?: string;
   contactPhone?: string;
@@ -137,6 +139,28 @@ export default function ConversationPanel() {
       });
     };
 
+    const handleLoggedOut = (data: { sessionId: string }) => {
+      if (data.sessionId !== selectedSessionId) return;
+      setConversations([]);
+      setSelectedConversation(null);
+      setMessages([]);
+      ToastMessage.info({ title: "Channel logged out from WhatsApp" });
+    };
+
+    const handleConversationDeleted = (data: {
+      sessionId: string;
+      conversationId: string;
+    }) => {
+      if (data.sessionId !== selectedSessionId) return;
+      setConversations((prev) => prev.filter((c) => c._id !== data.conversationId));
+      setSelectedConversation((prev) =>
+        prev?._id === data.conversationId ? null : prev,
+      );
+      if (data.conversationId === selectedConversation?._id) {
+        setMessages([]);
+      }
+    };
+
     const handleMessageNew = (data: {
       sessionId: string;
       conversationId: string;
@@ -156,7 +180,9 @@ export default function ConversationPanel() {
 
     socket.on("connect", handleConnect);
     socket.on("baileys:conversation:update", handleConversationUpdate);
+    socket.on("baileys:conversation:deleted", handleConversationDeleted);
     socket.on("baileys:message:new", handleMessageNew);
+    socket.on("baileys:loggedOut", handleLoggedOut);
 
     if (socket.connected) {
       handleConnect();
@@ -167,7 +193,9 @@ export default function ConversationPanel() {
     return () => {
       socket.off("connect", handleConnect);
       socket.off("baileys:conversation:update", handleConversationUpdate);
+      socket.off("baileys:conversation:deleted", handleConversationDeleted);
       socket.off("baileys:message:new", handleMessageNew);
+      socket.off("baileys:loggedOut", handleLoggedOut);
       socket.emit("leave:session", { sessionId: selectedSessionId });
     };
   }, [selectedSessionId, selectedConversation]);
@@ -192,6 +220,18 @@ export default function ConversationPanel() {
   const handleMessageDeleted = useCallback((messageId: string) => {
     setMessages((prev) => prev.filter((m) => m._id !== messageId));
   }, []);
+
+  const handleConversationUpdated = useCallback(
+    (updated: Conversation) => {
+      setConversations((prev) =>
+        prev.map((c) => (c._id === updated._id ? { ...c, ...updated } : c)),
+      );
+      setSelectedConversation((prev) =>
+        prev?._id === updated._id ? { ...prev, ...updated } : prev,
+      );
+    },
+    [],
+  );
 
   const handleConversationDeleted = useCallback(
     (convId: string) => {
@@ -251,6 +291,7 @@ export default function ConversationPanel() {
             isLoading={isLoadingConversations}
             onSelect={handleSelectConversation}
             onDeleted={handleConversationDeleted}
+            onUpdated={handleConversationUpdated}
           />
         </div>
 

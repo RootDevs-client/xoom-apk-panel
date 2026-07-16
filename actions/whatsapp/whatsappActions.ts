@@ -218,6 +218,28 @@ export async function deleteWhatsAppMessage(id: string) {
   }
 }
 
+export async function updateWhatsAppConversationName(
+  id: string,
+  displayName: string,
+) {
+  try {
+    const res = await apiClient(
+      `/api/admin/whatsapp/conversations/${id}`,
+      { method: "PATCH", body: { displayName } },
+    );
+    return res;
+  } catch (error: any) {
+    if (error?.digest?.startsWith("NEXT_REDIRECT")) throw error;
+    return {
+      ok: false,
+      message:
+        error instanceof Error
+          ? error.message
+          : "Failed to update conversation name",
+    };
+  }
+}
+
 export async function deleteWhatsAppConversation(id: string) {
   try {
     const res = await apiClient(`/api/admin/whatsapp/conversations/${id}`, {

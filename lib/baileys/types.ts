@@ -28,6 +28,9 @@ export interface ServerToClientEvents {
     data: { sessionId: string; conversation: Record<string, unknown> }
   ) => void;
   "baileys:error": (data: { sessionId: string; error: string }) => void;
+  "baileys:conversation:deleted": (
+    data: { sessionId: string; conversationId: string; remoteJid: string }
+  ) => void;
 }
 
 export interface ClientToServerEvents {

@@ -6,6 +6,7 @@ export interface IBaileysConversation extends Document {
   contactName?: string;
   contactPhone?: string;
   profilePicUrl?: string;
+  displayName?: string;
   lastMessage: {
     body: string;
     type: string;
@@ -30,6 +31,7 @@ const BaileysConversationSchema = new Schema<IBaileysConversation>(
     contactName: { type: String, default: null },
     contactPhone: { type: String, default: null },
     profilePicUrl: { type: String, default: null },
+    displayName: { type: String, default: null },
     lastMessage: {
       type: new Schema(
         {

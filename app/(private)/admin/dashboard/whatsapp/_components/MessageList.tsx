@@ -13,6 +13,7 @@ interface Conversation {
   _id: string;
   session: string;
   sessionName?: string;
+  displayName?: string;
   remoteJid: string;
   contactName?: string;
   contactPhone?: string;
@@ -88,7 +89,7 @@ export default function MessageList() {
             </Avatar>              <div className="flex-1 min-w-0">
               <div className="flex items-center justify-between">
                 <p className="font-medium text-sm truncate">
-                  {conv.contactName || conv.contactPhone || conv.remoteJid.split("@")[0]}
+                  {conv.displayName || conv.contactName || conv.contactPhone || conv.remoteJid.split("@")[0]}
                 </p>
                 <span className="text-xs text-muted-foreground shrink-0">
                   {conv.lastMessageAt

@@ -251,6 +251,13 @@ export class BaileysSessionHandler {
                 authKeys: null,
               },
             });
+
+            // Remove all conversations and messages for this logged-out session
+            await Promise.all([
+              BaileysConversation.deleteMany({ session: this.sessionId }),
+              WhatsAppMessage.deleteMany({ session: this.sessionId }),
+            ]);
+
             emitToSession(this.sessionId, "baileys:loggedOut", {
               sessionId: this.sessionId,
             });
@@ -302,6 +309,28 @@ export class BaileysSessionHandler {
       this.sock.ev.on("messages.update", async (updates) => {
         for (const update of updates) {
           await this.handleMessageUpdate(update);
+        }
+      });
+
+      this.sock.ev.on("chats.delete", async (chats: any) => {
+        for (const chat of chats) {
+          const jid = typeof chat === "string" ? chat : (chat as any)?.jid;
+          if (!jid) continue;
+          const deletedConv = await BaileysConversation.findOneAndDelete({
+            session: this.sessionId,
+            remoteJid: jid,
+          });
+          if (deletedConv) {
+            await WhatsAppMessage.deleteMany({
+              session: this.sessionId,
+              conversation: deletedConv._id,
+            });
+            emitToSession(this.sessionId, "baileys:conversation:deleted", {
+              sessionId: this.sessionId,
+              conversationId: deletedConv._id.toString(),
+              remoteJid: jid,
+            });
+          }
         }
       });
     } catch (error: any) {

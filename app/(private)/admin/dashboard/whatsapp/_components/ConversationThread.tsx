@@ -12,6 +12,7 @@ interface Conversation {
   remoteJid: string;
   contactName?: string;
   contactPhone?: string;
+  displayName?: string;
   profilePicUrl?: string;
   lastMessage: { body: string; timestamp: string; fromMe: boolean };
   unreadCount: number;
@@ -68,6 +69,7 @@ export default function ConversationThread({
   }
 
   const contactName =
+    conversation.displayName ||
     conversation.contactName ||
     conversation.contactPhone ||
     conversation.remoteJid.split("@")[0];

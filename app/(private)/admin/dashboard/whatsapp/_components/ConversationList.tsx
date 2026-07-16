@@ -1,6 +1,9 @@
 "use client";
 
-import { deleteWhatsAppConversation } from "@/actions/whatsapp/whatsappActions";
+import {
+  deleteWhatsAppConversation,
+  updateWhatsAppConversationName,
+} from "@/actions/whatsapp/whatsappActions";
 import { ToastMessage } from "@/components/custom/ToastMessage";
 import {
   AlertDialog,
@@ -15,7 +18,8 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { Loader2, MessageSquare, Trash2, User } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Check, Loader2, MessageSquare, Pencil, Trash2, User, X } from "lucide-react";
 import moment from "moment-timezone";
 import { useState } from "react";
 
@@ -23,6 +27,7 @@ interface Conversation {
   _id: string;
   session: string;
   sessionName?: string;
+  displayName?: string;
   remoteJid: string;
   contactName?: string;
   contactPhone?: string;
@@ -43,6 +48,7 @@ interface Props {
   isLoading: boolean;
   onSelect: (conv: Conversation) => void;
   onDeleted: (convId: string) => void;
+  onUpdated?: (conv: Conversation) => void;
 }
 
 export default function ConversationList({
@@ -51,9 +57,12 @@ export default function ConversationList({
   isLoading,
   onSelect,
   onDeleted,
+  onUpdated,
 }: Props) {
   const [deleteTarget, setDeleteTarget] = useState<Conversation | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editValue, setEditValue] = useState("");
 
   if (isLoading) {
     return (
@@ -75,6 +84,30 @@ export default function ConversationList({
       </Card>
     );
   }
+
+  const handleStartEdit = (conv: Conversation) => {
+    setEditingId(conv._id);
+    setEditValue(conv.displayName || conv.contactName || conv.contactPhone || conv.remoteJid.split("@")[0]);
+  };
+
+  const handleCancelEdit = () => {
+    setEditingId(null);
+    setEditValue("");
+  };
+
+  const handleSaveEdit = async (convId: string) => {
+    const trimmed = editValue.trim();
+    if (!trimmed) return;
+    const res = await updateWhatsAppConversationName(convId, trimmed);
+    if (res?.status) {
+      ToastMessage.success({ title: "Name updated" });
+      onUpdated?.(res.data?.conversation);
+    } else {
+      ToastMessage.error({ title: res?.message || "Failed to update name" });
+    }
+    setEditingId(null);
+    setEditValue("");
+  };
 
   const handleDeleteConfirm = async () => {
     if (!deleteTarget) return;
@@ -118,9 +151,43 @@ export default function ConversationList({
                   </Avatar>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between">
-                      <p className="font-medium text-sm truncate">
-                        {contactDisplay}
-                      </p>
+                      {editingId === conv._id ? (
+                        <div className="flex items-center gap-1 flex-1 mr-2">
+                          <Input
+                            value={editValue}
+                            onChange={(e) => setEditValue(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") handleSaveEdit(conv._id);
+                              if (e.key === "Escape") handleCancelEdit();
+                            }}
+                            className="h-7 text-sm py-1 px-2"
+                            autoFocus
+                            onClick={(e) => e.stopPropagation()}
+                          />
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleSaveEdit(conv._id);
+                            }}
+                            className="size-6 rounded flex items-center justify-center hover:bg-primary/10 text-primary shrink-0"
+                          >
+                            <Check className="size-3.5" />
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleCancelEdit();
+                            }}
+                            className="size-6 rounded flex items-center justify-center hover:bg-muted shrink-0"
+                          >
+                            <X className="size-3.5" />
+                          </button>
+                        </div>
+                      ) : (
+                        <p className="font-medium text-sm truncate">
+                          {conv.displayName || contactDisplay}
+                        </p>
+                      )}
                       <span className="text-[10px] text-muted-foreground shrink-0 ml-2">
                         {conv.lastMessageAt
                           ? moment(conv.lastMessageAt).fromNow()
@@ -147,17 +214,29 @@ export default function ConversationList({
                     </Badge>
                   )}
                 </div>
-                {/* Delete button on hover */}
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setDeleteTarget(conv);
-                  }}
-                  className="absolute top-1 right-2 size-6 rounded-full bg-destructive/80 text-destructive-foreground flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer z-10 hover:bg-destructive"
-                  title="Delete conversation"
-                >
-                  <Trash2 className="size-3 text-white" />
-                </button>
+                {/* Edit and Delete buttons on hover */}
+                <div className="absolute top-1 right-2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleStartEdit(conv);
+                    }}
+                    className="size-6 rounded-full bg-muted/80 flex items-center justify-center cursor-pointer hover:bg-muted"
+                    title="Rename"
+                  >
+                    <Pencil className="size-3" />
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setDeleteTarget(conv);
+                    }}
+                    className="size-6 rounded-full bg-destructive/80 text-destructive-foreground flex items-center justify-center cursor-pointer hover:bg-destructive"
+                    title="Delete conversation"
+                  >
+                    <Trash2 className="size-3 text-white" />
+                  </button>
+                </div>
               </div>
             );
           })}
