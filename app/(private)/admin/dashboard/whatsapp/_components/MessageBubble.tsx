@@ -12,12 +12,10 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import {
-  Dialog,
-  DialogContent,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Check, CheckCheck, Download, FileText, Trash2 } from "lucide-react";
 import moment from "moment-timezone";
+import Link from "next/link";
 import { useState } from "react";
 
 interface Message {
@@ -45,6 +43,7 @@ export default function MessageBubble({ message, onDeleted }: Props) {
   const [isHovering, setIsHovering] = useState(false);
   const [imageError, setImageError] = useState(false);
   const [modalImage, setModalImage] = useState<string | null>(null);
+  console.log("message", message);
 
   const isMine = message.fromMe;
   const time = message.timestamp
@@ -146,7 +145,7 @@ export default function MessageBubble({ message, onDeleted }: Props) {
 
     if (isDocument) {
       return (
-        <a
+        <Link
           href={message.mediaUrl}
           target="_blank"
           rel="noopener noreferrer"
@@ -166,7 +165,7 @@ export default function MessageBubble({ message, onDeleted }: Props) {
             <p className="text-[10px] opacity-70">Click to download</p>
           </div>
           <Download className="size-4 shrink-0 opacity-70" />
-        </a>
+        </Link>
       );
     }
 

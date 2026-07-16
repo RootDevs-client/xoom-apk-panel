@@ -1,20 +1,20 @@
 import {
-  makeWASocket,
+  Browsers,
   DisconnectReason,
   fetchLatestBaileysVersion,
-  Browsers,
   isJidBroadcast,
   isJidStatusBroadcast,
+  makeWASocket,
   proto,
 } from "@whiskeysockets/baileys";
 
-import QRCode from "qrcode";
-import { WhatsAppSession } from "@/model/WhatsAppSession";
-import { WhatsAppMessage } from "@/model/WhatsAppMessage";
 import { BaileysConversation } from "@/model/BaileysConversation";
-import { useMongoDBAuthState } from "./MongoAuthState";
-import { emitToSession, broadcast } from "./socket-server";
+import { WhatsAppMessage } from "@/model/WhatsAppMessage";
+import { WhatsAppSession } from "@/model/WhatsAppSession";
 import pino from "pino";
+import QRCode from "qrcode";
+import { useMongoDBAuthState } from "./MongoAuthState";
+import { broadcast, emitToSession } from "./socket-server";
 
 const logger = pino({
   level: "error",
@@ -144,7 +144,9 @@ export class BaileysSessionHandler {
       const { state, saveCreds } = await useMongoDBAuthState(this.sessionId);
       const { version } = await fetchLatestBaileysVersion();
 
-      logger.info(`[Baileys] Starting session ${this.sessionId} with version ${version}`);
+      logger.info(
+        `[Baileys] Starting session ${this.sessionId} with version ${version}`,
+      );
 
       console.log(`[Baileys] Creating WA socket for session ${this.sessionId}`);
 
@@ -165,7 +167,10 @@ export class BaileysSessionHandler {
 
       this.sock.ev.on("connection.update", async (update) => {
         const { connection, lastDisconnect, qr } = update;
-        console.log(`[Baileys] Session ${this.sessionId} connection.update:`, { hasQR: !!qr, connection });
+        console.log(`[Baileys] Session ${this.sessionId} connection.update:`, {
+          hasQR: !!qr,
+          connection,
+        });
 
         if (qr) {
           this.qrRetries++;
@@ -177,7 +182,9 @@ export class BaileysSessionHandler {
           });
 
           const qrBase64 = await QRCode.toDataURL(qr);
-          console.log(`[Baileys] QR generated for session ${this.sessionId}, emitting via socket`);
+          console.log(
+            `[Baileys] QR generated for session ${this.sessionId}, emitting via socket`,
+          );
           emitToSession(this.sessionId, "baileys:qr", {
             sessionId: this.sessionId,
             qrCode: qrBase64,
@@ -414,7 +421,9 @@ export class BaileysSessionHandler {
       const displayBody = body || `[${messageType}]`;
 
       if (!conversation) {
-        const contactName = fromMe ? "You" : pushName || remoteJid.split("@")[0];
+        const contactName = fromMe
+          ? "You"
+          : pushName || remoteJid.split("@")[0];
         conversation = await BaileysConversation.create({
           session: this.sessionId,
           remoteJid,
@@ -468,7 +477,10 @@ export class BaileysSessionHandler {
 
       emitToSession(this.sessionId, "baileys:conversation:update", {
         sessionId: this.sessionId,
-        conversation: conversation.toObject() as unknown as Record<string, unknown>,
+        conversation: conversation.toObject() as unknown as Record<
+          string,
+          unknown
+        >,
       });
     } catch (error: any) {
       logger.error(`[Baileys] Error handling message: ${error.message}`);
@@ -493,7 +505,7 @@ export class BaileysSessionHandler {
 
         await WhatsAppMessage.findOneAndUpdate(
           { session: this.sessionId, keyId: key.id },
-          { $set: { status: statusStr } }
+          { $set: { status: statusStr } },
         );
 
         emitToSession(this.sessionId, "baileys:message:status", {
