@@ -14,7 +14,8 @@
     "precommit": "lint-staged",
     "type-check": "tsc --noEmit",
     "baileys": "tsx watch lib/baileys/index.ts",
-    "dev:all": "concurrently -n next,wa -c cyan,green \"pnpm dev\" \"pnpm baileys\"",
+    "meta-wa": "tsx watch lib/whatsapp-meta/entry.ts",
+    "dev:all": "concurrently -n next,wa,meta -c cyan,green,yellow \"pnpm dev\" \"pnpm baileys\" \"pnpm meta-wa\"",
     "start:baileys": "node dist/lib/baileys/index.js"
   },
   "dependencies": {

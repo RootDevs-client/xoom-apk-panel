@@ -15,6 +15,7 @@ export const POST = async (req: NextRequest) => {
 
   try {
     const body = await req.json();
+    console.log("body", body);
     const userIP =
       req.headers.get("x-forwarded-for")?.split(",")[0].trim() ??
       req.headers.get("x-real-ip") ??
