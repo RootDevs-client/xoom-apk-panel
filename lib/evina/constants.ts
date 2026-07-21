@@ -16,6 +16,7 @@ export const COUNTRIES: Country[] = [
 ];
 
 export const API = {
+  getEvinaJs: "https://universal-subscription-api.vclipss.com/getevinajs",
   pinRequest: "https://universal-subscription-api.vclipss.com/pinrequest",
   pinVerify: "https://universal-subscription-api.vclipss.com/pinverify",
 };

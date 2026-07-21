@@ -24,7 +24,7 @@ export const routes = {
       categories: `/admin/dashboard/categories`,
       topics: `/admin/dashboard/topics`,
       news: `/admin/dashboard/news`,
-      promotionMethods: `/admin/dashboard/promotion-methods`,
+      operators: `/admin/dashboard/telco-operators`,
       whatsapp: `/admin/dashboard/whatsapp`,
     },
   },

@@ -1,6 +1,6 @@
 import { asyncHandler } from "@/lib/async-handler";
 import { apiResponse } from "@/lib/server.utils";
-import { PromotionMethod } from "@/model/PromotionMethod";
+import { TelcoOperator } from "@/model/TelcoOperator";
 import { NextRequest } from "next/server";
 
 export const GET = asyncHandler(async (req: NextRequest) => {
@@ -18,18 +18,21 @@ export const GET = asyncHandler(async (req: NextRequest) => {
   }
 
   if (operator) {
-    filter.operator = { $regex: operator, $options: "i" };
+    filter.$or = [
+      { name: { $regex: operator, $options: "i" } },
+      { code: { $regex: operator, $options: "i" } },
+    ];
   }
 
   if (is_active !== null) {
     filter.is_active = is_active === "true";
   }
 
-  const promotionMethods = await PromotionMethod.find(filter)
+  const telcoOperators = await TelcoOperator.find(filter)
     .sort({ createdAt: -1 })
     .lean();
 
-  return apiResponse(true, 200, "Promotion methods fetched successfully.", {
-    promotionMethods,
+  return apiResponse(true, 200, "Operators fetched successfully.", {
+    telcoOperators,
   });
 });

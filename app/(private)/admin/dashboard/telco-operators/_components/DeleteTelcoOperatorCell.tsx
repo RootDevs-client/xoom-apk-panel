@@ -1,6 +1,6 @@
 "use client";
 
-import { deletePromotionMethod } from "@/actions/promotion-method/promotionMethodActions";
+import { deleteTelcoOperator } from "@/actions/telco-operator/telcoOperatorActions";
 import { ToastMessage } from "@/components/custom/ToastMessage";
 import { Button } from "@/components/ui/button";
 import {
@@ -14,14 +14,14 @@ import {
 import { Trash2 } from "lucide-react";
 import { useState } from "react";
 import { ImSpinner9 } from "react-icons/im";
-import { type PromotionMethod } from "./columns";
+import { type TelcoOperator } from "./columns";
 
 interface Props {
-  row: PromotionMethod;
+  row: TelcoOperator;
   onSuccess: () => void;
 }
 
-export default function DeletePromotionMethodCell({ row, onSuccess }: Props) {
+export default function DeleteTelcoOperatorCell({ row, onSuccess }: Props) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -29,17 +29,17 @@ export default function DeletePromotionMethodCell({ row, onSuccess }: Props) {
     setLoading(true);
 
     try {
-      const res = await deletePromotionMethod(row._id);
+      const res = await deleteTelcoOperator(row._id);
 
       if (res?.status) {
         ToastMessage.success({
-          title: res?.message || "Promotion method deleted successfully!",
+          title: res?.message || "Operator deleted successfully!",
         });
         setOpen(false);
         onSuccess();
       } else {
         ToastMessage.error({
-          title: res?.message || "Failed to delete promotion method",
+          title: res?.message || "Failed to delete operator",
         });
       }
     } catch {
@@ -63,11 +63,11 @@ export default function DeletePromotionMethodCell({ row, onSuccess }: Props) {
       <Dialog open={open} onOpenChange={(v) => !loading && setOpen(v)}>
         <DialogContent className="max-w-sm">
           <DialogHeader>
-            <DialogTitle>Delete Conversession Name</DialogTitle>
+            <DialogTitle>Delete Operator</DialogTitle>
             <DialogDescription>
               Are you sure you want to delete{" "}
               <span className="font-semibold text-foreground">
-                {row.operator}
+                {row.name}
               </span>
               ? This action cannot be undone.
             </DialogDescription>
@@ -75,8 +75,16 @@ export default function DeletePromotionMethodCell({ row, onSuccess }: Props) {
 
           <div className="space-y-1.5 rounded-lg border bg-muted/40 px-4 py-3 text-sm">
             <div className="flex items-center justify-between">
-              <span className="text-muted-foreground">Operator</span>
-              <span className="font-medium">{row.operator}</span>
+              <span className="text-muted-foreground">Name</span>
+              <span className="font-medium">{row.name}</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-muted-foreground">Code</span>
+              <span className="font-medium">{row.code}</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-muted-foreground">Country</span>
+              <span className="font-medium">{row.country}</span>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-muted-foreground">Active</span>

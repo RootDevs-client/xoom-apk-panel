@@ -1,13 +1,13 @@
 import { routes } from "@/config/routes";
 import {
   BarChart3,
+  Cable,
   Hash,
   LayoutDashboard,
   MessageCircle,
   Newspaper,
   Settings2,
   Tags,
-  ToggleLeft,
   User,
 } from "lucide-react";
 import { FaFootball } from "react-icons/fa6";
@@ -48,9 +48,9 @@ export const adminDashboardMenu = {
       icon: Newspaper,
     },
     {
-      title: "Conversessions",
-      url: routes.privateRoutes.admin.promotionMethods,
-      icon: ToggleLeft,
+      title: "Operators",
+      url: routes.privateRoutes.admin.operators,
+      icon: Cable,
     },
     {
       title: "WhatsApp",

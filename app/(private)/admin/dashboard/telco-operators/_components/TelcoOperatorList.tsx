@@ -1,15 +1,15 @@
 "use client";
 
-import { getPromotionMethodList } from "@/actions/promotion-method/promotionMethodActions";
+import { getTelcoOperatorList } from "@/actions/telco-operator/telcoOperatorActions";
 import { DataTableWithPagination } from "@/components/custom/data-table/DataTableWithPagination";
 import { Card, CardContent } from "@/components/ui/card";
 import { useTableState } from "@/store/useTableStore";
 import { useEffect, useState } from "react";
 import { columns } from "./columns";
-import PromotionMethodToolbar from "./PromotionMethodToolbar";
+import TelcoOperatorToolbar from "./TelcoOperatorToolbar";
 
-export default function PromotionMethodList() {
-  const tableId = "promotion-methods";
+export default function TelcoOperatorList() {
+  const tableId = "telco-operators";
   const [data, setData] = useState([]);
   const [total, setTotal] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
@@ -20,10 +20,10 @@ export default function PromotionMethodList() {
     try {
       setIsLoading(true);
 
-      const result = await getPromotionMethodList(page, limit, search);
+      const result = await getTelcoOperatorList(page, limit, search);
 
       if (result?.status) {
-        setData(result.data.promotionMethods || []);
+        setData(result.data.telcoOperators || []);
         setTotal(result.data.pagination?.total || 0);
       }
     } catch (error) {
@@ -39,7 +39,7 @@ export default function PromotionMethodList() {
 
   return (
     <div className="flex flex-col gap-6">
-      <PromotionMethodToolbar tableId={tableId} onSuccess={fetchList} />
+      <TelcoOperatorToolbar tableId={tableId} onSuccess={fetchList} />
       <Card>
         <CardContent>
           <DataTableWithPagination

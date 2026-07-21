@@ -7,7 +7,7 @@ import { Plus, X } from "lucide-react";
 import { useState } from "react";
 import SearchBar from "../../categories/_components/SearchBar";
 import { DynamicBreadcrumb } from "../../settings/_components/DynamicBreadcrumb";
-import CreatePromotionMethodModal from "./CreatePromotionMethodModal";
+import CreateTelcoOperatorModal from "./CreateTelcoOperatorModal";
 
 export interface ToolbarProps {
   tableId: string;
@@ -16,10 +16,10 @@ export interface ToolbarProps {
 
 const breadcrumbItems = [
   { label: "Dashboard", href: "/admin/dashboard" },
-  { label: "Conversession" },
+  { label: "Operators" },
 ];
 
-export default function PromotionMethodToolbar({
+export default function TelcoOperatorToolbar({
   tableId,
   onSuccess,
 }: ToolbarProps) {
@@ -52,7 +52,7 @@ export default function PromotionMethodToolbar({
           <div className="mb-2 flex items-start justify-between flex-wrap space-y-2">
             <div>
               <h2 className="font-dm-sans font-medium text-lg">
-                Manage Conversession Name
+                Manage Operators
               </h2>
               <DynamicBreadcrumb items={breadcrumbItems} />
             </div>
@@ -62,7 +62,7 @@ export default function PromotionMethodToolbar({
               onClick={() => setCreateOpen(true)}
             >
               <Plus className="size-4" />
-              Add Conversession
+              Add Operator
             </Button>
           </div>
           <div className="flex items-center gap-4 flex-wrap">
@@ -109,7 +109,7 @@ export default function PromotionMethodToolbar({
         </div>
       </div>
 
-      <CreatePromotionMethodModal
+      <CreateTelcoOperatorModal
         open={createOpen}
         onOpenChange={setCreateOpen}
         onSuccess={onSuccess}
