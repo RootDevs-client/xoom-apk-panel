@@ -4,7 +4,6 @@ import { useEffect, useRef } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
 import { Loader2, MessageSquare, User } from "lucide-react";
-import { connectSocket, disconnectSocket } from "@/lib/socket-client";
 import MessageBubble from "./MessageBubble";
 import MessageInput from "./MessageInput";
 
@@ -13,6 +12,7 @@ interface Conversation {
   remoteJid: string;
   contactName?: string;
   contactPhone?: string;
+  displayName?: string;
   profilePicUrl?: string;
   lastMessage: { body: string; timestamp: string; fromMe: boolean };
   unreadCount: number;
@@ -32,52 +32,28 @@ interface Message {
 
 interface Props {
   sessionId: string;
+  sessionName?: string;
   conversation: Conversation | null;
   messages: Message[];
   isLoading: boolean;
   onMessageSent: (message: Message) => void;
+  onMessageDeleted: (messageId: string) => void;
 }
 
 export default function ConversationThread({
   sessionId,
+  sessionName,
   conversation,
   messages,
   isLoading,
   onMessageSent,
+  onMessageDeleted,
 }: Props) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
-
-  useEffect(() => {
-    if (!conversation) return;
-    const socket = connectSocket();
-
-    socket.on("connect", () => {
-      socket.emit("join:session", { sessionId });
-    });
-
-    socket.on(
-      "baileys:message:new",
-      (data: { sessionId: string; conversationId: string; message: any }) => {
-        if (
-          data.conversationId === conversation._id
-        ) {
-          onMessageSent(data.message as Message);
-        }
-      }
-    );
-
-    if (!socket.connected) {
-      socket.connect();
-    }
-
-    return () => {
-      socket.off("baileys:message:new");
-    };
-  }, [conversation, sessionId, onMessageSent]);
 
   if (!conversation) {
     return (
@@ -93,6 +69,7 @@ export default function ConversationThread({
   }
 
   const contactName =
+    conversation.displayName ||
     conversation.contactName ||
     conversation.contactPhone ||
     conversation.remoteJid.split("@")[0];
@@ -109,6 +86,8 @@ export default function ConversationThread({
         <div>
           <p className="font-medium text-sm">{contactName}</p>
           <p className="text-[10px] text-muted-foreground">
+            {sessionName && <span className="font-medium">{sessionName}</span>}
+            {sessionName && " · "}
             {conversation.contactPhone || conversation.remoteJid.split("@")[0]}
           </p>
         </div>
@@ -125,7 +104,11 @@ export default function ConversationThread({
           </div>
         ) : (
           messages.map((msg) => (
-            <MessageBubble key={msg.keyId} message={msg} />
+            <MessageBubble
+              key={msg.keyId}
+              message={msg}
+              onDeleted={onMessageDeleted}
+            />
           ))
         )}
         <div ref={messagesEndRef} />

@@ -52,7 +52,7 @@ export default function WhatsAppToolbar({
           <div className="mb-2 flex items-start justify-between flex-wrap space-y-2">
             <div>
               <h2 className="font-dm-sans font-medium text-lg">
-                WhatsApp Channels
+                WhatsApp Connections
               </h2>
               <DynamicBreadcrumb items={breadcrumbItems} />
             </div>
@@ -62,7 +62,7 @@ export default function WhatsAppToolbar({
               onClick={() => setCreateOpen(true)}
             >
               <Plus className="size-4" />
-              Connect Channel
+              Connect WhatsApp
             </Button>
           </div>
           <div className="flex items-center gap-4 flex-wrap">

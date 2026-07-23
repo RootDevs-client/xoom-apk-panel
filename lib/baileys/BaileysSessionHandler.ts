@@ -1,20 +1,20 @@
 import {
-  makeWASocket,
+  Browsers,
   DisconnectReason,
   fetchLatestBaileysVersion,
-  Browsers,
   isJidBroadcast,
   isJidStatusBroadcast,
+  makeWASocket,
   proto,
 } from "@whiskeysockets/baileys";
 
-import QRCode from "qrcode";
-import { WhatsAppSession } from "@/model/WhatsAppSession";
-import { WhatsAppMessage } from "@/model/WhatsAppMessage";
 import { BaileysConversation } from "@/model/BaileysConversation";
-import { useMongoDBAuthState } from "./MongoAuthState";
-import { emitToSession, broadcast } from "./socket-server";
+import { WhatsAppMessage } from "@/model/WhatsAppMessage";
+import { WhatsAppSession } from "@/model/WhatsAppSession";
 import pino from "pino";
+import QRCode from "qrcode";
+import { useMongoDBAuthState } from "./MongoAuthState";
+import { broadcast, emitToSession } from "./socket-server";
 
 const logger = pino({
   level: "error",
@@ -68,13 +68,61 @@ export class BaileysSessionHandler {
     }
   }
 
-  async sendMessage(remoteJid: string, content: string) {
+  async sendMessage(
+    remoteJid: string,
+    content: string,
+    media?: { type: string; url: string; fileName?: string; caption?: string },
+  ) {
     if (!this.sock) {
       throw new Error("Socket not connected");
     }
-    const result = await this.sock.sendMessage(remoteJid, {
-      text: content,
-    });
+
+    let result;
+    if (media) {
+      // Download the media from the URL
+      const mediaRes = await fetch(media.url);
+      const mediaBuffer = Buffer.from(await mediaRes.arrayBuffer());
+
+      switch (media.type) {
+        case "image":
+          result = await this.sock.sendMessage(remoteJid, {
+            image: mediaBuffer,
+            caption: media.caption || "",
+            mimetype: "image/jpeg",
+          } as any);
+          break;
+        case "video":
+          result = await this.sock.sendMessage(remoteJid, {
+            video: mediaBuffer,
+            caption: media.caption || "",
+            mimetype: "video/mp4",
+          } as any);
+          break;
+        case "document":
+          result = await this.sock.sendMessage(remoteJid, {
+            document: mediaBuffer,
+            fileName: media.fileName || "file",
+            caption: media.caption || "",
+            mimetype: "application/octet-stream",
+          } as any);
+          break;
+        case "audio":
+          result = await this.sock.sendMessage(remoteJid, {
+            audio: mediaBuffer,
+            mimetype: "audio/ogg",
+          } as any);
+          break;
+        default:
+          result = await this.sock.sendMessage(remoteJid, {
+            text: content || media.caption || "",
+          });
+      }
+    } else {
+      result = await this.sock.sendMessage(remoteJid, {
+        text: content,
+      });
+    }
+
     return result;
   }
 
@@ -96,7 +144,9 @@ export class BaileysSessionHandler {
       const { state, saveCreds } = await useMongoDBAuthState(this.sessionId);
       const { version } = await fetchLatestBaileysVersion();
 
-      logger.info(`[Baileys] Starting session ${this.sessionId} with version ${version}`);
+      logger.info(
+        `[Baileys] Starting session ${this.sessionId} with version ${version}`,
+      );
 
       console.log(`[Baileys] Creating WA socket for session ${this.sessionId}`);
 
@@ -117,7 +167,10 @@ export class BaileysSessionHandler {
 
       this.sock.ev.on("connection.update", async (update) => {
         const { connection, lastDisconnect, qr } = update;
-        console.log(`[Baileys] Session ${this.sessionId} connection.update:`, { hasQR: !!qr, connection });
+        console.log(`[Baileys] Session ${this.sessionId} connection.update:`, {
+          hasQR: !!qr,
+          connection,
+        });
 
         if (qr) {
           this.qrRetries++;
@@ -129,7 +182,9 @@ export class BaileysSessionHandler {
           });
 
           const qrBase64 = await QRCode.toDataURL(qr);
-          console.log(`[Baileys] QR generated for session ${this.sessionId}, emitting via socket`);
+          console.log(
+            `[Baileys] QR generated for session ${this.sessionId}, emitting via socket`,
+          );
           emitToSession(this.sessionId, "baileys:qr", {
             sessionId: this.sessionId,
             qrCode: qrBase64,
@@ -196,6 +251,13 @@ export class BaileysSessionHandler {
                 authKeys: null,
               },
             });
+
+            // Remove all conversations and messages for this logged-out session
+            await Promise.all([
+              BaileysConversation.deleteMany({ session: this.sessionId }),
+              WhatsAppMessage.deleteMany({ session: this.sessionId }),
+            ]);
+
             emitToSession(this.sessionId, "baileys:loggedOut", {
               sessionId: this.sessionId,
             });
@@ -249,6 +311,28 @@ export class BaileysSessionHandler {
           await this.handleMessageUpdate(update);
         }
       });
+
+      this.sock.ev.on("chats.delete", async (chats: any) => {
+        for (const chat of chats) {
+          const jid = typeof chat === "string" ? chat : (chat as any)?.jid;
+          if (!jid) continue;
+          const deletedConv = await BaileysConversation.findOneAndDelete({
+            session: this.sessionId,
+            remoteJid: jid,
+          });
+          if (deletedConv) {
+            await WhatsAppMessage.deleteMany({
+              session: this.sessionId,
+              conversation: deletedConv._id,
+            });
+            emitToSession(this.sessionId, "baileys:conversation:deleted", {
+              sessionId: this.sessionId,
+              conversationId: deletedConv._id.toString(),
+              remoteJid: jid,
+            });
+          }
+        }
+      });
     } catch (error: any) {
       logger.error(`[Baileys] Error creating connection: ${error.message}`);
       await WhatsAppSession.findByIdAndUpdate(this.sessionId, {
@@ -290,9 +374,63 @@ export class BaileysSessionHandler {
       if (!message) return;
 
       const messageType = Object.keys(message)[0] || "unknown";
-      const body = message.conversation ||
-        message.extendedTextMessage?.text ||
-        "";
+
+      // Extract body and media info from different message types
+      let body = "";
+      let mediaUrl: string | undefined;
+      let mimeType: string | undefined;
+      let fileName: string | undefined;
+      let fileSize: number | undefined;
+
+      const mediaContent = (message as any)[messageType];
+
+      switch (messageType) {
+        case "conversation":
+          body = message.conversation || "";
+          break;
+        case "extendedTextMessage":
+          body = message.extendedTextMessage?.text || "";
+          break;
+        case "imageMessage":
+          body = mediaContent?.caption || "";
+          mediaUrl = mediaContent?.url || "";
+          mimeType = mediaContent?.mimetype || "image/jpeg";
+          fileSize = mediaContent?.fileLength || undefined;
+          break;
+        case "videoMessage":
+          body = mediaContent?.caption || "";
+          mediaUrl = mediaContent?.url || "";
+          mimeType = mediaContent?.mimetype || "video/mp4";
+          fileSize = mediaContent?.fileLength || undefined;
+          break;
+        case "documentMessage":
+          body = mediaContent?.caption || "";
+          mediaUrl = mediaContent?.url || "";
+          mimeType = mediaContent?.mimetype || "application/octet-stream";
+          fileName = mediaContent?.fileName || "";
+          fileSize = mediaContent?.fileLength || undefined;
+          break;
+        case "audioMessage":
+          body = "";
+          mediaUrl = mediaContent?.url || "";
+          mimeType = mediaContent?.mimetype || "audio/ogg";
+          fileSize = mediaContent?.fileLength || undefined;
+          break;
+        case "stickerMessage":
+          body = "";
+          mediaUrl = mediaContent?.url || "";
+          mimeType = mediaContent?.mimetype || "image/webp";
+          break;
+        case "locationMessage":
+          body = `📍 Location`;
+          break;
+        default:
+          body = mediaContent?.caption || "";
+          if (!body) {
+            mediaUrl = mediaContent?.url || "";
+            mimeType = mediaContent?.mimetype || "";
+          }
+      }
 
       const timestamp = msg.messageTimestamp
         ? new Date(Number(msg.messageTimestamp) * 1000)
@@ -309,15 +447,19 @@ export class BaileysSessionHandler {
         remoteJid,
       });
 
+      const displayBody = body || `[${messageType}]`;
+
       if (!conversation) {
-        const contactName = fromMe ? "You" : pushName || remoteJid.split("@")[0];
+        const contactName = fromMe
+          ? "You"
+          : pushName || remoteJid.split("@")[0];
         conversation = await BaileysConversation.create({
           session: this.sessionId,
           remoteJid,
           contactName,
           contactPhone: remoteJid.split("@")[0],
           lastMessage: {
-            body,
+            body: displayBody,
             type: messageType,
             timestamp,
             fromMe,
@@ -327,7 +469,7 @@ export class BaileysSessionHandler {
         });
       } else {
         conversation.lastMessage = {
-          body,
+          body: displayBody,
           type: messageType,
           timestamp,
           fromMe,
@@ -348,6 +490,10 @@ export class BaileysSessionHandler {
         pushName,
         body,
         type: messageType,
+        mediaUrl: mediaUrl || undefined,
+        mimeType: mimeType || undefined,
+        fileName: fileName || undefined,
+        fileSize: fileSize || undefined,
         status: fromMe ? "sent" : "delivered",
         timestamp,
       });
@@ -360,7 +506,10 @@ export class BaileysSessionHandler {
 
       emitToSession(this.sessionId, "baileys:conversation:update", {
         sessionId: this.sessionId,
-        conversation: conversation.toObject() as unknown as Record<string, unknown>,
+        conversation: conversation.toObject() as unknown as Record<
+          string,
+          unknown
+        >,
       });
     } catch (error: any) {
       logger.error(`[Baileys] Error handling message: ${error.message}`);
@@ -385,7 +534,7 @@ export class BaileysSessionHandler {
 
         await WhatsAppMessage.findOneAndUpdate(
           { session: this.sessionId, keyId: key.id },
-          { $set: { status: statusStr } }
+          { $set: { status: statusStr } },
         );
 
         emitToSession(this.sessionId, "baileys:message:status", {

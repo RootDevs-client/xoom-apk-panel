@@ -23,13 +23,13 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ColumnDef } from "@tanstack/react-table";
 import {
+  Link2,
   MoreHorizontal,
   Pencil,
+  RotateCw,
   Trash2,
   Wifi,
   WifiOff,
-  RotateCw,
-  Link2,
 } from "lucide-react";
 import moment from "moment-timezone";
 import { useState } from "react";
@@ -117,7 +117,7 @@ export const columns = ({
 }): ColumnDef<WhatsAppSession>[] => [
   {
     accessorKey: "name",
-    header: "Channel Name",
+    header: "Connection Name",
     cell: ({ row }) => (
       <div className="flex items-center gap-3">
         {row.original.profilePicUrl ? (
@@ -147,9 +147,7 @@ export const columns = ({
     header: "Phone Number",
     cell: ({ row }) => (
       <span className="font-mono text-sm">
-        {row.original.phoneNumber
-          ? `+${row.original.phoneNumber}`
-          : "—"}
+        {row.original.phoneNumber ? `+${row.original.phoneNumber}` : "—"}
       </span>
     ),
   },
@@ -287,9 +285,8 @@ function EditNameDialog({
   const handleSave = async () => {
     if (!name.trim()) return;
     setLoading(true);
-    const { updateWhatsAppSession } = await import(
-      "@/actions/whatsapp/whatsappActions"
-    );
+    const { updateWhatsAppSession } =
+      await import("@/actions/whatsapp/whatsappActions");
     const res = await updateWhatsAppSession(session._id, {
       name: name.trim(),
     });

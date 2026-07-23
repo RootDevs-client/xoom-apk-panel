@@ -135,7 +135,7 @@ export function PinScreen({
               value={d}
               onChange={(e) => handleDigit(idx, e.target.value)}
               onKeyDown={(e) => handleKeyDown(idx, e)}
-              className={`w-14 h-[60px] rounded-xl text-center text-[22px] font-bold text-gray-900 outline-none transition-all duration-200 border-[1.5px] bg-white focus:border-red-500 focus:ring-[3px] focus:ring-red-500/20 ${
+              className={`w-14 h-15 rounded-xl text-center text-[22px] font-bold text-gray-900 outline-none transition-all duration-200 border-[1.5px] bg-white focus:border-red-500 focus:ring-[3px] focus:ring-red-500/20 ${
                 d ? "border-red-500" : "border-transparent"
               }`}
             />

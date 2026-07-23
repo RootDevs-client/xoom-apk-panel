@@ -19,12 +19,20 @@ export const GET = asyncHandler(async (req: NextRequest) => {
       .sort({ timestamp: 1 })
       .skip((page - 1) * limit)
       .limit(limit)
+      .populate("session", "name")
       .lean(),
     WhatsAppMessage.countDocuments(filter),
   ]);
 
+  // Transform to include session name while keeping session as id for backward compat
+  const transformed = (messages as any[]).map((msg) => ({
+    ...msg,
+    sessionName: (msg.session as any)?.name || "Unknown",
+    session: (msg.session as any)?._id || msg.session,
+  }));
+
   return apiResponse(true, 200, "Messages fetched successfully.", {
-    messages,
+    messages: transformed,
     pagination: {
       total,
       page,

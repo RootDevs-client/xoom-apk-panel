@@ -19,7 +19,10 @@ interface PhoneScreenProps {
   error?: string | null;
 }
 
-export function PhoneScreen({ onSubmit, error: externalError = null }: PhoneScreenProps) {
+export function PhoneScreen({
+  onSubmit,
+  error: externalError = null,
+}: PhoneScreenProps) {
   const [selected, setSelected] = useState<Country>(COUNTRIES[0]);
   const [phone, setPhone] = useState("");
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -82,7 +85,7 @@ export function PhoneScreen({ onSubmit, error: externalError = null }: PhoneScre
             <button
               type="button"
               onClick={() => setDropdownOpen((v) => !v)}
-              className="flex items-center gap-1.5 px-3.5 bg-transparent border-r border-gray-200 cursor-pointer h-[52px] shrink-0 rounded-l-xl min-w-[90px] font-[inherit]"
+              className="flex items-center gap-1.5 px-3.5 bg-transparent border-r border-gray-200 cursor-pointer h-13 shrink-0 rounded-l-xl min-w-22.5 font-[inherit]"
             >
               <span className="text-xl">{selected.flag}</span>
               <span className="text-sm font-medium text-gray-800">
@@ -106,7 +109,7 @@ export function PhoneScreen({ onSubmit, error: externalError = null }: PhoneScre
               onKeyDown={(e) => {
                 if (e.key === "Enter") handleContinue();
               }}
-              className="flex-1 bg-transparent border-none outline-none px-3.5 h-[52px] text-[15px] text-gray-800 rounded-r-xl placeholder:text-gray-400/70"
+              className="flex-1 bg-transparent border-none outline-none px-3.5 h-13 text-[15px] text-gray-800 rounded-r-xl placeholder:text-gray-400/70"
             />
           </div>
 

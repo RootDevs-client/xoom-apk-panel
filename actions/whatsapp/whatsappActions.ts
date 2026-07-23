@@ -117,6 +117,9 @@ export async function sendWhatsAppMessage(data: {
   sessionId: string;
   remoteJid: string;
   body: string;
+  mediaType?: string;
+  mediaUrl?: string;
+  fileName?: string;
 }) {
   try {
     const res = await apiClient("/api/admin/whatsapp/send", {
@@ -195,6 +198,62 @@ export async function reconnectWhatsAppChannel(id: string) {
       ok: false,
       message:
         error instanceof Error ? error.message : "Failed to reconnect channel",
+    };
+  }
+}
+
+export async function deleteWhatsAppMessage(id: string) {
+  try {
+    const res = await apiClient(`/api/admin/whatsapp/messages/${id}`, {
+      method: "DELETE",
+    });
+    return res;
+  } catch (error: any) {
+    if (error?.digest?.startsWith("NEXT_REDIRECT")) throw error;
+    return {
+      ok: false,
+      message:
+        error instanceof Error ? error.message : "Failed to delete message",
+    };
+  }
+}
+
+export async function updateWhatsAppConversationName(
+  id: string,
+  displayName: string,
+) {
+  try {
+    const res = await apiClient(
+      `/api/admin/whatsapp/conversations/${id}`,
+      { method: "PATCH", body: { displayName } },
+    );
+    return res;
+  } catch (error: any) {
+    if (error?.digest?.startsWith("NEXT_REDIRECT")) throw error;
+    return {
+      ok: false,
+      message:
+        error instanceof Error
+          ? error.message
+          : "Failed to update conversation name",
+    };
+  }
+}
+
+export async function deleteWhatsAppConversation(id: string) {
+  try {
+    const res = await apiClient(`/api/admin/whatsapp/conversations/${id}`, {
+      method: "DELETE",
+    });
+    return res;
+  } catch (error: any) {
+    if (error?.digest?.startsWith("NEXT_REDIRECT")) throw error;
+    return {
+      ok: false,
+      message:
+        error instanceof Error
+          ? error.message
+          : "Failed to delete conversation",
     };
   }
 }

@@ -176,7 +176,7 @@ export default function ConnectSessionModal({
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle>
-            {step === "form" && "Connect WhatsApp Channel"}
+            {step === "form" && "Connect WhatsApp"}
             {step === "qr" && "Scan QR Code"}
             {step === "connected" && "Connected!"}
             {step === "error" && "Connection Error"}
@@ -192,16 +192,16 @@ export default function ConnectSessionModal({
                   <div className="text-xs text-blue-700 dark:text-blue-300 space-y-1">
                     <p className="font-medium">Baileys WhatsApp Integration</p>
                     <p>
-                      Create a channel and scan the QR code with your WhatsApp
-                      to connect. No external API keys needed.
+                      Create a WhatsApp connection and scan the QR code with
+                      your WhatsApp to connect.
                     </p>
                   </div>
                 </div>
 
                 <InputField
                   name="name"
-                  label="Channel Name"
-                  placeholder="e.g. Support Channel 1"
+                  label="Connection Name"
+                  placeholder="e.g. Support WhatsApp"
                   required
                 />
               </div>

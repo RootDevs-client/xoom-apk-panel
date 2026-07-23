@@ -25,12 +25,20 @@ export const GET = asyncHandler(async (req: NextRequest) => {
       .sort({ lastMessageAt: -1 })
       .skip((page - 1) * limit)
       .limit(limit)
+      .populate("session", "name")
       .lean(),
     BaileysConversation.countDocuments(filter),
   ]);
 
+  // Transform to include session name while keeping session as id for backward compat
+  const transformed = (conversations as any[]).map((conv) => ({
+    ...conv,
+    sessionName: (conv.session as any)?.name || "Unknown",
+    session: (conv.session as any)?._id || conv.session,
+  }));
+
   return apiResponse(true, 200, "Conversations fetched successfully.", {
-    conversations,
+    conversations: transformed,
     pagination: {
       total,
       page,
