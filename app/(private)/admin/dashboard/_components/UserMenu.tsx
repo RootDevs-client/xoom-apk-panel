@@ -16,7 +16,6 @@ import useAdminProfile from "@/store/useAdminProfile";
 import { ChevronDown, Lock, LogOut, SquarePen } from "lucide-react";
 import { signOut } from "next-auth/react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import EditProfileModal from "./EditProfileModal";
 import PasswordChangeModal from "./PasswordChangeModal";
@@ -26,7 +25,6 @@ export default function UserMenu() {
   const [open, setOpen] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
-  const router = useRouter();
 
   //   logout function
   const handleLogout = async () => {
@@ -34,9 +32,9 @@ export default function UserMenu() {
       redirect: false,
     });
 
-    ToastMessage.success({ title: "Logout Successfully!" });
     clearAdminData();
-    router.push(routes.publicRoutes.adminLogin);
+    ToastMessage.success({ title: "Logout Successfully!" });
+    window.location.href = routes.publicRoutes.adminLogin;
   };
 
   return (

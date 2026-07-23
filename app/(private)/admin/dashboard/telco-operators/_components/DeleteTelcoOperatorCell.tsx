@@ -88,7 +88,7 @@ export default function DeleteTelcoOperatorCell({ row, onSuccess }: Props) {
             </div>
             <div className="flex items-center justify-between">
               <span className="text-muted-foreground">Active</span>
-              <span>{row.is_active ? "Active" : "Inactive"}</span>
+              <span>{row.isActive ? "Active" : "Inactive"}</span>
             </div>
           </div>
 

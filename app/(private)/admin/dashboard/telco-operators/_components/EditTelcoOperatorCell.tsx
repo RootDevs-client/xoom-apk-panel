@@ -3,6 +3,7 @@
 import { updateTelcoOperator } from "@/actions/telco-operator/telcoOperatorActions";
 import { ToastMessage } from "@/components/custom/ToastMessage";
 import InputField from "@/components/form/InputField";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -36,33 +37,55 @@ interface Props {
   onSuccess: () => void;
 }
 
-interface ConfigItemForm {
-  key: string;
+interface CgElementForm {
   label: string;
-  type: "string" | "number" | "boolean";
-  value: string;
-  required: boolean;
+  id: string;
+  type:
+    | "button"
+    | "checkbox"
+    | "input"
+    | "form"
+    | "submit"
+    | "link"
+    | "div"
+    | "custom";
+  order: number;
 }
 
 interface FormValues {
   name: string;
   code: string;
   country: string;
-  evinaEnabled: boolean;
   telcoParameterValues?: string;
   variant: "STANDARD" | "EVINA" | "CG_CALLBACK";
-  pinLocation: "TELCO_PAGE" | "OUR_PAGE";
-  configs: ConfigItemForm[];
-  is_active: boolean;
+  configs: CgElementForm[];
+  settings: {
+    mode: "instant" | "hold" | "hold_until_admin_change";
+    hold: {
+      duration: number;
+      unit: "minute" | "hour" | "day";
+    };
+  };
+  isActive: boolean;
 }
 
-const defaultConfig: ConfigItemForm = {
-  key: "",
+const defaultCgElement: CgElementForm = {
   label: "",
-  type: "string",
-  value: "",
-  required: false,
+  id: "",
+  type: "button",
+  order: 1,
 };
+
+const cgElementTypes = [
+  "button",
+  "checkbox",
+  "input",
+  "form",
+  "submit",
+  "link",
+  "div",
+  "custom",
+] as const;
 
 export default function EditTelcoOperatorCell({ row, onSuccess }: Props) {
   const [open, setOpen] = useState(false);
@@ -74,12 +97,17 @@ export default function EditTelcoOperatorCell({ row, onSuccess }: Props) {
       name: row.name,
       code: row.code,
       country: row.country,
-      evinaEnabled: row.evinaEnabled,
-      telcoParameterValues: (row as any).telcoParameterValues || "",
+      telcoParameterValues: row.telcoParameterValues || "",
       variant: row.variant,
-      pinLocation: row.pinLocation,
       configs: [],
-      is_active: row.is_active,
+      settings: {
+        mode: row.settings?.mode ?? "instant",
+        hold: {
+          duration: row.settings?.hold?.duration ?? 0,
+          unit: row.settings?.hold?.unit ?? "minute",
+        },
+      },
+      isActive: row.isActive,
     },
   });
 
@@ -97,25 +125,30 @@ export default function EditTelcoOperatorCell({ row, onSuccess }: Props) {
 
     try {
       const configs = values.configs.map((cfg) => ({
-        ...cfg,
-        value:
-          cfg.type === "number"
-            ? Number(cfg.value)
-            : cfg.type === "boolean"
-              ? cfg.value === "true"
-              : cfg.value,
+        label: cfg.label.trim(),
+        id: cfg.id.trim(),
+        type: cfg.type,
+        order: cfg.order,
       }));
 
       const res = await updateTelcoOperator(row._id, {
         name: values.name.trim(),
         code: values.code.trim(),
         country: values.country.trim(),
-        evinaEnabled: values.evinaEnabled,
         telcoParameterValues: values.telcoParameterValues?.trim() || "",
         variant: values.variant,
-        pinLocation: values.pinLocation,
         configs,
-        is_active: values.is_active,
+        settings: {
+          mode: values.settings.mode,
+          hold:
+            values.settings.mode === "hold"
+              ? {
+                  duration: Number(values.settings.hold.duration) || 0,
+                  unit: values.settings.hold.unit,
+                }
+              : undefined,
+        },
+        isActive: values.isActive,
       });
 
       if (res?.status) {
@@ -154,23 +187,27 @@ export default function EditTelcoOperatorCell({ row, onSuccess }: Props) {
         size="icon"
         className="h-8 w-8 cursor-pointer"
         onClick={() => {
-          const configs = ((row as any).configs || []).map((cfg: any) => ({
-            key: cfg.key || "",
+          const configs = (row.configs || []).map((cfg: any) => ({
             label: cfg.label || "",
-            type: cfg.type || "string",
-            value: String(cfg.value ?? ""),
-            required: cfg.required ?? false,
+            id: cfg.id || "",
+            type: cfg.type || "button",
+            order: cfg.order ?? 1,
           }));
           methods.reset({
             name: row.name,
             code: row.code,
             country: row.country,
-            evinaEnabled: row.evinaEnabled,
             telcoParameterValues: row.telcoParameterValues || "",
             variant: row.variant,
-            pinLocation: row.pinLocation,
             configs,
-            is_active: row.is_active,
+            settings: {
+              mode: row.settings?.mode ?? "instant",
+              hold: {
+                duration: row.settings?.hold?.duration ?? 0,
+                unit: row.settings?.hold?.unit ?? "minute",
+              },
+            },
+            isActive: row.isActive,
           });
           setError("");
           setOpen(true);
@@ -180,7 +217,7 @@ export default function EditTelcoOperatorCell({ row, onSuccess }: Props) {
       </Button>
 
       <Dialog open={open} onOpenChange={(v) => !loading && setOpen(v)}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="sm:max-w-xl max-h-[90vh] overflow-y-auto">
           <FormProvider {...methods}>
             <form onSubmit={handleSubmit}>
               <DialogHeader>
@@ -193,14 +230,14 @@ export default function EditTelcoOperatorCell({ row, onSuccess }: Props) {
                     type="text"
                     label="Operator Name"
                     name="name"
-                    placeholder="e.g. Banglalink"
+                    placeholder="e.g. GP Bangladesh"
                     required
                   />
                   <InputField
                     type="text"
                     label="Code"
                     name="code"
-                    placeholder="e.g. BL"
+                    placeholder="e.g. GP"
                     required
                   />
                 </div>
@@ -209,7 +246,7 @@ export default function EditTelcoOperatorCell({ row, onSuccess }: Props) {
                   type="text"
                   label="Country"
                   name="country"
-                  placeholder="e.g. Bangladesh"
+                  placeholder="e.g. BANGLADESH"
                   required
                 />
 
@@ -220,95 +257,121 @@ export default function EditTelcoOperatorCell({ row, onSuccess }: Props) {
                   placeholder="Enter parameter value"
                 />
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label className="text-sm font-dm-sans font-medium block">
-                      Variant <span className="text-red-500">*</span>
-                    </Label>
-                    <Controller
-                      control={methods.control}
-                      name="variant"
-                      rules={{ required: "Variant is required" }}
-                      render={({ field }) => (
-                        <Select
-                          value={field.value}
-                          onValueChange={field.onChange}
-                        >
-                          <SelectTrigger className="w-full h-11">
-                            <SelectValue placeholder="Select variant" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="STANDARD">Standard</SelectItem>
-                            <SelectItem value="EVINA">EVINA</SelectItem>
-                            <SelectItem value="CG_CALLBACK">
-                              CG Callback
-                            </SelectItem>
-                          </SelectContent>
-                        </Select>
-                      )}
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label className="text-sm font-dm-sans font-medium block">
-                      PIN Location <span className="text-red-500">*</span>
-                    </Label>
-                    <Controller
-                      control={methods.control}
-                      name="pinLocation"
-                      rules={{ required: "PIN location is required" }}
-                      render={({ field }) => (
-                        <Select
-                          value={field.value}
-                          onValueChange={field.onChange}
-                        >
-                          <SelectTrigger className="w-full h-11">
-                            <SelectValue placeholder="Select PIN location" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="TELCO_PAGE">
-                              Telco Page
-                            </SelectItem>
-                            <SelectItem value="OUR_PAGE">Our Page</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      )}
-                    />
-                  </div>
+                <div className="space-y-2">
+                  <Label className="text-sm font-dm-sans font-medium block">
+                    Variant <span className="text-red-500">*</span>
+                  </Label>
+                  <Controller
+                    control={methods.control}
+                    name="variant"
+                    rules={{ required: "Variant is required" }}
+                    render={({ field }) => (
+                      <Select
+                        value={field.value}
+                        onValueChange={field.onChange}
+                      >
+                        <SelectTrigger className="w-full h-11">
+                          <SelectValue placeholder="Select variant" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="STANDARD">Standard</SelectItem>
+                          <SelectItem value="EVINA">EVINA</SelectItem>
+                          <SelectItem value="CG_CALLBACK">
+                            CG Callback
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
+                    )}
+                  />
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="flex items-center justify-between bg-gray-100 px-4 py-3 rounded-md">
+                <div className="space-y-3 border rounded-md p-4">
+                  <Label className="text-sm font-dm-sans font-semibold block">
+                    Settings
+                  </Label>
+
+                  <div className="space-y-2">
                     <Label className="text-sm font-dm-sans font-medium block">
-                      EVINA Enabled
+                      Mode
                     </Label>
                     <Controller
                       control={methods.control}
-                      name="evinaEnabled"
+                      name="settings.mode"
                       render={({ field }) => (
-                        <Switch
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                        />
+                        <Select
+                          value={field.value}
+                          onValueChange={(val) => {
+                            field.onChange(val);
+                            if (val !== "hold") {
+                              methods.setValue("settings.hold.duration", 0);
+                            }
+                          }}
+                        >
+                          <SelectTrigger className="w-full h-11">
+                            <SelectValue placeholder="Select mode" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="instant">Instant</SelectItem>
+                            <SelectItem value="hold">Hold</SelectItem>
+                            <SelectItem value="hold_until_admin_change">
+                              Hold Until Admin Change
+                            </SelectItem>
+                          </SelectContent>
+                        </Select>
                       )}
                     />
                   </div>
 
-                  <div className="flex items-center justify-between bg-gray-100 px-4 py-3 rounded-md">
-                    <Label className="text-sm font-dm-sans font-medium block">
-                      Active
-                    </Label>
-                    <Controller
-                      control={methods.control}
-                      name="is_active"
-                      render={({ field }) => (
-                        <Switch
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
+                  {methods.watch("settings.mode") === "hold" && (
+                    <div className="grid grid-cols-2 gap-4">
+                      <InputField
+                        type="number"
+                        label="Hold Duration"
+                        name="settings.hold.duration"
+                        placeholder="e.g. 30"
+                      />
+                      <div className="space-y-2">
+                        <Label className="text-sm font-dm-sans font-medium block">
+                          Hold Unit
+                        </Label>
+                        <Controller
+                          control={methods.control}
+                          name="settings.hold.unit"
+                          render={({ field }) => (
+                            <Select
+                              value={field.value}
+                              onValueChange={field.onChange}
+                            >
+                              <SelectTrigger className="w-full h-11">
+                                <SelectValue placeholder="Select unit" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="minute">Minute</SelectItem>
+                                <SelectItem value="hour">Hour</SelectItem>
+                                <SelectItem value="day">Day</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          )}
                         />
-                      )}
-                    />
-                  </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex items-center border justify-between  px-4 py-3 rounded-md">
+                  <Label className="text-sm font-dm-sans font-medium block">
+                    Active
+                  </Label>
+                  <Controller
+                    control={methods.control}
+                    name="isActive"
+                    render={({ field }) => (
+                      <Switch
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    )}
+                  />
                 </div>
 
                 <div className="space-y-3">
@@ -320,7 +383,7 @@ export default function EditTelcoOperatorCell({ row, onSuccess }: Props) {
                       type="button"
                       variant="outline"
                       size="sm"
-                      onClick={() => append({ ...defaultConfig })}
+                      onClick={() => append({ ...defaultCgElement })}
                       className="gap-1"
                     >
                       <Plus className="size-3" />
@@ -357,24 +420,62 @@ export default function EditTelcoOperatorCell({ row, onSuccess }: Props) {
                       <div className="grid grid-cols-2 gap-3">
                         <InputField
                           type="text"
-                          label="Key"
-                          name={`configs.${index}.key`}
-                          placeholder="e.g. userTelcoServiceId"
+                          label="Label"
+                          name={`configs.${index}.label`}
+                          placeholder="e.g. Consent Button"
                           required
                         />
                         <InputField
                           type="text"
-                          label="Label"
-                          name={`configs.${index}.label`}
-                          placeholder="e.g. Service ID"
+                          label="ID"
+                          name={`configs.${index}.id`}
+                          placeholder="e.g. consent_btn"
                           required
+                        />
+                      </div>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="space-y-2">
+                          <Label className="text-sm font-dm-sans font-medium block">
+                            Type
+                          </Label>
+                          <Controller
+                            control={methods.control}
+                            name={`configs.${index}.type`}
+                            render={({ field }) => (
+                              <Select
+                                value={field.value}
+                                onValueChange={field.onChange}
+                              >
+                                <SelectTrigger className="w-full h-11">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {cgElementTypes.map((t) => (
+                                    <SelectItem key={t} value={t}>
+                                      {t}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            )}
+                          />
+                        </div>
+                        <InputField
+                          type="number"
+                          label="Order"
+                          name={`configs.${index}.order`}
+                          placeholder="e.g. 1"
                         />
                       </div>
                     </div>
                   ))}
                 </div>
 
-                {error && <p className="text-sm text-red-500">{error}</p>}
+                {error && (
+                  <Alert variant="destructive">
+                    <AlertDescription>{error}</AlertDescription>
+                  </Alert>
+                )}
               </div>
 
               <DialogFooter>

@@ -5,7 +5,7 @@ import { updateTag } from "next/cache";
 
 export async function getAdminProfile() {
   try {
-    const res = await apiClient("/api/admin/auth/me", {
+    const res = await apiClient("/admin/auth/me", {
       method: "GET",
       tags: ["profile"],
       cache: "no-store",
@@ -26,7 +26,7 @@ export async function getAdminProfile() {
 
 export async function updateAdminProfile(data: any) {
   try {
-    const res = await apiClient(`/api/admin/auth/me`, {
+    const res = await apiClient(`/admin/auth/me`, {
       method: "PUT",
       body: data,
     });
@@ -52,7 +52,7 @@ export async function updateAdminProfile(data: any) {
 
 export async function updateAdminPassword(data: any) {
   try {
-    const res = await apiClient(`/api/admin/auth/password`, {
+    const res = await apiClient(`/admin/auth/password`, {
       method: "PUT",
       body: data,
     });

@@ -30,7 +30,10 @@ export async function apiClient<TResponse = any, TBody = undefined>(
     const session = await auth();
     const token = session?.token;
 
-    const baseURL = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+    // const baseURL = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+    const baseURL =
+      process.env.NEXT_PUBLIC_BASE_URL_BACKEND ||
+      "http://192.168.66.66:8000/api/v1";
 
     const headers: HeadersInit = {};
 

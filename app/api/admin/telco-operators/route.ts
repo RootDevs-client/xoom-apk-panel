@@ -6,7 +6,7 @@ import { NextRequest } from "next/server";
 export const POST = asyncHandler(async (req: NextRequest) => {
   const body = await req.json();
 
-  const { name, code, country, evinaEnabled, telcoParameterValues, variant, pinLocation, configs, is_active } = body;
+  const { name, code, country, telcoParameterValues, variant, configs, settings, isActive } = body;
 
   if (!name?.trim()) {
     return apiResponse(false, 400, "Operator name is required.");
@@ -30,12 +30,11 @@ export const POST = asyncHandler(async (req: NextRequest) => {
     name: name.trim(),
     code: code.trim().toUpperCase(),
     country: country.trim(),
-    evinaEnabled: evinaEnabled ?? false,
     telcoParameterValues: telcoParameterValues ?? "",
     variant: variant ?? "STANDARD",
-    pinLocation: pinLocation ?? "TELCO_PAGE",
     configs: configs ?? [],
-    is_active: is_active ?? true,
+    settings: settings ?? { mode: "instant", hold: {} },
+    is_active: isActive ?? true,
   });
 
   return apiResponse(

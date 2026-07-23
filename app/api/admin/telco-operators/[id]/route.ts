@@ -25,7 +25,7 @@ export const PATCH = asyncHandler(
   async (req: NextRequest, { id }: { id: string }) => {
     const body = await req.json();
 
-    const { name, code, country, evinaEnabled, telcoParameterValues, variant, pinLocation, configs, is_active } = body;
+    const { name, code, country, telcoParameterValues, variant, configs, settings, isActive } = body;
 
     if (code !== undefined && !code?.trim()) {
       return apiResponse(false, 400, "Operator code cannot be empty.");
@@ -49,12 +49,11 @@ export const PATCH = asyncHandler(
     if (name !== undefined) updateData.name = name.trim();
     if (code !== undefined) updateData.code = code.trim().toUpperCase();
     if (country !== undefined) updateData.country = country.trim();
-    if (evinaEnabled !== undefined) updateData.evinaEnabled = evinaEnabled;
     if (telcoParameterValues !== undefined) updateData.telcoParameterValues = telcoParameterValues;
     if (variant !== undefined) updateData.variant = variant;
-    if (pinLocation !== undefined) updateData.pinLocation = pinLocation;
     if (configs !== undefined) updateData.configs = configs;
-    if (is_active !== undefined) updateData.is_active = is_active;
+    if (settings !== undefined) updateData.settings = settings;
+    if (isActive !== undefined) updateData.is_active = isActive;
 
     const telcoOperator = await TelcoOperator.findByIdAndUpdate(
       id,

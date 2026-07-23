@@ -11,11 +11,14 @@ export type TelcoOperator = {
   name: string;
   code: string;
   country: string;
-  evinaEnabled: boolean;
   telcoParameterValues?: string;
   variant: "STANDARD" | "EVINA" | "CG_CALLBACK";
-  pinLocation: "TELCO_PAGE" | "OUR_PAGE";
-  is_active: boolean;
+  configs: { label: string; id: string; type: string; order: number }[];
+  settings?: {
+    mode: "instant" | "hold" | "hold_until_admin_change";
+    hold?: { duration?: number; unit?: "minute" | "hour" | "day" };
+  };
+  isActive: boolean;
   createdAt: string;
   updatedAt: string;
 };
@@ -74,29 +77,27 @@ export const columns = ({
     ),
   },
   {
-    accessorKey: "evinaEnabled",
-    header: "EVINA",
-    cell: ({ row }) =>
-      row.original.evinaEnabled ? (
-        <Badge variant="default">Enabled</Badge>
-      ) : (
-        <Badge variant="destructive">Disabled</Badge>
-      ),
+    accessorKey: "settings.mode",
+    header: "Mode",
+    cell: ({ row }) => {
+      const mode = row.original.settings?.mode ?? "instant";
+      const colorMap: Record<string, "default" | "secondary" | "outline" | "destructive"> = {
+        instant: "default",
+        hold: "secondary",
+        hold_until_admin_change: "outline",
+      };
+      return <Badge variant={colorMap[mode] ?? "default"}>{mode}</Badge>;
+    },
   },
   {
-    accessorKey: "is_active",
+    accessorKey: "isActive",
     header: "Active",
     cell: ({ row }) => (
-      <Badge variant={row.original.is_active ? "default" : "destructive"}>
-        {row.original.is_active ? "Active" : "Inactive"}
+      <Badge variant={row.original.isActive ? "default" : "destructive"}>
+        {row.original.isActive ? "Active" : "Inactive"}
       </Badge>
     ),
   },
-  // {
-  //   accessorKey: "updatedAt",
-  //   header: "Updated At",
-  //   cell: ({ row }) => formatDate(row.original.updatedAt),
-  // },
   {
     id: "actions",
     header: "Actions",

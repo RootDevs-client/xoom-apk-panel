@@ -1,31 +1,84 @@
 import mongoose, { Document, Schema } from "mongoose";
 
-export interface IConfigItem {
-  key: string;
+export type HoldMode = "instant" | "hold" | "hold_until_admin_change";
+export type HoldUnit = "minute" | "hour" | "day";
+
+export interface IHoldSettings {
+  duration?: number;
+  unit?: HoldUnit;
+}
+
+export interface IProviderSettings {
+  mode?: HoldMode;
+  hold?: IHoldSettings;
+}
+
+export type CgElementType =
+  | "button"
+  | "checkbox"
+  | "input"
+  | "form"
+  | "submit"
+  | "link"
+  | "div"
+  | "custom";
+
+export interface ICgElement {
   label: string;
-  type: "string" | "number" | "boolean";
-  value: mongoose.Schema.Types.Mixed;
-  required: boolean;
+  id: string;
+  type: CgElementType;
+  order: number;
 }
 
 export interface ITelcoOperator extends Document {
   name: string;
   code: string;
   country: string;
-  evinaEnabled: boolean;
-  telcoParameterValues: string;
   variant: "STANDARD" | "EVINA" | "CG_CALLBACK";
-  pinLocation: "TELCO_PAGE" | "OUR_PAGE";
-  configs: IConfigItem[];
+  telcoParameterValues: string;
+  configs: ICgElement[];
+  settings?: IProviderSettings;
   is_active: boolean;
+  isDeleted: boolean;
+  deletedAt?: Date;
   createdAt: Date;
   updatedAt: Date;
 }
 
-const ConfigItemSchema = new Schema<IConfigItem>(
+const HoldSettingsSchema = new Schema<IHoldSettings>(
   {
-    key: { type: String, required: true, trim: true },
+    duration: { type: Number, default: null },
+    unit: {
+      type: String,
+      enum: ["minute", "hour", "day"],
+      default: "minute",
+    },
+  },
+  { _id: false },
+);
+
+const ProviderSettingsSchema = new Schema<IProviderSettings>(
+  {
+    mode: {
+      type: String,
+      enum: ["instant", "hold", "hold_until_admin_change"],
+      default: "instant",
+    },
+    hold: { type: HoldSettingsSchema, default: () => ({}) },
+  },
+  { _id: false },
+);
+
+const CgElementSchema = new Schema<ICgElement>(
+  {
     label: { type: String, required: true, trim: true },
+    id: { type: String, required: true, trim: true },
+    type: {
+      type: String,
+      required: true,
+      enum: ["button", "checkbox", "input", "form", "submit", "link", "div", "custom"],
+    },
+    order: { type: Number, default: 1 },
   },
   { _id: false },
 );
@@ -41,20 +94,17 @@ const TelcoOperatorSchema = new Schema<ITelcoOperator>(
       uppercase: true,
     },
     country: { type: String, required: true, trim: true },
-    evinaEnabled: { type: Boolean, default: false },
     variant: {
       type: String,
       enum: ["STANDARD", "EVINA", "CG_CALLBACK"],
       required: true,
     },
-    pinLocation: {
-      type: String,
-      enum: ["TELCO_PAGE", "OUR_PAGE"],
-      default: "TELCO_PAGE",
-    },
     telcoParameterValues: { type: String, default: "" },
-    configs: { type: [ConfigItemSchema], default: [] },
+    configs: { type: [CgElementSchema], default: [] },
+    settings: { type: ProviderSettingsSchema, default: () => ({}) },
     is_active: { type: Boolean, default: true },
+    isDeleted: { type: Boolean, default: false },
+    deletedAt: { type: Date, default: null },
   },
   {
     versionKey: false,
