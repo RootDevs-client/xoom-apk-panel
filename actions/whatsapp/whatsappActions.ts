@@ -14,10 +14,11 @@ export async function getWhatsAppSessions(
       search: search || "",
     });
 
-    const res = await apiClient(
-      `/api/admin/whatsapp/sessions?${params.toString()}`,
-      { method: "GET", tags: ["whatsapp-sessions"] },
-    );
+    const res = await apiClient(`/admin/whatsapp-account`, {
+      method: "GET",
+      tags: ["whatsapp-sessions"],
+    });
+    console.log("response====", res);
 
     return res;
   } catch (error: any) {
@@ -31,9 +32,12 @@ export async function getWhatsAppSessions(
   }
 }
 
-export async function createWhatsAppSession(data: { name: string }) {
+export async function createWhatsAccount(data: {
+  name: string;
+  phone: string;
+}) {
   try {
-    const res = await apiClient("/api/admin/whatsapp/sessions", {
+    const res = await apiClient("/admin/whatsapp-account", {
       method: "POST",
       body: data,
     });
@@ -53,7 +57,7 @@ export async function updateWhatsAppSession(
   data: { name?: string },
 ) {
   try {
-    const res = await apiClient(`/api/admin/whatsapp/sessions/${id}`, {
+    const res = await apiClient(`/admin/whatsapp-account/${id}`, {
       method: "PATCH",
       body: data,
     });
@@ -70,7 +74,7 @@ export async function updateWhatsAppSession(
 
 export async function deleteWhatsAppSession(id: string) {
   try {
-    const res = await apiClient(`/api/admin/whatsapp/sessions/${id}`, {
+    const res = await apiClient(`/admin/whatsapp-account/${id}`, {
       method: "DELETE",
     });
     return res;
@@ -162,7 +166,9 @@ export async function getWhatsAppConversations(
     return {
       ok: false,
       message:
-        error instanceof Error ? error.message : "Failed to fetch conversations",
+        error instanceof Error
+          ? error.message
+          : "Failed to fetch conversations",
       data: { conversations: [], pagination: {} },
     };
   }
@@ -223,10 +229,10 @@ export async function updateWhatsAppConversationName(
   displayName: string,
 ) {
   try {
-    const res = await apiClient(
-      `/api/admin/whatsapp/conversations/${id}`,
-      { method: "PATCH", body: { displayName } },
-    );
+    const res = await apiClient(`/api/admin/whatsapp/conversations/${id}`, {
+      method: "PATCH",
+      body: { displayName },
+    });
     return res;
   } catch (error: any) {
     if (error?.digest?.startsWith("NEXT_REDIRECT")) throw error;

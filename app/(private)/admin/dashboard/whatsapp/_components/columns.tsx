@@ -38,7 +38,7 @@ import { ImSpinner9 } from "react-icons/im";
 export type WhatsAppSession = {
   _id: string;
   name: string;
-  phoneNumber?: string | null;
+  phone?: string | null;
   waDisplayName?: string | null;
   profilePicUrl?: string | null;
   connectionStatus: string;
@@ -143,11 +143,11 @@ export const columns = ({
     ),
   },
   {
-    accessorKey: "phoneNumber",
+    accessorKey: "phone",
     header: "Phone Number",
     cell: ({ row }) => (
       <span className="font-mono text-sm">
-        {row.original.phoneNumber ? `+${row.original.phoneNumber}` : "—"}
+        {row.original.phone ? `+${row.original.phone}` : "—"}
       </span>
     ),
   },

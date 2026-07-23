@@ -25,12 +25,12 @@ export const GET = asyncHandler(
     }
 
     await WhatsAppSession.findByIdAndUpdate(id, {
-      $set: { connectionStatus: "idle", errorMessage: null },
+      $set: { connectionStatus: "connecting", errorMessage: null },
     });
 
     return apiResponse(true, 200, "Channel reset. QR code will appear shortly.", {
       sessionId: id,
-      status: "idle",
+      status: "connecting",
     });
   },
   true,

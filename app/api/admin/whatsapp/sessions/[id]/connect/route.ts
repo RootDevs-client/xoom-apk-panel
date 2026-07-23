@@ -18,12 +18,12 @@ export const POST = asyncHandler(
     }
 
     await WhatsAppSession.findByIdAndUpdate(id, {
-      $set: { connectionStatus: "idle", errorMessage: null },
+      $set: { connectionStatus: "connecting", errorMessage: null },
     });
 
     return apiResponse(true, 200, "Connection requested. QR code will appear in real-time.", {
       sessionId: id,
-      status: "idle",
+      status: "connecting",
     });
   },
   true,

@@ -1,6 +1,6 @@
 "use client";
 
-import { createWhatsAppSession } from "@/actions/whatsapp/whatsappActions";
+import { createWhatsAccount } from "@/actions/whatsapp/whatsappActions";
 import { ToastMessage } from "@/components/custom/ToastMessage";
 import InputField from "@/components/form/InputField";
 import { Button } from "@/components/ui/button";
@@ -11,9 +11,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { connectSocket, disconnectSocket } from "@/lib/socket-client";
+import { connectSocket, reconnectSocketToUrl } from "@/lib/socket-client";
+import type { Socket } from "socket.io-client";
 import { CheckCircle2, Loader2, QrCode, Smartphone } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { ImSpinner9 } from "react-icons/im";
 
@@ -25,6 +26,7 @@ interface Props {
 
 interface FormValues {
   name: string;
+  phone: string;
 }
 
 export default function ConnectSessionModal({
@@ -42,8 +44,10 @@ export default function ConnectSessionModal({
   const [errorMessage, setErrorMessage] = useState("");
 
   const form = useForm<FormValues>({
-    defaultValues: { name: "" },
+    defaultValues: { name: "", phone: "" },
   });
+
+  const socketRef = useRef<Socket | null>(null);
 
   const { handleSubmit, reset } = form;
 
@@ -53,81 +57,87 @@ export default function ConnectSessionModal({
       setQrCode(null);
       setChannelId(null);
       setErrorMessage("");
-      disconnectSocket();
     }
   }, [open]);
 
-  useEffect(() => {
-    if (step === "qr" && channelId) {
-      const socket = connectSocket();
+  const setupChannelSocket = (channelId: string) => {
+    const socket = connectSocket();
+    socketRef.current = socket;
 
-      const handleConnect = () => {
-        socket.emit("join:session", { sessionId: channelId });
-      };
+    const onConnect = () => {
+      console.log("[Socket] Connected");
+      socket.emit("admin:join", { accountId: channelId });
+    };
 
-      socket.on("connect", handleConnect);
-
-      socket.on("connect_error", (err) => {
-        console.error("[Socket] connect_error:", err.message);
-      });
-
-      socket.on("disconnect", (reason) => {
-        console.warn("[Socket] disconnected:", reason);
-      });
-
-      socket.on("error", (err) => {
-        console.error("[Socket] error:", err);
-      });
-
-      socket.on("baileys:qr", (data: { sessionId: string; qrCode: string }) => {
-        if (data.sessionId === channelId) {
-          setQrCode(data.qrCode);
-        }
-      });
-
-      socket.on("baileys:connected", (data: { sessionId: string }) => {
-        if (data.sessionId === channelId) {
-          setStep("connected");
-          ToastMessage.success({ title: "WhatsApp connected!" });
-          setTimeout(() => {
-            onOpenChange(false);
-            onSuccess();
-          }, 1500);
-        }
-      });
-
-      socket.on(
-        "baileys:error",
-        (data: { sessionId: string; error: string }) => {
-          if (data.sessionId === channelId) {
-            setErrorMessage(data.error);
-            setStep("error");
-            ToastMessage.error({ title: data.error });
-          }
-        },
-      );
-
-      if (socket.connected) {
-        socket.emit("join:session", { sessionId: channelId });
-      } else {
-        socket.connect();
+    const onQR = (data: {
+      accountId: string;
+      qrCode: string;
+      connectionString?: string;
+    }) => {
+      if (data.accountId !== channelId) return;
+      console.log("[Socket] whatsapp:qr", data);
+      setQrCode(data.qrCode);
+      if (data.connectionString) {
+        socket.off("connect", onConnect);
+        socket.off("whatsapp:qr", onQR);
+        socket.off("whatsapp:connected", onConnected);
+        socket.off("whatsapp:error", onError);
+        const newSocket = reconnectSocketToUrl(data.connectionString);
+        socketRef.current = newSocket;
+        newSocket.on("connect", onConnect);
+        newSocket.on("whatsapp:qr", onQR);
+        newSocket.on("whatsapp:connected", onConnected);
+        newSocket.on("whatsapp:error", onError);
+        if (newSocket.connected) onConnect();
       }
+    };
 
-      return () => {
-        socket.emit("leave:session", { sessionId: channelId });
-        socket.off("connect", handleConnect);
-        socket.off("connect_error");
-        socket.off("disconnect");
-        socket.off("error");
-        socket.off("baileys:qr");
-        socket.off("baileys:connected");
-        socket.off("baileys:error");
-      };
+    const onConnected = (d: { accountId: string }) => {
+      if (d.accountId === channelId) {
+        setStep("connected");
+        ToastMessage.success({ title: "WhatsApp connected!" });
+        setTimeout(() => {
+          onOpenChange(false);
+          onSuccess();
+        }, 1500);
+      }
+    };
+
+    const onError = (d: { accountId: string; error: string }) => {
+      if (d.accountId === channelId) {
+        setErrorMessage(d.error);
+        setStep("error");
+        ToastMessage.error({ title: d.error });
+      }
+    };
+
+    socket.on("connect", onConnect);
+    socket.on("whatsapp:qr", onQR);
+    socket.on("whatsapp:connected", onConnected);
+    socket.on("whatsapp:error", onError);
+
+    if (socket.connected) {
+      onConnect();
+    } else {
+      socket.connect();
     }
-  }, [step, channelId, onOpenChange, onSuccess]);
+
+    return () => {
+      socket.emit("admin:leave", { accountId: channelId });
+      socket.off("connect", onConnect);
+      socket.off("whatsapp:qr", onQR);
+      socket.off("whatsapp:connected", onConnected);
+      socket.off("whatsapp:error", onError);
+    };
+  };
+
+  useEffect(() => {
+    if (!channelId) return;
+    return setupChannelSocket(channelId);
+  }, [channelId, onOpenChange, onSuccess]);
 
   const resetForm = () => {
-    reset({ name: "" });
+    reset({ name: "", phone: "" });
   };
 
   const onSubmit = async (data: FormValues) => {
@@ -135,8 +145,9 @@ export default function ConnectSessionModal({
     setChannelName(data.name.trim());
 
     try {
-      const res = await createWhatsAppSession({
+      const res = await createWhatsAccount({
         name: data.name.trim(),
+        phone: data.phone.trim(),
       });
 
       console.log("res====", res);
@@ -166,9 +177,6 @@ export default function ConnectSessionModal({
       onOpenChange={(v: boolean) => {
         if (!v) {
           resetForm();
-          if (channelId) {
-            disconnectSocket();
-          }
         }
         onOpenChange(v);
       }}
@@ -202,6 +210,12 @@ export default function ConnectSessionModal({
                   name="name"
                   label="Connection Name"
                   placeholder="e.g. Support WhatsApp"
+                  required
+                />
+                <InputField
+                  name="phone"
+                  label="Mobile Number"
+                  placeholder="e.g. +8801712345678"
                   required
                 />
               </div>
@@ -249,17 +263,33 @@ export default function ConnectSessionModal({
               <QrCode className="size-3" />
               QR code refreshes automatically
             </div>
-            <Button
-              variant="outline"
-              size="sm"
-              className="mt-2"
-              onClick={() => {
-                onOpenChange(false);
-                onSuccess();
-              }}
-            >
-              Close
-            </Button>
+            <div className="flex gap-2 mt-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  const s = socketRef.current;
+                  if (s?.connected) {
+                    console.log("[Socket] emitting refresh-qr", channelId);
+                    s.emit("refresh-qr", { accountId: channelId });
+                  } else {
+                    console.warn("[Socket] not connected");
+                  }
+                }}
+              >
+                Refresh QR
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  onOpenChange(false);
+                  onSuccess();
+                }}
+              >
+                Close
+              </Button>
+            </div>
           </div>
         )}
 

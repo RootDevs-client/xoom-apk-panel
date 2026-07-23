@@ -1,5 +1,6 @@
 "use client";
 import DashboardLoader from "@/app/(private)/admin/dashboard/_components/DashboardLoader";
+import { disconnectSocket, initSocket } from "@/lib/socket-client";
 import useAdminProfile from "@/store/useAdminProfile";
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
@@ -15,12 +16,15 @@ export default function DashboardProvider({
   const [mainLoading, setMainLoading] = useState(true);
   const token = session?.token;
 
+  const userId = adminData?._id || "";
+
+  console.log("fetchAdminData", adminData);
+
   useEffect(() => {
-    //  Wait for session to finish loading first
     if (sessionStatus === "loading") return;
 
-    // No session at all — stop loader immediately
     if (sessionStatus === "unauthenticated") {
+      disconnectSocket();
       setMainLoading(false);
       return;
     }
@@ -31,16 +35,15 @@ export default function DashboardProvider({
   }, [fetchAdminData, token, adminData, sessionStatus]);
 
   useEffect(() => {
-    // Success — stop loader
     if (isSuccess && adminData) {
       setMainLoading(false);
+      initSocket(userId, token);
     }
 
-    // Error of any kind — stop loader (redirect/error handled in apiClient)
     if (error) {
       setMainLoading(false);
     }
-  }, [isSuccess, adminData, error]);
+  }, [isSuccess, adminData, error, token]);
 
   if (mainLoading || sessionStatus === "loading") {
     return (

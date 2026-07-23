@@ -21,8 +21,8 @@ export default function WhatsAppSessionList() {
       setIsLoading(true);
       const result = await getWhatsAppSessions(page, limit, search);
       if (result?.status) {
-        setData(result.data.sessions || []);
-        setTotal(result.data.pagination?.total || 0);
+        setData(result.data || []);
+        setTotal(result.pagination?.totalDocs || 0);
       }
     } catch (error) {
       console.error(error);

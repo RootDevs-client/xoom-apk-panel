@@ -111,7 +111,7 @@ export default function ConversationPanel() {
     const socket = connectSocket();
 
     const handleConnect = () => {
-      socket.emit("join:session", { sessionId: selectedSessionId });
+      socket.emit("admin:join", { accountId: selectedSessionId });
     };
 
     const handleConversationUpdate = (data: {
@@ -179,10 +179,10 @@ export default function ConversationPanel() {
     };
 
     socket.on("connect", handleConnect);
-    socket.on("baileys:conversation:update", handleConversationUpdate);
-    socket.on("baileys:conversation:deleted", handleConversationDeleted);
-    socket.on("baileys:message:new", handleMessageNew);
-    socket.on("baileys:loggedOut", handleLoggedOut);
+    socket.on("whatsapp:conversation:update", handleConversationUpdate);
+    socket.on("whatsapp:conversation:deleted", handleConversationDeleted);
+    socket.on("whatsapp:message:new", handleMessageNew);
+    socket.on("whatsapp:loggedOut", handleLoggedOut);
 
     if (socket.connected) {
       handleConnect();
@@ -192,11 +192,11 @@ export default function ConversationPanel() {
 
     return () => {
       socket.off("connect", handleConnect);
-      socket.off("baileys:conversation:update", handleConversationUpdate);
-      socket.off("baileys:conversation:deleted", handleConversationDeleted);
-      socket.off("baileys:message:new", handleMessageNew);
-      socket.off("baileys:loggedOut", handleLoggedOut);
-      socket.emit("leave:session", { sessionId: selectedSessionId });
+      socket.off("whatsapp:conversation:update", handleConversationUpdate);
+      socket.off("whatsapp:conversation:deleted", handleConversationDeleted);
+      socket.off("whatsapp:message:new", handleMessageNew);
+      socket.off("whatsapp:loggedOut", handleLoggedOut);
+      socket.emit("admin:leave", { accountId: selectedSessionId });
     };
   }, [selectedSessionId, selectedConversation]);
 

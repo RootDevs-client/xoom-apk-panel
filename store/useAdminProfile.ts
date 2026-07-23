@@ -20,6 +20,7 @@ const useAdminProfile = create<AdminProfileState>((set) => ({
 
     try {
       const res = await getAdminProfile();
+      console.log("response me", res);
       if (!res.status) {
         set({
           isSuccess: false,

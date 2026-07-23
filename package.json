@@ -13,10 +13,7 @@
     "format:check": "prettier --check .",
     "precommit": "lint-staged",
     "type-check": "tsc --noEmit",
-    "baileys": "tsx watch lib/baileys/index.ts",
-    "meta-wa": "tsx watch lib/whatsapp-meta/entry.ts",
-    "dev:all": "concurrently -n next,wa,meta -c cyan,green,yellow \"pnpm dev\" \"pnpm baileys\" \"pnpm meta-wa\"",
-    "start:baileys": "node dist/lib/baileys/index.js"
+    "dev:all": "pnpm dev"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1066.0",
