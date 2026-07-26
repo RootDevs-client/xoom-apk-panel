@@ -11,7 +11,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { connectSocket, reconnectSocketToUrl } from "@/lib/socket-client";
+import { connectSocket } from "@/lib/socket-client";
 import type { Socket } from "socket.io-client";
 import { CheckCircle2, Loader2, QrCode, Smartphone } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
@@ -60,6 +60,16 @@ export default function ConnectSessionModal({
     }
   }, [open]);
 
+  const renderQrImage = async (raw: string) => {
+    try {
+      const { default: QRCode } = await import("qrcode");
+      const dataUrl = await QRCode.toDataURL(raw, { width: 300, margin: 1 });
+      setQrCode(dataUrl);
+    } catch {
+      ToastMessage.error({ title: "Failed to render QR code" });
+    }
+  };
+
   const setupChannelSocket = (channelId: string) => {
     const socket = connectSocket();
     socketRef.current = socket;
@@ -69,30 +79,13 @@ export default function ConnectSessionModal({
       socket.emit("admin:join", { accountId: channelId });
     };
 
-    const onQR = (data: {
-      accountId: string;
-      qrCode: string;
-      connectionString?: string;
-    }) => {
+    const onQR = (data: { accountId: string; qr: string }) => {
       if (data.accountId !== channelId) return;
-      console.log("[Socket] whatsapp:qr", data);
-      setQrCode(data.qrCode);
-      if (data.connectionString) {
-        socket.off("connect", onConnect);
-        socket.off("whatsapp:qr", onQR);
-        socket.off("whatsapp:connected", onConnected);
-        socket.off("whatsapp:error", onError);
-        const newSocket = reconnectSocketToUrl(data.connectionString);
-        socketRef.current = newSocket;
-        newSocket.on("connect", onConnect);
-        newSocket.on("whatsapp:qr", onQR);
-        newSocket.on("whatsapp:connected", onConnected);
-        newSocket.on("whatsapp:error", onError);
-        if (newSocket.connected) onConnect();
-      }
+      console.log("[Socket] qr", data);
+      renderQrImage(data.qr);
     };
 
-    const onConnected = (d: { accountId: string }) => {
+    const onReady = (d: { accountId: string }) => {
       if (d.accountId === channelId) {
         setStep("connected");
         ToastMessage.success({ title: "WhatsApp connected!" });
@@ -103,18 +96,17 @@ export default function ConnectSessionModal({
       }
     };
 
-    const onError = (d: { accountId: string; error: string }) => {
-      if (d.accountId === channelId) {
-        setErrorMessage(d.error);
-        setStep("error");
-        ToastMessage.error({ title: d.error });
-      }
+    const onError = (d: { accountId?: string; message: string }) => {
+      if (d.accountId && d.accountId !== channelId) return;
+      setErrorMessage(d.message);
+      setStep("error");
+      ToastMessage.error({ title: d.message });
     };
 
     socket.on("connect", onConnect);
-    socket.on("whatsapp:qr", onQR);
-    socket.on("whatsapp:connected", onConnected);
-    socket.on("whatsapp:error", onError);
+    socket.on("qr", onQR);
+    socket.on("ready", onReady);
+    socket.on("error", onError);
 
     if (socket.connected) {
       onConnect();
@@ -125,9 +117,9 @@ export default function ConnectSessionModal({
     return () => {
       socket.emit("admin:leave", { accountId: channelId });
       socket.off("connect", onConnect);
-      socket.off("whatsapp:qr", onQR);
-      socket.off("whatsapp:connected", onConnected);
-      socket.off("whatsapp:error", onError);
+      socket.off("qr", onQR);
+      socket.off("ready", onReady);
+      socket.off("error", onError);
     };
   };
 
