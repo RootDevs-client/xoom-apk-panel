@@ -1,5 +1,5 @@
 "use client";
-import { updatePrivacyPolicy } from "@/actions/settings/settingsActions";
+import { updateGeneralSettings } from "@/actions/settings/settingsActions";
 import { ToastMessage } from "@/components/custom/ToastMessage";
 import { Button } from "@/components/ui/button";
 import {
@@ -38,7 +38,7 @@ export default function PrivacyPolicySettings({ privacySettings }: any) {
       title: "Updating privacy policy...",
     });
     try {
-      const result = await updatePrivacyPolicy(data);
+      const result = await updateGeneralSettings({ privacyPolicy: data.content });
       if (!result.status) {
         ToastMessage.error(
           { title: result?.message || "Failed to save privacy policy" },

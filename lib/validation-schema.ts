@@ -59,6 +59,9 @@ export const settingsGeneralSchema = z.object({
   offerDescription: z.string().optional(),
 
   aboutUs: z.string().optional(),
+
+  privacyPolicy: z.string().optional(),
+  termsOfService: z.string().optional(),
 });
 
 export const settingsPrivacyPolicySchema = z.object({

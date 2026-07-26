@@ -5,7 +5,7 @@ import { updateTag } from "next/cache";
 // general settings
 export async function getGeneralSettings() {
   try {
-    const res = await apiClient(`/api/admin/settings/general`, {
+    const res = await apiClient(`/admin/settings/general`, {
       method: "GET",
       tags: ["settings"],
       cache: "force-cache",
@@ -30,7 +30,7 @@ export async function getGeneralSettings() {
 export async function updateGeneralSettings(data: any) {
   try {
     // Both create and update use PUT method
-    const endpoint = `/api/admin/settings/general`;
+    const endpoint = `/admin/settings/general`;
 
     const res = await apiClient(endpoint, {
       method: "PUT",
@@ -61,7 +61,7 @@ export async function updateGeneralSettings(data: any) {
 // privacy policy
 export async function getPrivacyPolicy() {
   try {
-    const res = await apiClient(`/api/admin/settings/privacy-policy`, {
+    const res = await apiClient(`/admin/settings/privacy-policy`, {
       method: "GET",
       tags: ["settings"],
       cache: "force-cache",
@@ -83,7 +83,7 @@ export async function getPrivacyPolicy() {
 
 export async function updatePrivacyPolicy(data: any) {
   try {
-    const endpoint = `/api/admin/settings/privacy-policy`;
+    const endpoint = `/admin/settings/privacy-policy`;
 
     const res = await apiClient(endpoint, {
       method: "PUT",
@@ -113,7 +113,7 @@ export async function updatePrivacyPolicy(data: any) {
 // terms & conditions
 export async function getTerms() {
   try {
-    const res = await apiClient(`/api/admin/settings/terms`, {
+    const res = await apiClient(`/admin/settings/terms`, {
       method: "GET",
       tags: ["settings"],
       cache: "force-cache",
@@ -137,7 +137,7 @@ export async function getTerms() {
 
 export async function updateTerms(data: any) {
   try {
-    const endpoint = `/api/admin/settings/terms`;
+    const endpoint = `/admin/settings/terms`;
 
     const res = await apiClient(endpoint, {
       method: "PUT",

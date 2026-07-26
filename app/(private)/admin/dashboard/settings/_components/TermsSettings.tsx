@@ -1,5 +1,5 @@
 "use client";
-import { updateTerms } from "@/actions/settings/settingsActions";
+import { updateGeneralSettings } from "@/actions/settings/settingsActions";
 import { ToastMessage } from "@/components/custom/ToastMessage";
 import { Button } from "@/components/ui/button";
 import {
@@ -38,7 +38,7 @@ export default function TermsSettings({ termsSettings }: any) {
       title: "Updating terms & conditions...",
     });
     try {
-      const result = await updateTerms(data);
+      const result = await updateGeneralSettings({ termsOfService: data.content });
       if (!result.status) {
         ToastMessage.error(
           { title: result?.message || "Failed to save terms & conditions" },
