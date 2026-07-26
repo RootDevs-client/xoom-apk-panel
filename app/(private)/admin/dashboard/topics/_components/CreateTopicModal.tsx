@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { uploadSingleFile } from "@/lib/fileUpload";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { ImSpinner9 } from "react-icons/im";
 
@@ -26,6 +26,16 @@ interface Props {
 
 interface FormValues {
   name: string;
+  slug: string;
+}
+
+function generateSlug(text: string) {
+  return text
+    .toLowerCase()
+    .trim()
+    .replace(/[^\w\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-");
 }
 
 export default function CreateTopicModal({
@@ -36,16 +46,29 @@ export default function CreateTopicModal({
   const [iconFile, setIconFile] = useState<File | null>(null);
   const [iconUploading, setIconUploading] = useState(false);
   const [loading, setLoading] = useState(false);
+  const lastAutoSlug = useRef("");
 
   const form = useForm<FormValues>({
-    defaultValues: { name: "" },
+    defaultValues: { name: "", slug: "" },
   });
 
-  const { handleSubmit, setError, reset, formState } = form;
+  const { handleSubmit, setError, reset, setValue, watch, formState } = form;
+
+  const watchedName = watch("name");
+  const watchedSlug = watch("slug");
+
+  useEffect(() => {
+    const autoSlug = generateSlug(watchedName);
+    if (watchedSlug === lastAutoSlug.current) {
+      setValue("slug", autoSlug);
+      lastAutoSlug.current = autoSlug;
+    }
+  }, [watchedName, watchedSlug, setValue]);
 
   const resetForm = () => {
     setIconFile(null);
-    reset({ name: "" });
+    lastAutoSlug.current = "";
+    reset({ name: "", slug: "" });
   };
 
   const onSubmit = async (data: FormValues) => {
@@ -71,6 +94,7 @@ export default function CreateTopicModal({
 
       const res = await createTopic({
         name: data.name.trim(),
+        slug: data.slug.trim() || undefined,
         icon: iconUrl,
       });
 
@@ -127,6 +151,13 @@ export default function CreateTopicModal({
                 label="Topic Name"
                 required
                 placeholder="Enter topic name"
+              />
+
+              <InputField
+                name="slug"
+                label="Slug"
+                required
+                placeholder="Enter slug"
               />
 
               <div className="space-y-1.5">

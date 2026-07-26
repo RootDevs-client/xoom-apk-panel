@@ -1,18 +1,12 @@
 "use client";
 
 import { getCategoryList } from "@/actions/category/categoryActions";
-import { getTopicList } from "@/actions/topic/topicActions";
 import { createNews, type NewsFormData } from "@/actions/news/newsActions";
-import { ToastMessage } from "@/components/custom/ToastMessage";
+import { getTopicList } from "@/actions/topic/topicActions";
 import FileUploadComponent from "@/components/custom/FileUploadComponent";
+import { ToastMessage } from "@/components/custom/ToastMessage";
+import FlatpickrInput from "@/components/form/FlatpickrInput";
 import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import {
   Dialog,
   DialogContent,
@@ -20,20 +14,26 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import FlatpickrInput from "@/components/form/FlatpickrInput";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { uploadSingleFile } from "@/lib/fileUpload";
-import { useEffect, useState } from "react";
 import {
   DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
   DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ImSpinner9 } from "react-icons/im";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { uploadSingleFile } from "@/lib/fileUpload";
 import { ChevronDown, X } from "lucide-react";
+import { useEffect, useState } from "react";
+import { ImSpinner9 } from "react-icons/im";
 
 interface Props {
   open: boolean;
@@ -182,7 +182,12 @@ export default function CreateNewsModal({
   };
 
   return (
-      <Dialog open={open} onOpenChange={(v) => !loading && !imageUploading && !iconUploading && onOpenChange(v)}>
+    <Dialog
+      open={open}
+      onOpenChange={(v) =>
+        !loading && !imageUploading && !iconUploading && onOpenChange(v)
+      }
+    >
       <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
@@ -271,7 +276,7 @@ export default function CreateNewsModal({
                 <DropdownMenuTrigger asChild>
                   <button
                     type="button"
-                    className="border-input data-[placeholder]:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:bg-input/30 dark:hover:bg-input/50 flex w-full items-center justify-between gap-2 rounded-md border bg-transparent px-3 py-2 text-sm whitespace-nowrap shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 data-[size=default]:h-9"
+                    className="border-input data-placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:bg-input/30 dark:hover:bg-input/50 flex w-full items-center justify-between gap-2 rounded-md border bg-transparent px-3 py-2 text-sm whitespace-nowrap shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 data-[size=default]:h-9"
                   >
                     <span className="text-muted-foreground">
                       {selectedTopicIds.length > 0
@@ -353,9 +358,7 @@ export default function CreateNewsModal({
               />
             </div>
 
-            {error && (
-              <p className="text-sm text-red-500">{error}</p>
-            )}
+            {error && <p className="text-sm text-red-500">{error}</p>}
           </div>
 
           <DialogFooter>
@@ -367,7 +370,10 @@ export default function CreateNewsModal({
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={loading || imageUploading || iconUploading}>
+            <Button
+              type="submit"
+              disabled={loading || imageUploading || iconUploading}
+            >
               {(loading || imageUploading || iconUploading) && (
                 <ImSpinner9 className="mr-2 h-3 w-3 animate-spin" />
               )}

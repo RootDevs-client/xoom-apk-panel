@@ -27,6 +27,7 @@ interface Props {
 
 interface FormValues {
   name: string;
+  slug: string;
 }
 
 export default function EditTopicCell({ row, onSuccess }: Props) {
@@ -37,16 +38,16 @@ export default function EditTopicCell({ row, onSuccess }: Props) {
   const [loading, setLoading] = useState(false);
 
   const form = useForm<FormValues>({
-    defaultValues: { name: row.name },
+    defaultValues: { name: row.name, slug: row.slug },
   });
 
   const { handleSubmit, setError, reset, formState } = form;
 
   useEffect(() => {
     if (open) {
-      reset({ name: row.name });
+      reset({ name: row.name, slug: row.slug });
     }
-  }, [open, row.name, reset]);
+  }, [open, row.name, row.slug, reset]);
 
   const onSubmit = async (data: FormValues) => {
     setLoading(true);
@@ -73,6 +74,7 @@ export default function EditTopicCell({ row, onSuccess }: Props) {
 
       const res = await updateTopic(row._id, {
         name: data.name.trim(),
+        slug: data.slug.trim(),
         icon: iconUrl,
       });
 
@@ -137,19 +139,29 @@ export default function EditTopicCell({ row, onSuccess }: Props) {
                   required
                 />
 
+                <InputField
+                  name="slug"
+                  label="Slug"
+                  placeholder="Enter slug"
+                  required
+                />
+
                 <div className="space-y-1.5">
                   <Label className="text-sm font-medium">Topic Icon</Label>
-                  <FileUploadComponent
-                    accept="image"
-                    maxSize={5}
-                    maxFiles={1}
-                    onFilesChange={(files) => setIconFile(files[0] || null)}
-                    existingImageUrl={!iconRemoved ? row.icon || "" : ""}
-                    onRemoveExisting={() => {
-                      setIconRemoved(true);
-                      setIconFile(null);
-                    }}
-                  />
+                <FileUploadComponent
+                  accept="image"
+                  maxSize={5}
+                  maxFiles={1}
+                  onFilesChange={(files) => {
+                    setIconFile(files[0] || null);
+                    if (files.length > 0) setIconRemoved(false);
+                  }}
+                  existingImageUrl={!iconRemoved ? row.icon || "" : ""}
+                  onRemoveExisting={() => {
+                    setIconRemoved(true);
+                    setIconFile(null);
+                  }}
+                />
                 </div>
 
                 {formState.errors.root && (

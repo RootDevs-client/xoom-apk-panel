@@ -3,6 +3,7 @@
 import { apiClient } from "@/lib/api-client";
 export interface TopicsFormData {
   name: string;
+  slug?: string;
   icon?: string | null;
 }
 
@@ -18,7 +19,7 @@ export async function getTopicList(
       search: search || "",
     });
 
-    const res = await apiClient(`/api/admin/topics?${params.toString()}`, {
+    const res = await apiClient(`/admin/topic?${params.toString()}`, {
       method: "GET",
       tags: ["topics"],
     });
@@ -39,7 +40,7 @@ export async function getTopicList(
 
 export async function createTopic(data: TopicsFormData) {
   try {
-    const res = await apiClient("/api/admin/topics", {
+    const res = await apiClient("/admin/topic", {
       method: "POST",
       body: data,
     });
@@ -58,8 +59,8 @@ export async function createTopic(data: TopicsFormData) {
 
 export async function updateTopic(id: string, data: TopicsFormData) {
   try {
-    const res = await apiClient(`/api/admin/topics/${id}`, {
-      method: "PATCH",
+    const res = await apiClient(`/admin/topic/${id}`, {
+      method: "PUT",
       body: data,
     });
     return res;
@@ -77,7 +78,7 @@ export async function updateTopic(id: string, data: TopicsFormData) {
 
 export async function deleteTopic(id: string) {
   try {
-    const res = await apiClient(`/api/admin/topics/${id}`, {
+    const res = await apiClient(`/admin/topic/${id}`, {
       method: "DELETE",
     });
     return res;

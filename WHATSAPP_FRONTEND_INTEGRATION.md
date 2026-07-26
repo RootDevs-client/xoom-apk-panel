@@ -2,7 +2,7 @@
 
 ## Base Info
 
-- **Base URL:** `http://localhost:5000/api/v1`
+- **Base URL:** `http://localhost:8000/api/v1`
 - **Socket Namespace:** `/admin`
 - **HTTP Auth:** JWT Bearer token
 - **Socket Auth:** `auth: { token: "<JWT>" }` or query param `?token=<JWT>`
@@ -13,27 +13,27 @@
 ## Socket Setup
 
 ```ts
-import { io, Socket } from 'socket.io-client';
+import { io, Socket } from "socket.io-client";
 
-const baseUrl = 'http://localhost:5000';
-const jwt = '<ADMIN_JWT>';
-const accountId = '<WHATSAPP_ACCOUNT_ID>';
+const baseUrl = "http://localhost:8000";
+const jwt = "<ADMIN_JWT>";
+const accountId = "<WHATSAPP_ACCOUNT_ID>";
 
 const socket: Socket = io(`${baseUrl}/admin`, {
   auth: { token: jwt },
-  transports: ['websocket', 'polling'],
+  transports: ["websocket", "polling"],
 });
 
-socket.on('connect', () => {
-  console.log('Socket connected:', socket.id);
+socket.on("connect", () => {
+  console.log("Socket connected:", socket.id);
 });
 
-socket.on('connect_error', (err) => {
-  console.error('Socket connection error:', err.message);
+socket.on("connect_error", (err) => {
+  console.error("Socket connection error:", err.message);
 });
 
-socket.on('disconnect', (reason) => {
-  console.log('Socket disconnected:', reason);
+socket.on("disconnect", (reason) => {
+  console.log("Socket disconnected:", reason);
 });
 ```
 
@@ -62,22 +62,22 @@ Content-Type: application/json
 
 ### Socket Events After Create
 
-| Event | Payload | When |
-|-------|---------|------|
-| `status` | `{ accountId, status: "connecting" }` | Immediately after start |
-| `qr` | `{ accountId, qr: "2@..." }` | When QR is generated |
-| `ready` | `{ accountId, phone, jid }` | When QR is scanned |
-| `disconnected` | `{ accountId, reason?: string }` | If connection fails |
-| `error` | `{ accountId, message, code? }` | If session start fails |
+| Event          | Payload                               | When                    |
+| -------------- | ------------------------------------- | ----------------------- |
+| `status`       | `{ accountId, status: "connecting" }` | Immediately after start |
+| `qr`           | `{ accountId, qr: "2@..." }`          | When QR is generated    |
+| `ready`        | `{ accountId, phone, jid }`           | When QR is scanned      |
+| `disconnected` | `{ accountId, reason?: string }`      | If connection fails     |
+| `error`        | `{ accountId, message, code? }`       | If session start fails  |
 
 ### Frontend Response
 
 ```ts
-const res = await api.post('/admin/baileys/create', { name: 'GP Bangladesh' });
+const res = await api.post("/admin/baileys/create", { name: "GP Bangladesh" });
 const { accountId, sessionId } = res.data.data;
 
 // Join room for this account to receive events
-socket.emit('admin:join', { accountId });
+socket.emit("admin:join", { accountId });
 ```
 
 ---
@@ -93,10 +93,10 @@ const socket = io(`${baseUrl}/admin`, {
   auth: { token: jwt },
 });
 
-socket.on('connect', () => {
+socket.on("connect", () => {
   // Server auto-joins all active account rooms on connection
   // Optionally also explicitly join rooms for accounts you care about
-  socket.emit('admin:join', { accountId });
+  socket.emit("admin:join", { accountId });
 });
 ```
 
@@ -108,12 +108,12 @@ socket.on('connect', () => {
 
 ### Socket Events
 
-| Condition | Event | Payload |
-|-----------|-------|---------|
-| Account status is `CONNECTED` | `ready` | `{ accountId, phone, jid }` |
-| Account status is NOT connected AND cached QR exists | `qr` | `{ accountId, qr }` |
-| Account status is NOT connected AND no cached QR | — | No event |
-| Nothing to report | — | No event |
+| Condition                                            | Event   | Payload                     |
+| ---------------------------------------------------- | ------- | --------------------------- |
+| Account status is `CONNECTED`                        | `ready` | `{ accountId, phone, jid }` |
+| Account status is NOT connected AND cached QR exists | `qr`    | `{ accountId, qr }`         |
+| Account status is NOT connected AND no cached QR     | —       | No event                    |
+| Nothing to report                                    | —       | No event                    |
 
 ### Frontend Response
 
@@ -141,7 +141,7 @@ Authorization: Bearer {token}
 
 ```ts
 // Option B: Socket event
-socket.emit('refresh-qr', { accountId });
+socket.emit("refresh-qr", { accountId });
 ```
 
 ### Backend
@@ -153,11 +153,11 @@ socket.emit('refresh-qr', { accountId });
 
 ### Socket Events
 
-| Event | Payload | When |
-|-------|---------|------|
+| Event    | Payload                               | When               |
+| -------- | ------------------------------------- | ------------------ |
 | `status` | `{ accountId, status: "connecting" }` | Session restarting |
-| `qr` | `{ accountId, qr: "2@..." }` | New QR generated |
-| `error` | `{ accountId, message, code? }` | If restart fails |
+| `qr`     | `{ accountId, qr: "2@..." }`          | New QR generated   |
+| `error`  | `{ accountId, message, code? }`       | If restart fails   |
 
 ### Frontend Response
 
@@ -213,6 +213,7 @@ Baileys detects `connection === 'close'` with non-logout reason.
 ```
 
 Possible `reason` values:
+
 - `manual_disconnect` — triggered by `POST /admin/baileys/disconnect/:sessionId`
 - `restart_required` — Baileys requested restart, backend will auto-reconnect
 - `reason_<statusCode>` — other disconnection reasons
@@ -384,20 +385,20 @@ Client is disconnected immediately after this emission.
 
 ## Complete Feature Table
 
-| Frontend Action | API / Socket Emit | Backend Action | Socket Response | Frontend Response |
-|-----------------|-------------------|----------------|-----------------|-------------------|
-| Create WhatsApp account | `POST /admin/baileys/create` | Create MongoDB account, generate `sessionId`, auto-start Baileys | `status`, `qr` | Show QR modal |
-| Refresh QR | `socket.emit('refresh-qr', { accountId })` or `POST /admin/baileys/start/:sessionId` | Restart Baileys session, generate new QR | `qr` | Replace existing QR |
-| Reload page | Reconnect socket `/admin` with JWT | Auto-join all active account rooms, emit room state | `qr` or `ready` or nothing | Show QR / connected / idle |
-| Scan QR succeeds | — | Baileys detects open connection | `ready` | Close QR modal, update status |
-| Connection drops (non-logout) | — | Baileys detects close, may auto-reconnect | `disconnected` | Show disconnected badge |
-| Manual disconnect | `POST /admin/baileys/disconnect/:sessionId` | Gracefully close socket, update DB | `disconnected` | Show disconnected state |
-| Logout | `POST /admin/baileys/logout/:sessionId` | Logout from Baileys, clear session data | `logout` | Remove connected UI |
-| Receive message | — | Persist message to DB | `message` | Append to chat UI |
-| Contacts updated | — | — | `sync` | Refresh contacts list |
-| Groups updated | — | — | `sync` | Refresh groups list |
-| History syncing | — | — | `history` | Show progress bar |
-| Reconnect max retries | — | Stop reconnecting | `error` with code `MAX_RETRIES` | Show error, prompt manual restart |
+| Frontend Action               | API / Socket Emit                                                                    | Backend Action                                                   | Socket Response                 | Frontend Response                 |
+| ----------------------------- | ------------------------------------------------------------------------------------ | ---------------------------------------------------------------- | ------------------------------- | --------------------------------- |
+| Create WhatsApp account       | `POST /admin/baileys/create`                                                         | Create MongoDB account, generate `sessionId`, auto-start Baileys | `status`, `qr`                  | Show QR modal                     |
+| Refresh QR                    | `socket.emit('refresh-qr', { accountId })` or `POST /admin/baileys/start/:sessionId` | Restart Baileys session, generate new QR                         | `qr`                            | Replace existing QR               |
+| Reload page                   | Reconnect socket `/admin` with JWT                                                   | Auto-join all active account rooms, emit room state              | `qr` or `ready` or nothing      | Show QR / connected / idle        |
+| Scan QR succeeds              | —                                                                                    | Baileys detects open connection                                  | `ready`                         | Close QR modal, update status     |
+| Connection drops (non-logout) | —                                                                                    | Baileys detects close, may auto-reconnect                        | `disconnected`                  | Show disconnected badge           |
+| Manual disconnect             | `POST /admin/baileys/disconnect/:sessionId`                                          | Gracefully close socket, update DB                               | `disconnected`                  | Show disconnected state           |
+| Logout                        | `POST /admin/baileys/logout/:sessionId`                                              | Logout from Baileys, clear session data                          | `logout`                        | Remove connected UI               |
+| Receive message               | —                                                                                    | Persist message to DB                                            | `message`                       | Append to chat UI                 |
+| Contacts updated              | —                                                                                    | —                                                                | `sync`                          | Refresh contacts list             |
+| Groups updated                | —                                                                                    | —                                                                | `sync`                          | Refresh groups list               |
+| History syncing               | —                                                                                    | —                                                                | `history`                       | Show progress bar                 |
+| Reconnect max retries         | —                                                                                    | Stop reconnecting                                                | `error` with code `MAX_RETRIES` | Show error, prompt manual restart |
 
 ---
 
@@ -405,35 +406,35 @@ Client is disconnected immediately after this emission.
 
 ### Baileys Sessions
 
-| Method | Endpoint | Auth | Description |
-|--------|----------|------|-------------|
-| `POST` | `/admin/baileys/create` | JWT | Create account + auto-start session |
-| `POST` | `/admin/baileys/start/:sessionId` | JWT | Start session for existing account |
-| `POST` | `/admin/baileys/disconnect/:sessionId` | JWT | Disconnect session without logout |
-| `POST` | `/admin/baileys/logout/:sessionId` | JWT | Full logout and clear session |
-| `GET` | `/admin/baileys/sessions` | JWT | List all sessions |
-| `GET` | `/admin/baileys/sessions/:sessionId` | JWT | Get single session details |
-| `POST` | `/admin/baileys/start-all` | JWT | Start all pending sessions |
+| Method | Endpoint                               | Auth | Description                         |
+| ------ | -------------------------------------- | ---- | ----------------------------------- |
+| `POST` | `/admin/baileys/create`                | JWT  | Create account + auto-start session |
+| `POST` | `/admin/baileys/start/:sessionId`      | JWT  | Start session for existing account  |
+| `POST` | `/admin/baileys/disconnect/:sessionId` | JWT  | Disconnect session without logout   |
+| `POST` | `/admin/baileys/logout/:sessionId`     | JWT  | Full logout and clear session       |
+| `GET`  | `/admin/baileys/sessions`              | JWT  | List all sessions                   |
+| `GET`  | `/admin/baileys/sessions/:sessionId`   | JWT  | Get single session details          |
+| `POST` | `/admin/baileys/start-all`             | JWT  | Start all pending sessions          |
 
 ### WhatsApp Accounts
 
-| Method | Endpoint | Auth | Description |
-|--------|----------|------|-------------|
-| `POST` | `/admin/whatsapp-account` | JWT | Create account record only |
-| `GET` | `/admin/whatsapp-account` | JWT | List accounts |
-| `GET` | `/admin/whatsapp-account/:id` | JWT | Get account by ID |
-| `PUT` | `/admin/whatsapp-account/:id` | JWT | Update account |
-| `DELETE` | `/admin/whatsapp-account/:id` | JWT | Delete account |
+| Method   | Endpoint                      | Auth | Description                |
+| -------- | ----------------------------- | ---- | -------------------------- |
+| `POST`   | `/admin/whatsapp-account`     | JWT  | Create account record only |
+| `GET`    | `/admin/whatsapp-account`     | JWT  | List accounts              |
+| `GET`    | `/admin/whatsapp-account/:id` | JWT  | Get account by ID          |
+| `PUT`    | `/admin/whatsapp-account/:id` | JWT  | Update account             |
+| `DELETE` | `/admin/whatsapp-account/:id` | JWT  | Delete account             |
 
 ### WhatsApp Channels
 
-| Method | Endpoint | Auth | Description |
-|--------|----------|------|-------------|
-| `POST` | `/admin/whatsapp-channel` | JWT | Create channel |
-| `GET` | `/admin/whatsapp-channel` | JWT | List channels |
-| `GET` | `/admin/whatsapp-channel/:id` | JWT | Get channel by ID |
-| `PUT` | `/admin/whatsapp-channel/:id` | JWT | Update channel |
-| `DELETE` | `/admin/whatsapp-channel/:id` | JWT | Delete channel |
+| Method   | Endpoint                      | Auth | Description       |
+| -------- | ----------------------------- | ---- | ----------------- |
+| `POST`   | `/admin/whatsapp-channel`     | JWT  | Create channel    |
+| `GET`    | `/admin/whatsapp-channel`     | JWT  | List channels     |
+| `GET`    | `/admin/whatsapp-channel/:id` | JWT  | Get channel by ID |
+| `PUT`    | `/admin/whatsapp-channel/:id` | JWT  | Update channel    |
+| `DELETE` | `/admin/whatsapp-channel/:id` | JWT  | Delete channel    |
 
 ---
 
@@ -446,13 +447,13 @@ All socket events are room-scoped to `account:<accountId>`.
 
 ```ts
 // Join specific account room
-socket.emit('admin:join', { accountId: '<ACCOUNT_ID>' });
+socket.emit("admin:join", { accountId: "<ACCOUNT_ID>" });
 
 // Leave account room
-socket.emit('admin:leave', { accountId: '<ACCOUNT_ID>' });
+socket.emit("admin:leave", { accountId: "<ACCOUNT_ID>" });
 
 // Request QR refresh for an account
-socket.emit('refresh-qr', { accountId: '<ACCOUNT_ID>' });
+socket.emit("refresh-qr", { accountId: "<ACCOUNT_ID>" });
 ```
 
 ---
@@ -563,17 +564,22 @@ Frontend               API                    Backend                Baileys    
 
 ```tsx
 // hooks/useWhatsAppSocket.ts
-import { useEffect, useRef, useState } from 'react';
-import { io, Socket } from 'socket.io-client';
+import { useEffect, useRef, useState } from "react";
+import { io, Socket } from "socket.io-client";
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
-type WhatsAppStatus = 'idle' | 'connecting' | 'connected' | 'disconnected' | 'logged_out';
+type WhatsAppStatus =
+  | "idle"
+  | "connecting"
+  | "connected"
+  | "disconnected"
+  | "logged_out";
 
 export function useWhatsAppSocket(jwt: string, accountId?: string) {
   const socketRef = useRef<Socket | null>(null);
   const [qr, setQr] = useState<string | null>(null);
-  const [status, setStatus] = useState<WhatsAppStatus>('idle');
+  const [status, setStatus] = useState<WhatsAppStatus>("idle");
   const [phone, setPhone] = useState<string | null>(null);
   const [jid, setJid] = useState<string | null>(null);
 
@@ -582,62 +588,68 @@ export function useWhatsAppSocket(jwt: string, accountId?: string) {
 
     const socket = io(`${BASE_URL}/admin`, {
       auth: { token: jwt },
-      transports: ['websocket', 'polling'],
+      transports: ["websocket", "polling"],
     });
 
     socketRef.current = socket;
 
-    socket.on('connect', () => {
-      console.log('Socket connected');
+    socket.on("connect", () => {
+      console.log("Socket connected");
       if (accountId) {
-        socket.emit('admin:join', { accountId });
+        socket.emit("admin:join", { accountId });
       }
     });
 
-    socket.on('qr', (payload: { accountId: string; qr: string }) => {
+    socket.on("qr", (payload: { accountId: string; qr: string }) => {
       if (!accountId || payload.accountId === accountId) {
         setQr(payload.qr);
-        setStatus('connecting');
+        setStatus("connecting");
       }
     });
 
-    socket.on('ready', (payload: { accountId: string; phone: string; jid: string }) => {
-      if (!accountId || payload.accountId === accountId) {
-        setQr(null);
-        setPhone(payload.phone);
-        setJid(payload.jid);
-        setStatus('connected');
-      }
-    });
+    socket.on(
+      "ready",
+      (payload: { accountId: string; phone: string; jid: string }) => {
+        if (!accountId || payload.accountId === accountId) {
+          setQr(null);
+          setPhone(payload.phone);
+          setJid(payload.jid);
+          setStatus("connected");
+        }
+      },
+    );
 
-    socket.on('disconnected', (payload: { accountId: string; reason?: string }) => {
-      if (!accountId || payload.accountId === accountId) {
-        setQr(null);
-        setStatus('disconnected');
-      }
-    });
+    socket.on(
+      "disconnected",
+      (payload: { accountId: string; reason?: string }) => {
+        if (!accountId || payload.accountId === accountId) {
+          setQr(null);
+          setStatus("disconnected");
+        }
+      },
+    );
 
-    socket.on('logout', (payload: { accountId: string }) => {
+    socket.on("logout", (payload: { accountId: string }) => {
       if (!accountId || payload.accountId === accountId) {
         setQr(null);
         setPhone(null);
         setJid(null);
-        setStatus('logged_out');
+        setStatus("logged_out");
       }
     });
 
-    socket.on('message', (payload: any) => {
+    socket.on("message", (payload: any) => {
       if (!accountId || payload.accountId === accountId) {
         // handle new message in chat UI
       }
     });
 
-    socket.on('error', (payload: any) => {
-      console.error('Socket error:', payload);
+    socket.on("error", (payload: any) => {
+      console.error("Socket error:", payload);
     });
 
-    socket.on('disconnect', () => {
-      setStatus('disconnected');
+    socket.on("disconnect", () => {
+      setStatus("disconnected");
     });
 
     return () => {
@@ -647,7 +659,7 @@ export function useWhatsAppSocket(jwt: string, accountId?: string) {
 
   const refreshQr = () => {
     if (accountId && socketRef.current) {
-      socketRef.current.emit('refresh-qr', { accountId });
+      socketRef.current.emit("refresh-qr", { accountId });
     }
   };
 

@@ -23,8 +23,8 @@ export default function TopicLists() {
       const result = await getTopicList(page, limit, search);
 
       if (result?.status) {
-        setData(result.data.topics || []);
-        setTotal(result.data.pagination?.total || 0);
+        setData(result.data || []);
+        setTotal(result.pagination?.totalDocs || 0);
       }
     } catch (error) {
       console.error(error);
