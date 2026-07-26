@@ -121,7 +121,6 @@ export default function DatePickerField<T extends FieldValues>({
               defaultHour,
               defaultMinute,
               onChange: (selectedDates) => {
-                // Store as ISO string for consistency
                 if (selectedDates.length > 0) {
                   field.onChange(selectedDates[0].toISOString());
                 } else {

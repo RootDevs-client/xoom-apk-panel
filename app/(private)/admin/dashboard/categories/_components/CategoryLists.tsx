@@ -23,8 +23,8 @@ export default function CategoryLists() {
       const result = await getCategoryList(page, limit, search);
 
       if (result?.status) {
-        setData(result.data.categories || []);
-        setTotal(result.data.pagination?.total || 0);
+        setData(result.data || []);
+        setTotal(result.pagination?.totalDocs || 0);
       }
     } catch (error) {
       console.error(error);

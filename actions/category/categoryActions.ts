@@ -5,6 +5,7 @@ import { apiClient } from "@/lib/api-client";
 export interface CategoryFormData {
   name: string;
   icon?: string | null;
+  slug?: string;
 }
 
 export async function getCategoryList(
@@ -19,7 +20,7 @@ export async function getCategoryList(
       search: search || "",
     });
 
-    const res = await apiClient(`/api/admin/categories?${params.toString()}`, {
+    const res = await apiClient(`/admin/category?${params.toString()}`, {
       method: "GET",
       tags: ["categories"],
     });
@@ -40,7 +41,7 @@ export async function getCategoryList(
 
 export async function createCategory(data: CategoryFormData) {
   try {
-    const res = await apiClient("/api/admin/categories", {
+    const res = await apiClient("/admin/category", {
       method: "POST",
       body: data,
     });
@@ -59,8 +60,8 @@ export async function createCategory(data: CategoryFormData) {
 
 export async function updateCategory(id: string, data: CategoryFormData) {
   try {
-    const res = await apiClient(`/api/admin/categories/${id}`, {
-      method: "PATCH",
+    const res = await apiClient(`/admin/category/${id}`, {
+      method: "PUT",
       body: data,
     });
     return res;
@@ -78,7 +79,7 @@ export async function updateCategory(id: string, data: CategoryFormData) {
 
 export async function deleteCategory(id: string) {
   try {
-    const res = await apiClient(`/api/admin/categories/${id}`, {
+    const res = await apiClient(`/admin/category/${id}`, {
       method: "DELETE",
     });
     return res;

@@ -77,15 +77,17 @@ export default function CreateNewsModal({
 
   const loadCategories = async () => {
     const res = await getCategoryList(1, 100, "");
+    console.log("res", res);
     if (res?.status) {
-      setCategoryOptions(res.data.categories || []);
+      setCategoryOptions(res.data || []);
     }
   };
 
   const loadTopics = async () => {
     const res = await getTopicList(1, 100, "");
+    console.log("res", res);
     if (res?.status) {
-      setTopicOptions(res.data.topics || []);
+      setTopicOptions(res.data || []);
     }
   };
 
@@ -149,11 +151,10 @@ export default function CreateNewsModal({
         image: imageUrl,
         icon: iconUrl,
         categories: [selectedCategory],
-        topics: selectedTopicIds
-          .map((id) => topicOptions.find((t) => t._id === id)?.name)
-          .filter((n): n is string => !!n),
+        topics: selectedTopicIds,
         publishedDate,
       };
+      console.log("data", data);
 
       const res = await createNews(data);
 
@@ -355,6 +356,7 @@ export default function CreateNewsModal({
                   if (error) setError("");
                 }}
                 placeholder="Select published date"
+                enableTime
               />
             </div>
 

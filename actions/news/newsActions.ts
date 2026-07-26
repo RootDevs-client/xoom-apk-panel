@@ -12,11 +12,7 @@ export interface NewsFormData {
   publishedDate: string;
 }
 
-export async function getNewsList(
-  page: number,
-  limit: number,
-  search: string,
-) {
+export async function getNewsList(page: number, limit: number, search: string) {
   try {
     const params = new URLSearchParams({
       page: String(page),
@@ -24,7 +20,7 @@ export async function getNewsList(
       search: search || "",
     });
 
-    const res = await apiClient(`/api/admin/news?${params.toString()}`, {
+    const res = await apiClient(`/admin/news?${params.toString()}`, {
       method: "GET",
       tags: ["news"],
     });
@@ -45,7 +41,7 @@ export async function getNewsList(
 
 export async function createNews(data: NewsFormData) {
   try {
-    const res = await apiClient("/api/admin/news", {
+    const res = await apiClient("/admin/news", {
       method: "POST",
       body: data,
     });
@@ -56,16 +52,15 @@ export async function createNews(data: NewsFormData) {
     }
     return {
       ok: false,
-      message:
-        error instanceof Error ? error.message : "Failed to create news",
+      message: error instanceof Error ? error.message : "Failed to create news",
     };
   }
 }
 
 export async function updateNews(id: string, data: Partial<NewsFormData>) {
   try {
-    const res = await apiClient(`/api/admin/news/${id}`, {
-      method: "PATCH",
+    const res = await apiClient(`/admin/news/${id}`, {
+      method: "PUT",
       body: data,
     });
     return res;
@@ -75,15 +70,14 @@ export async function updateNews(id: string, data: Partial<NewsFormData>) {
     }
     return {
       ok: false,
-      message:
-        error instanceof Error ? error.message : "Failed to update news",
+      message: error instanceof Error ? error.message : "Failed to update news",
     };
   }
 }
 
 export async function getNewsById(id: string) {
   try {
-    const res = await apiClient(`/api/admin/news/${id}`, {
+    const res = await apiClient(`/admin/news/${id}`, {
       method: "GET",
     });
     return res;
@@ -93,15 +87,14 @@ export async function getNewsById(id: string) {
     }
     return {
       ok: false,
-      message:
-        error instanceof Error ? error.message : "Failed to get news",
+      message: error instanceof Error ? error.message : "Failed to get news",
     };
   }
 }
 
 export async function deleteNews(id: string) {
   try {
-    const res = await apiClient(`/api/admin/news/${id}`, {
+    const res = await apiClient(`/admin/news/${id}`, {
       method: "DELETE",
     });
     return res;
@@ -111,8 +104,7 @@ export async function deleteNews(id: string) {
     }
     return {
       ok: false,
-      message:
-        error instanceof Error ? error.message : "Failed to delete news",
+      message: error instanceof Error ? error.message : "Failed to delete news",
     };
   }
 }

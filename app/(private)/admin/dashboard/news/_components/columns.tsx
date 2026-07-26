@@ -12,11 +12,12 @@ export type NewsItem = {
   description: string;
   image?: string;
   categories: { _id: string; name: string; slug: string }[];
-  topics: string[];
+  topics: { _id: string; name: string; slug: string }[];
   publishedDate: string;
   createdAt: string;
   updatedAt: string;
   icon?: string;
+  name?: string;
 };
 
 const formatDate = (date: string) => {
@@ -80,7 +81,7 @@ export const columns = ({
               key={i}
               className="inline-flex items-center rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground"
             >
-              {topic}
+              {topic?.name}
             </span>
           ))
         ) : (

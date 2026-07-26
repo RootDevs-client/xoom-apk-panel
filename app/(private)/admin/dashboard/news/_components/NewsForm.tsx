@@ -64,7 +64,7 @@ interface Props {
     image?: string;
     icon?: string;
     categories: { _id: string; name: string }[];
-    topics: string[];
+    topics: { _id: string; name: string; slug: string }[];
     publishedDate: string;
   };
 }
@@ -113,7 +113,8 @@ export default function NewsForm({ mode, initialData }: Props) {
   // ── Load categories ───────────────────────────────────────────────────────
   useEffect(() => {
     getCategoryList(1, 100, "").then((res) => {
-      if (res?.status) setCategoryOptions(res.data.categories || []);
+      console.log("res", res);
+      if (res?.status) setCategoryOptions(res.data || []);
     });
   }, []);
 
@@ -121,13 +122,12 @@ export default function NewsForm({ mode, initialData }: Props) {
   useEffect(() => {
     getTopicList(1, 100, "").then((res) => {
       if (res?.status) {
-        const topics = res.data.topics || [];
+        const topics = res.data || [];
         setTopicOptions(topics);
         if (initialData?.topics?.length) {
+          const initialTopicIds = initialData.topics.map((t) => t._id);
           const matching = topics
-            .filter((t: { name: string }) =>
-              initialData.topics.includes(t.name),
-            )
+            .filter((t: { _id: string }) => initialTopicIds.includes(t._id))
             .map((t: { _id: string }) => t._id);
           setSelectedTopicIds(matching);
         }
@@ -182,11 +182,10 @@ export default function NewsForm({ mode, initialData }: Props) {
         image: imageUrl,
         icon: iconUrl,
         categories: [values.category],
-        topics: selectedTopicIds
-          .map((id) => topicOptions.find((t) => t._id === id)?.name)
-          .filter((n): n is string => !!n),
+        topics: selectedTopicIds,
         publishedDate: values.publishedDate,
       };
+      console.log("data=====", data);
 
       const res = isEdit
         ? await updateNews(initialData!._id, data)
@@ -345,6 +344,7 @@ export default function NewsForm({ mode, initialData }: Props) {
             control={control}
             label="Published Date"
             required
+            enableTime
             error={errors.publishedDate}
           />
         </div>
