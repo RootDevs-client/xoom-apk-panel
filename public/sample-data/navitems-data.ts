@@ -9,6 +9,7 @@ import {
   Settings2,
   Tags,
   User,
+  Megaphone,
 } from "lucide-react";
 import { FaFootball } from "react-icons/fa6";
 
@@ -46,6 +47,11 @@ export const adminDashboardMenu = {
       title: "News",
       url: routes.privateRoutes.admin.news,
       icon: Newspaper,
+    },
+    {
+      title: "Promotion Categories",
+      url: routes.privateRoutes.admin.promotionCategory,
+      icon: Megaphone,
     },
     {
       title: "Operators",

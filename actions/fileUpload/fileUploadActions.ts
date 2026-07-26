@@ -15,7 +15,7 @@ export async function uploadFile(formData: FormData): Promise<{
   data: { url: string } | null;
 }> {
   try {
-    const res: UploadResponse = await apiClient("/api/admin/upload", {
+    const res: UploadResponse = await apiClient("/admin/upload/file", {
       method: "POST",
       body: formData,
       isFormData: true,

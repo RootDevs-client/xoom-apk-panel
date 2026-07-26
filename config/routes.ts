@@ -26,6 +26,7 @@ export const routes = {
       news: `/admin/dashboard/news`,
       operators: `/admin/dashboard/telco-operators`,
       whatsapp: `/admin/dashboard/whatsapp`,
+      promotionCategory: `/admin/dashboard/promotion-category`,
     },
   },
 };
