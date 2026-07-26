@@ -1,11 +1,9 @@
 "use client";
 
 import { createPromotion } from "@/actions/promotion/promotionActions";
-import FileUploadComponent from "@/components/custom/FileUploadComponent";
 import InputField from "@/components/form/InputField";
 import { ToastMessage } from "@/components/custom/ToastMessage";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   Dialog,
   DialogContent,
@@ -14,8 +12,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { uploadSingleFile } from "@/lib/fileUpload";
-import { useEffect, useRef, useState } from "react";
+import { Switch } from "@/components/ui/switch";
+import { useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { ImSpinner9 } from "react-icons/im";
 
@@ -25,17 +23,8 @@ interface Props {
   onSuccess: () => void;
 }
 
-const generateSlug = (text: string) =>
-  text
-    .toLowerCase()
-    .trim()
-    .replace(/[^\w\s-]/g, "")
-    .replace(/\s+/g, "-")
-    .replace(/-+/g, "-");
-
 interface FormValues {
-  name: string;
-  slug: string;
+  operator: string;
 }
 
 export default function CreatePromotionModal({
@@ -43,29 +32,18 @@ export default function CreatePromotionModal({
   onOpenChange,
   onSuccess,
 }: Props) {
-  const [iconFile, setIconFile] = useState<File | null>(null);
-  const [iconUploading, setIconUploading] = useState(false);
+  const [isActive, setIsActive] = useState(true);
   const [loading, setLoading] = useState(false);
-  const slugManuallyEdited = useRef(false);
 
   const form = useForm<FormValues>({
-    defaultValues: { name: "", slug: "" },
+    defaultValues: { operator: "" },
   });
 
-  const { handleSubmit, setError, reset, formState, register, watch, setValue } = form;
-
-  const nameValue = watch("name");
-
-  useEffect(() => {
-    if (!slugManuallyEdited.current && nameValue) {
-      setValue("slug", generateSlug(nameValue));
-    }
-  }, [nameValue, setValue]);
+  const { handleSubmit, setError, reset, formState } = form;
 
   const resetForm = () => {
-    setIconFile(null);
-    slugManuallyEdited.current = false;
-    reset({ name: "", slug: "" });
+    reset({ operator: "" });
+    setIsActive(true);
   };
 
   const onSubmit = async (data: FormValues) => {
@@ -73,26 +51,9 @@ export default function CreatePromotionModal({
     const loadingToast = ToastMessage.loading({ title: "Creating promotion category..." });
 
     try {
-      let iconUrl: string | undefined;
-
-      if (iconFile) {
-        setIconUploading(true);
-        const uploaded = await uploadSingleFile(iconFile);
-        if (uploaded?.url) {
-          iconUrl = uploaded.url;
-        } else {
-          setError("root", { message: "Failed to upload icon" });
-          setLoading(false);
-          setIconUploading(false);
-          return;
-        }
-        setIconUploading(false);
-      }
-
       const res = await createPromotion({
-        name: data.name.trim(),
-        slug: data.slug.trim() || generateSlug(data.name),
-        icon: iconUrl || "",
+        operator: data.operator.trim(),
+        isActive,
       });
 
       if (res?.status) {
@@ -122,7 +83,6 @@ export default function CreatePromotionModal({
       );
     } finally {
       setLoading(false);
-      setIconUploading(false);
     }
   };
 
@@ -144,31 +104,19 @@ export default function CreatePromotionModal({
 
             <div className="py-4 space-y-4">
               <InputField
-                name="name"
-                label="Category Name"
-                placeholder="Enter category name"
+                name="operator"
+                label="Operator"
+                placeholder="Enter operator name"
                 required
               />
 
-              <div className="space-y-1.5">
-                <Label className="text-sm font-medium">Slug</Label>
-                <Input
-                  defaultValue=""
-                  placeholder="Auto-generated from name"
-                  {...register("slug", {
-                    onChange: () => { slugManuallyEdited.current = true; },
-                  })}
+              <div className="flex items-center gap-2">
+                <Switch
+                  id="isActive"
+                  checked={isActive}
+                  onCheckedChange={setIsActive}
                 />
-              </div>
-
-              <div className="space-y-1.5">
-                <Label className="text-sm font-medium">Category Icon</Label>
-                <FileUploadComponent
-                  accept="image"
-                  maxSize={5}
-                  maxFiles={1}
-                  onFilesChange={(files) => setIconFile(files[0] || null)}
-                />
+                <Label htmlFor="isActive">Active</Label>
               </div>
 
               {formState.errors.root && (
@@ -189,10 +137,10 @@ export default function CreatePromotionModal({
               </Button>
               <Button
                 type="submit"
-                disabled={loading || iconUploading}
+                disabled={loading}
                 className="text-white cursor-pointer"
               >
-                {(loading || iconUploading) && (
+                {loading && (
                   <ImSpinner9 className="mr-2 h-3 w-3 animate-spin" />
                 )}
                 Create

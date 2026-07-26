@@ -24,7 +24,7 @@ export default function SubscribeLists() {
       const result = await getSubscribeList(page, limit, search);
 
       if (result?.data) {
-        setData(result.data.docs || []);
+        setData(result.data?.docs || []);
         setTotal(result.data.totalDocs || 0);
       }
     } catch (error) {

@@ -2,15 +2,14 @@
 
 import { ColumnDef } from "@tanstack/react-table";
 import moment from "moment-timezone";
-import Image from "next/image";
+import { Badge } from "@/components/ui/badge";
 import DeletePromotionCell from "./DeletePromotionCell";
 import EditPromotionCell from "./EditPromotionCell";
 
 export type PromotionCategory = {
   _id: string;
-  name: string;
-  slug: string;
-  icon?: string;
+  operator: string;
+  isActive: boolean;
   createdAt: string;
   updatedAt: string;
 };
@@ -25,30 +24,17 @@ export const columns = ({
   onSuccess: () => void;
 }): ColumnDef<PromotionCategory>[] => [
   {
-    accessorKey: "icon",
-    header: "Icon",
-    cell: ({ row }) =>
-      row.original.icon ? (
-        <Image
-          src={row.original.icon}
-          alt={row.original.name}
-          width={60}
-          height={40}
-          className="h-10 w-14 rounded object-cover"
-        />
-      ) : (
-        <div className="h-10 w-14 rounded bg-muted flex items-center justify-center text-xs text-muted-foreground">
-          N/A
-        </div>
-      ),
+    accessorKey: "operator",
+    header: "Operator",
   },
   {
-    accessorKey: "name",
-    header: "Name",
-  },
-  {
-    accessorKey: "slug",
-    header: "Slug",
+    accessorKey: "isActive",
+    header: "Active",
+    cell: ({ row }) => (
+      <Badge variant={row.original.isActive ? "default" : "secondary"}>
+        {row.original.isActive ? "Active" : "Inactive"}
+      </Badge>
+    ),
   },
   {
     accessorKey: "updatedAt",

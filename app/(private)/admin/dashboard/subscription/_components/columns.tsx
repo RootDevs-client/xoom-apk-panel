@@ -3,7 +3,6 @@
 import { Badge } from "@/components/ui/badge";
 import { ColumnDef } from "@tanstack/react-table";
 import moment from "moment-timezone";
-import { CancelSubscriptionCell } from "./CancelSubscriptionCell";
 
 // Define the type based on API response
 export type DeviceInfo = Record<string, any>;
@@ -94,9 +93,9 @@ export const columns: ColumnDef<Subscribe>[] = [
       );
     },
   },
-  {
-    id: "actions",
-    header: "Actions",
-    cell: ({ row }) => <CancelSubscriptionCell row={row.original} />,
-  },
+  // {
+  //   id: "actions",
+  //   header: "Actions",
+  //   cell: ({ row }) => <CancelSubscriptionCell row={row.original} />,
+  // },
 ];

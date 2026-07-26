@@ -3,9 +3,8 @@
 import { apiClient } from "@/lib/api-client";
 
 export interface PromotionFormData {
-  name: string;
-  icon?: string | null;
-  slug?: string;
+  operator: string;
+  isActive?: boolean;
 }
 
 export async function getPromotionList(

@@ -14,7 +14,7 @@ export async function getSubscribeList(
       search: search || "",
     });
 
-    const res = await apiClient(`/api/admin/subscribe?${params.toString()}`, {
+    const res = await apiClient(`/admin/subscribe?${params.toString()}`, {
       method: "GET",
       tags: ["subscribe"],
     });
@@ -35,7 +35,7 @@ export async function getSubscribeList(
 
 export async function cancelSubscription(id: string) {
   try {
-    const res = await apiClient(`/api/admin/subscribe/${id}/unsubscribe`, {
+    const res = await apiClient(`/admin/subscribe/${id}/unsubscribe`, {
       method: "POST",
     });
     return res;

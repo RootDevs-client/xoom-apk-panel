@@ -66,19 +66,19 @@ export default function DeletePromotionCell({ row, onSuccess }: Props) {
             <DialogTitle>Delete Promotion Category</DialogTitle>
             <DialogDescription>
               Are you sure you want to delete{" "}
-              <span className="font-semibold text-foreground">{row.name}</span>?
+              <span className="font-semibold text-foreground">{row.operator}</span>?
               This action cannot be undone.
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-1.5 rounded-lg border bg-muted/40 px-4 py-3 text-sm">
             <div className="flex items-center justify-between">
-              <span className="text-muted-foreground">Name</span>
-              <span className="font-medium">{row.name}</span>
+              <span className="text-muted-foreground">Operator</span>
+              <span className="font-medium">{row.operator}</span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-muted-foreground">Slug</span>
-              <span className="font-mono text-xs">{row.slug}</span>
+              <span className="text-muted-foreground">Active</span>
+              <span className="font-medium">{row.isActive ? "Yes" : "No"}</span>
             </div>
           </div>
 
