@@ -2,7 +2,7 @@
 
 import {
   deleteWhatsAppConversation,
-  updateWhatsAppConversationName,
+  updateWhatsAppChannelName,
 } from "@/actions/whatsapp/whatsappActions";
 import { ToastMessage } from "@/components/custom/ToastMessage";
 import {
@@ -98,7 +98,7 @@ export default function ConversationList({
   const handleSaveEdit = async (convId: string) => {
     const trimmed = editValue.trim();
     if (!trimmed) return;
-    const res = await updateWhatsAppConversationName(convId, trimmed);
+    const res = await updateWhatsAppChannelName(convId, trimmed);
     if (res?.status) {
       ToastMessage.success({ title: "Name updated" });
       onUpdated?.(res.data?.conversation);

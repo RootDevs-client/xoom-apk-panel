@@ -3,7 +3,6 @@
 import {
   deleteWhatsAppSession,
   disconnectWhatsAppChannel,
-  reconnectWhatsAppChannel,
 } from "@/actions/whatsapp/whatsappActions";
 import { ToastMessage } from "@/components/custom/ToastMessage";
 import { Badge } from "@/components/ui/badge";
@@ -42,15 +41,15 @@ import type { Socket } from "socket.io-client";
 export type WhatsAppSession = {
   _id: string;
   name: string;
-  phone?: string | null;
-  waDisplayName?: string | null;
-  profilePicUrl?: string | null;
-  connectionStatus: string;
-  errorMessage?: string | null;
-  baileysJid?: string | null;
-  authCreds?: any;
-  lastConnectedAt?: string | null;
-  qrCodeRetries: number;
+  phone: string;
+  sessionId: string;
+  platform: string;
+  status: string;
+  isActive: boolean;
+  isDeleted: boolean;
+  jid?: string;
+  lastSeen?: string | null;
+  lastSyncedAt?: string | null;
   createdAt: string;
   updatedAt: string;
 };
@@ -64,49 +63,31 @@ const statusConfig: Record<
   string,
   { label: string; className: string; icon: React.ElementType }
 > = {
-  idle: {
-    label: "Idle",
-    className:
-      "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400 border-gray-200 dark:border-gray-700",
-    icon: WifiOff,
-  },
-  qr: {
-    label: "QR Generated",
+  PENDING: {
+    label: "Pending",
     className:
       "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400 border-yellow-200 dark:border-yellow-800",
-    icon: Link2,
+    icon: WifiOff,
   },
-  connecting: {
+  CONNECTING: {
     label: "Connecting",
     className:
       "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 border-blue-200 dark:border-blue-800",
     icon: RotateCw,
   },
-  connected: {
+  CONNECTED: {
     label: "Connected",
     className:
       "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 border-green-200 dark:border-green-800",
     icon: Wifi,
   },
-  reconnecting: {
-    label: "Reconnecting",
-    className:
-      "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 border-blue-200 dark:border-blue-800",
-    icon: RotateCw,
-  },
-  disconnected: {
+  DISCONNECTED: {
     label: "Disconnected",
     className:
       "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 border-red-200 dark:border-red-800",
     icon: WifiOff,
   },
-  loggedOut: {
-    label: "Logged Out",
-    className:
-      "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400 border-orange-200 dark:border-orange-800",
-    icon: WifiOff,
-  },
-  error: {
+  ERROR: {
     label: "Error",
     className:
       "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 border-red-200 dark:border-red-800",
@@ -124,22 +105,14 @@ export const columns = ({
     header: "Connection Name",
     cell: ({ row }) => (
       <div className="flex items-center gap-3">
-        {row.original.profilePicUrl ? (
-          <img
-            src={row.original.profilePicUrl}
-            alt=""
-            className="size-8 rounded-full object-cover"
-          />
-        ) : (
-          <div className="size-8 rounded-full bg-primary/10 flex items-center justify-center text-xs font-bold text-primary">
-            {row.original.name.charAt(0).toUpperCase()}
-          </div>
-        )}
+        <div className="size-8 rounded-full bg-primary/10 flex items-center justify-center text-xs font-bold text-primary">
+          {row.original.name?.charAt(0).toUpperCase() || "?"}
+        </div>
         <div className="flex flex-col">
           <span className="font-medium">{row.original.name}</span>
-          {row.original.waDisplayName && (
-            <span className="text-xs text-muted-foreground">
-              {row.original.waDisplayName}
+          {row.original.jid && (
+            <span className="text-xs text-muted-foreground font-mono">
+              {row.original.jid}
             </span>
           )}
         </div>
@@ -151,16 +124,16 @@ export const columns = ({
     header: "Phone Number",
     cell: ({ row }) => (
       <span className="font-mono text-sm">
-        {row.original.phone ? `+${row.original.phone}` : "—"}
+        {row.original.phone ? `${row.original.phone}` : "—"}
       </span>
     ),
   },
   {
-    accessorKey: "connectionStatus",
+    accessorKey: "status",
     header: "Status",
     cell: ({ row }) => {
-      const status = row.original.connectionStatus || "idle";
-      const config = statusConfig[status] || statusConfig.idle;
+      const status = row.original.status || "PENDING";
+      const config = statusConfig[status] || statusConfig.PENDING;
       const Icon = config.icon;
       return (
         <Badge
@@ -174,9 +147,9 @@ export const columns = ({
     },
   },
   {
-    accessorKey: "lastConnectedAt",
-    header: "Last Connected",
-    cell: ({ row }) => formatDate(row.original.lastConnectedAt),
+    accessorKey: "lastSeen",
+    header: "Last Seen",
+    cell: ({ row }) => formatDate(row.original.lastSeen),
   },
   {
     id: "actions",
@@ -212,16 +185,6 @@ function ActionCell({
       onSuccess();
     } else {
       ToastMessage.error({ title: res?.message || "Failed to disconnect" });
-    }
-  };
-
-  const handleReconnect = async () => {
-    const res = await reconnectWhatsAppChannel(session._id);
-    if (res?.status) {
-      ToastMessage.success({ title: "Reconnecting..." });
-      onSuccess();
-    } else {
-      ToastMessage.error({ title: res?.message || "Failed to reconnect" });
     }
   };
 
@@ -369,7 +332,7 @@ function ActionCell({
   };
 
   const handleRefreshQR = () => {
-    if (session.connectionStatus === "connected") return;
+    if (session.status === "CONNECTED") return;
 
     setQrOpen(true);
     setQrCode(null);
@@ -393,7 +356,7 @@ function ActionCell({
     }
   };
 
-  const isConnected = session.connectionStatus === "connected";
+  const isConnected = session.status === "CONNECTED";
 
   return (
     <>
@@ -410,15 +373,9 @@ function ActionCell({
               Disconnect
             </DropdownMenuItem>
           ) : (
-            <DropdownMenuItem onClick={handleReconnect}>
-              <RotateCw className="size-4 mr-2" />
-              {session.authCreds ? "Reconnect" : "Connect"}
-            </DropdownMenuItem>
-          )}
-          {!isConnected && (
             <DropdownMenuItem onClick={handleRefreshQR}>
               <QrCode className="size-4 mr-2" />
-              Refresh QR
+              Connect / Reconnect
             </DropdownMenuItem>
           )}
           <DropdownMenuItem onClick={() => setEditOpen(true)}>

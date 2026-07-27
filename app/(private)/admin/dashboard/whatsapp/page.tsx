@@ -1,13 +1,16 @@
 "use client";
 
+import { MessagesSquare, Radio, Smartphone } from "lucide-react";
 import { useState } from "react";
-import { Smartphone, MessageSquare } from "lucide-react";
+import ChannelMessagePanel from "./_components/ChannelMessagePanel";
+import WhatsAppChannelList from "./_components/WhatsAppChannelList";
 import WhatsAppSessionList from "./_components/WhatsAppSessionList";
-import ConversationPanel from "./_components/ConversationPanel";
 
 const tabs = [
   { id: "sessions", label: "Baileys Channels", icon: Smartphone },
-  { id: "conversations", label: "Baileys Conversations", icon: MessageSquare },
+  { id: "channels", label: "Channels", icon: Radio },
+  // { id: "conversations", label: "Baileys Conversations", icon: MessageSquare },
+  { id: "channel-messages", label: "Channel Messages", icon: MessagesSquare },
 ];
 
 export default function WhatsAppPage() {
@@ -33,7 +36,9 @@ export default function WhatsAppPage() {
       </div>
 
       {activeTab === "sessions" && <WhatsAppSessionList />}
-      {activeTab === "conversations" && <ConversationPanel />}
+      {activeTab === "channels" && <WhatsAppChannelList />}
+      {/* {activeTab === "conversations" && <ConversationPanel />} */}
+      {activeTab === "channel-messages" && <ChannelMessagePanel />}
     </div>
   );
 }

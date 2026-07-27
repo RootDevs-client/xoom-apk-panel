@@ -18,6 +18,35 @@ export async function getWhatsAppSessions(
       method: "GET",
       tags: ["whatsapp-sessions"],
     });
+
+    return res;
+  } catch (error: any) {
+    if (error?.digest?.startsWith("NEXT_REDIRECT")) throw error;
+    return {
+      ok: false,
+      message:
+        error instanceof Error ? error.message : "Failed to fetch channels",
+      data: { sessions: [], pagination: {} },
+    };
+  }
+}
+
+export async function getWhatsAppChannels(
+  page: number,
+  limit: number,
+  search: string,
+) {
+  try {
+    const params = new URLSearchParams({
+      page: String(page),
+      limit: String(limit),
+      search: search || "",
+    });
+
+    const res = await apiClient(`/admin/whatsapp-channel`, {
+      method: "GET",
+      tags: ["whatsapp-channel"],
+    });
     console.log("response====", res);
 
     return res;
@@ -28,6 +57,37 @@ export async function getWhatsAppSessions(
       message:
         error instanceof Error ? error.message : "Failed to fetch channels",
       data: { sessions: [], pagination: {} },
+    };
+  }
+}
+
+export async function getWhatsAppChannelList(
+  page: number,
+  limit: number,
+  search: string,
+  accountId?: string,
+) {
+  try {
+    const params = new URLSearchParams({
+      page: String(page),
+      limit: String(limit),
+      search: search || "",
+    });
+    if (accountId) params.set("accountId", accountId);
+
+    const res = await apiClient(`/admin/whatsapp-channel?${params}`, {
+      method: "GET",
+      tags: ["whatsapp-channel-list"],
+    });
+    return res;
+  } catch (error: any) {
+    if (error?.digest?.startsWith("NEXT_REDIRECT")) throw error;
+    return {
+      ok: false,
+      message:
+        error instanceof Error ? error.message : "Failed to fetch channel list",
+      data: [],
+      pagination: {},
     };
   }
 }
@@ -58,7 +118,7 @@ export async function updateWhatsAppSession(
 ) {
   try {
     const res = await apiClient(`/admin/whatsapp-account/${id}`, {
-      method: "PATCH",
+      method: "PUT",
       body: data,
     });
     return res;
@@ -101,10 +161,11 @@ export async function getWhatsAppMessages(
     });
 
     const res = await apiClient(
-      `/api/admin/whatsapp/messages?${params.toString()}`,
+      `/admin/whatsapp-message?${params.toString()}`,
       { method: "GET", tags: ["whatsapp-messages"] },
     );
 
+    console.log(res);
     return res;
   } catch (error: any) {
     if (error?.digest?.startsWith("NEXT_REDIRECT")) throw error;
@@ -117,26 +178,33 @@ export async function getWhatsAppMessages(
   }
 }
 
-export async function sendWhatsAppMessage(data: {
-  sessionId: string;
-  remoteJid: string;
-  body: string;
-  mediaType?: string;
-  mediaUrl?: string;
-  fileName?: string;
-}) {
+export async function getWhatsAppChannelMessages(
+  channelId: string,
+  page: number,
+  limit: number,
+) {
   try {
-    const res = await apiClient("/api/admin/whatsapp/send", {
-      method: "POST",
-      body: data,
+    const params = new URLSearchParams({
+      page: String(page),
+      limit: String(limit),
+      channelId: channelId || "",
     });
+
+    const res = await apiClient(
+      `/admin/whatsapp-message?${params.toString()}`,
+      { method: "GET", tags: ["whatsapp-channel-messages"] },
+    );
+
     return res;
   } catch (error: any) {
     if (error?.digest?.startsWith("NEXT_REDIRECT")) throw error;
     return {
       ok: false,
       message:
-        error instanceof Error ? error.message : "Failed to send message",
+        error instanceof Error
+          ? error.message
+          : "Failed to fetch channel messages",
+      data: { messages: [], pagination: {} },
     };
   }
 }
@@ -156,7 +224,7 @@ export async function getWhatsAppConversations(
     });
 
     const res = await apiClient(
-      `/api/admin/whatsapp/conversations?${params.toString()}`,
+      `/admin/whatsapp/conversations?${params.toString()}`,
       { method: "GET", tags: ["whatsapp-conversations"] },
     );
 
@@ -176,10 +244,9 @@ export async function getWhatsAppConversations(
 
 export async function disconnectWhatsAppChannel(id: string) {
   try {
-    const res = await apiClient(
-      `/api/admin/whatsapp/sessions/${id}/disconnect`,
-      { method: "POST" },
-    );
+    const res = await apiClient(`/admin/whatsapp/sessions/${id}/disconnect`, {
+      method: "POST",
+    });
     return res;
   } catch (error: any) {
     if (error?.digest?.startsWith("NEXT_REDIRECT")) throw error;
@@ -193,10 +260,9 @@ export async function disconnectWhatsAppChannel(id: string) {
 
 export async function reconnectWhatsAppChannel(id: string) {
   try {
-    const res = await apiClient(
-      `/api/admin/whatsapp/sessions/${id}/reconnect`,
-      { method: "POST" },
-    );
+    const res = await apiClient(`/admin/whatsapp/sessions/${id}/reconnect`, {
+      method: "POST",
+    });
     return res;
   } catch (error: any) {
     if (error?.digest?.startsWith("NEXT_REDIRECT")) throw error;
@@ -210,7 +276,7 @@ export async function reconnectWhatsAppChannel(id: string) {
 
 export async function deleteWhatsAppMessage(id: string) {
   try {
-    const res = await apiClient(`/api/admin/whatsapp/messages/${id}`, {
+    const res = await apiClient(`/admin/whatsapp-message/${id}`, {
       method: "DELETE",
     });
     return res;
@@ -224,12 +290,12 @@ export async function deleteWhatsAppMessage(id: string) {
   }
 }
 
-export async function updateWhatsAppConversationName(
+export async function updateWhatsAppChannelName(
   id: string,
   displayName: string,
 ) {
   try {
-    const res = await apiClient(`/api/admin/whatsapp/conversations/${id}`, {
+    const res = await apiClient(`/admin/whatsapp-channel/${id}`, {
       method: "PATCH",
       body: { displayName },
     });
@@ -241,7 +307,31 @@ export async function updateWhatsAppConversationName(
       message:
         error instanceof Error
           ? error.message
-          : "Failed to update conversation name",
+          : "Failed to update channel name",
+    };
+  }
+}
+
+export async function sendWhatsAppMessage(data: {
+  sessionId: string;
+  remoteJid: string;
+  body: string;
+  mediaType?: "image" | "video" | "document" | "audio";
+  mediaUrl?: string;
+  fileName?: string;
+}) {
+  try {
+    const res = await apiClient("/api/admin/whatsapp/send", {
+      method: "POST",
+      body: data,
+    });
+    return res;
+  } catch (error: any) {
+    if (error?.digest?.startsWith("NEXT_REDIRECT")) throw error;
+    return {
+      ok: false,
+      message:
+        error instanceof Error ? error.message : "Failed to send message",
     };
   }
 }

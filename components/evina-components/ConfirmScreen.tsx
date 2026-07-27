@@ -29,7 +29,7 @@ export function ConfirmScreen({ fullPhone, onConfirm }: ConfirmScreenProps) {
       </CardHeader>
       <CardContent>
         <Button
-          id="Confirm"
+          id="confirm"
           onClick={onConfirm}
           className="w-full h-12 bg-red-600 hover:bg-red-700 active:scale-[0.98] text-white font-semibold text-base rounded-full transition-all"
         >

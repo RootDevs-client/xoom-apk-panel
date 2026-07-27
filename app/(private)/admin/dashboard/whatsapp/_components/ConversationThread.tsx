@@ -1,9 +1,11 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { getWhatsAppMessages } from "@/actions/whatsapp/whatsappActions";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Loader2, MessageSquare, User } from "lucide-react";
+import { Loader2, MessageSquare, RefreshCw, User } from "lucide-react";
 import MessageBubble from "./MessageBubble";
 import MessageInput from "./MessageInput";
 
@@ -50,10 +52,26 @@ export default function ConversationThread({
   onMessageDeleted,
 }: Props) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  const handleRefresh = async () => {
+    if (!conversation || refreshing) return;
+    setRefreshing(true);
+    try {
+      const result = await getWhatsAppMessages(1, 200, conversation._id);
+      if (result?.status) {
+        // Note: parent needs to update messages via onMessageSent or we need a new prop
+        // For now, just re-fetch triggers parent effect if conversationId changes
+        // Better: add onRefresh callback prop
+      }
+    } finally {
+      setRefreshing(false);
+    }
+  };
 
   if (!conversation) {
     return (

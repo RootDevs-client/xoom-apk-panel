@@ -51,12 +51,17 @@ export function initSocket(userId?: string, token?: string) {
   socket.off("connect");
   socket.off("disconnect");
   socket.off("connect_error");
+  socket.off("whatsapp:new-message");
 
   socket.on("connect", () => console.log("[Socket] Connected"));
   socket.on("disconnect", () => console.log("[Socket] Disconnected"));
   socket.on("connect_error", (err) =>
     console.error("[Socket] Connection error", err.message),
   );
+
+  socket.on("whatsapp:new-message", (data) => {
+    console.log("[Socket] whatsapp:new-message", data);
+  });
 
   return socket;
 }
