@@ -56,6 +56,8 @@ interface FormValues {
   name: string;
   code: string;
   country: string;
+  userTelcoServiceId?: number;
+  adAgencyCampaignId?: number;
   telcoParameterValues?: string;
   variant: "STANDARD" | "EVINA" | "CG_CALLBACK";
   configs: CgElementForm[];
@@ -97,6 +99,8 @@ export default function EditTelcoOperatorCell({ row, onSuccess }: Props) {
       name: row.name,
       code: row.code,
       country: row.country,
+      userTelcoServiceId: row.userTelcoServiceId ?? undefined,
+      adAgencyCampaignId: row.adAgencyCampaignId ?? undefined,
       telcoParameterValues: row.telcoParameterValues || "",
       variant: row.variant,
       configs: [],
@@ -135,6 +139,8 @@ export default function EditTelcoOperatorCell({ row, onSuccess }: Props) {
         name: values.name.trim(),
         code: values.code.trim(),
         country: values.country.trim(),
+        userTelcoServiceId: values.userTelcoServiceId ? Number(values.userTelcoServiceId) : undefined,
+        adAgencyCampaignId: values.adAgencyCampaignId ? Number(values.adAgencyCampaignId) : undefined,
         telcoParameterValues: values.telcoParameterValues?.trim() || "",
         variant: values.variant,
         configs,
@@ -197,6 +203,8 @@ export default function EditTelcoOperatorCell({ row, onSuccess }: Props) {
             name: row.name,
             code: row.code,
             country: row.country,
+            userTelcoServiceId: row.userTelcoServiceId ?? undefined,
+            adAgencyCampaignId: row.adAgencyCampaignId ?? undefined,
             telcoParameterValues: row.telcoParameterValues || "",
             variant: row.variant,
             configs,
@@ -249,6 +257,21 @@ export default function EditTelcoOperatorCell({ row, onSuccess }: Props) {
                   placeholder="e.g. BANGLADESH"
                   required
                 />
+
+                <div className="grid grid-cols-2 gap-4">
+                  <InputField
+                    type="number"
+                    label="Telco Service ID"
+                    name="userTelcoServiceId"
+                    placeholder="e.g. 12345"
+                  />
+                  <InputField
+                    type="number"
+                    label="Campaign ID"
+                    name="adAgencyCampaignId"
+                    placeholder="e.g. 67890"
+                  />
+                </div>
 
                 <InputField
                   type="text"

@@ -11,6 +11,8 @@ export type TelcoOperator = {
   name: string;
   code: string;
   country: string;
+  userTelcoServiceId?: number;
+  adAgencyCampaignId?: number;
   telcoParameterValues?: string;
   variant: "STANDARD" | "EVINA" | "CG_CALLBACK";
   configs: { label: string; id: string; type: string; order: number }[];
@@ -66,6 +68,16 @@ export const columns = ({
   {
     accessorKey: "country",
     header: "Country",
+  },
+  {
+    accessorKey: "userTelcoServiceId",
+    header: "Telco Service ID",
+    cell: ({ row }) => row.original.userTelcoServiceId ?? "—",
+  },
+  {
+    accessorKey: "adAgencyCampaignId",
+    header: "Campaign ID",
+    cell: ({ row }) => row.original.adAgencyCampaignId ?? "—",
   },
   {
     accessorKey: "variant",

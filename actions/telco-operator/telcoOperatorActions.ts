@@ -32,6 +32,8 @@ export type CreateTelcoOperatorInput = {
   name: string;
   code: string;
   country: string;
+  userTelcoServiceId?: number;
+  adAgencyCampaignId?: number;
   telcoParameterValues?: string;
   variant?: "STANDARD" | "EVINA" | "CG_CALLBACK";
   configs?: CgElementInput[];
