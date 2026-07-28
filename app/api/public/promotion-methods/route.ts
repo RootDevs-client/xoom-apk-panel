@@ -28,7 +28,6 @@ export const GET = asyncHandler(async (req: NextRequest) => {
   const promotionMethods = await PromotionMethod.find()
     .sort({ createdAt: -1 })
     .lean();
-  console.log(promotionMethods);
 
   return apiResponse(true, 200, "Promotion methods fetched successfully.", {
     promotionMethods,

@@ -170,13 +170,13 @@ export function PinScreen({
         </div>
 
         {/* Back button */}
-        <Button
+        {/* <Button
           variant="outline"
           onClick={onBack}
           className="mt-3 h-11 w-full rounded-full border border-[#333230] bg-transparent text-sm font-medium text-gray-500 hover:border-gray-500 hover:text-white"
         >
           ← Change number
-        </Button>
+        </Button> */}
       </CardContent>
     </Card>
   );

@@ -18,8 +18,6 @@ export default function DashboardProvider({
 
   const userId = adminData?._id || "";
 
-  console.log("fetchAdminData", adminData);
-
   useEffect(() => {
     if (sessionStatus === "loading") return;
 

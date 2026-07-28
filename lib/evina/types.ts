@@ -48,4 +48,5 @@ export type SubscriptionStep =
   | "pin"
   | "success"
   | "loading"
-  | "apiError";
+  | "apiError"
+  | "sessionExpired";
