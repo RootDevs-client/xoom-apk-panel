@@ -45,23 +45,33 @@ export function connectSocket(userId?: string, token?: string) {
   return s;
 }
 
+// Named callbacks so we can remove only our own handlers without nuking other components'
+let _onConnect: (() => void) | null = null;
+let _onDisconnect: (() => void) | null = null;
+let _onConnectError: ((err: Error) => void) | null = null;
+let _onWhatsAppNewMessage: ((data: any) => void) | null = null;
+
 export function initSocket(userId?: string, token?: string) {
   const socket = connectSocket(userId, token);
 
-  socket.off("connect");
-  socket.off("disconnect");
-  socket.off("connect_error");
-  socket.off("whatsapp:new-message");
+  // Remove only our own previously registered handlers
+  if (_onConnect) socket.off("connect", _onConnect);
+  if (_onDisconnect) socket.off("disconnect", _onDisconnect);
+  if (_onConnectError) socket.off("connect_error", _onConnectError);
+  if (_onWhatsAppNewMessage) socket.off("whatsapp:new-message", _onWhatsAppNewMessage);
 
-  socket.on("connect", () => console.log("[Socket] Connected"));
-  socket.on("disconnect", () => console.log("[Socket] Disconnected"));
-  socket.on("connect_error", (err) =>
-    console.error("[Socket] Connection error", err.message),
-  );
-
-  socket.on("whatsapp:new-message", (data) => {
+  _onConnect = () => console.log("[Socket] Connected");
+  _onDisconnect = () => console.log("[Socket] Disconnected");
+  _onConnectError = (err: Error) =>
+    console.error("[Socket] Connection error", err.message);
+  _onWhatsAppNewMessage = (data: any) => {
     console.log("[Socket] whatsapp:new-message", data);
-  });
+  };
+
+  socket.on("connect", _onConnect);
+  socket.on("disconnect", _onDisconnect);
+  socket.on("connect_error", _onConnectError);
+  socket.on("whatsapp:new-message", _onWhatsAppNewMessage);
 
   return socket;
 }

@@ -25,6 +25,7 @@ import { ColumnDef } from "@tanstack/react-table";
 import {
   Link2,
   Loader2,
+  LogOut,
   MoreHorizontal,
   Pencil,
   QrCode,
@@ -198,6 +199,24 @@ function ActionCell({
     }
   };
 
+  const handleLogout = () => {
+    const socket = connectSocket();
+    // Attach socket handlers so onLogout/onDisconnected can process the response
+    attachHandlers(socket);
+
+    const doLogout = () => {
+      socket.emit("logout", { accountId: session._id });
+      log("logout emitted");
+      ToastMessage.info({ title: "Logging out WhatsApp session..." });
+    };
+
+    if (socket.connected) {
+      doLogout();
+    } else {
+      socket.once("connect", doLogout);
+    }
+  };
+
   // Renders the raw QR payload string (e.g. "2@...") into a scannable
   // image. The backend sends the raw Baileys QR string, not an image -
   // see WHATSAPP_FRONTEND_INTEGRATION.md section 1/3.
@@ -232,18 +251,23 @@ function ActionCell({
     socketRef.current = null;
   };
 
-  // Clean up whenever the QR dialog closes, and on unmount
+  // Clean up socket handlers when QR dialog closes
   useEffect(() => {
     if (!qrOpen) {
       cleanup("dialog closed");
       setQrCode(null);
       setQrLoading(false);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [qrOpen]);
+
+  // Clean up on unmount to avoid leaking handlers
+  useEffect(() => {
     return () => {
       cleanup("unmount");
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [qrOpen]);
+  }, []);
 
   const attachHandlers = (socket: Socket) => {
     socketRef.current = socket;
@@ -305,6 +329,20 @@ function ActionCell({
       if (data.accountId && data.accountId !== session._id) return;
       log("error event received", data);
       setQrLoading(false);
+
+      // If session not found (e.g., after logout), close the QR dialog
+      // and tell the user to create a new connection
+      if (data.code === "SESSION_NOT_FOUND") {
+        setQrOpen(false);
+        ToastMessage.error({
+          title: "Session no longer exists",
+          description:
+            "This WhatsApp session was logged out. Create a new connection to reconnect.",
+        });
+        onSuccess();
+        return;
+      }
+
       ToastMessage.error({ title: data.message || "WhatsApp error" });
     };
 
@@ -376,6 +414,12 @@ function ActionCell({
             <DropdownMenuItem onClick={handleRefreshQR}>
               <QrCode className="size-4 mr-2" />
               Connect / Reconnect
+            </DropdownMenuItem>
+          )}
+          {isConnected && (
+            <DropdownMenuItem onClick={handleLogout}>
+              <LogOut className="size-4 mr-2" />
+              Logout
             </DropdownMenuItem>
           )}
           <DropdownMenuItem onClick={() => setEditOpen(true)}>

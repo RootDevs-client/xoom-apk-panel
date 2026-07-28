@@ -141,33 +141,117 @@ export default function ChannelMessagePanel() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  // Track which account we've joined so we can leave on channel change/unmount
+  const joinedAccountRef = useRef<string | null>(null);
+
   useEffect(() => {
     const socket = connectSocket();
 
+    // Ensure socket is connected before joining room
+    if (!socket.connected) {
+      socket.connect();
+    }
+
+    // Leave previous account room if any
+    if (joinedAccountRef.current) {
+      socket.emit("admin:leave", { accountId: joinedAccountRef.current });
+      console.log("[Socket] left account room", joinedAccountRef.current);
+    }
+
+    // Join the selected channel's WhatsApp account room to receive events
+    if (selectedChannel?.whatsappAccountId) {
+      joinedAccountRef.current = selectedChannel.whatsappAccountId;
+      socket.emit("admin:join", { accountId: selectedChannel.whatsappAccountId });
+      console.log("[Socket] joined account room", selectedChannel.whatsappAccountId);
+    } else {
+      joinedAccountRef.current = null;
+    }
+
+    // Socket payload shape for channel messages:
+    // {
+    //   accountId: string,
+    //   channelId: string,        // matches selectedChannel._id
+    //   message: {
+    //     id: string,              // Mongo _id
+    //     messageId: string,        // WhatsApp message ID
+    //     senderJid: string,        // sender JID (e.g. "120363...@newsletter")
+    //     fromMe: boolean,
+    //     type: string,             // "text" | "image" | "video" | "audio" | "document"
+    //     text: string,             // text/caption content
+    //     timestamp: string,        // ISO timestamp
+    //     mediaUrl?: string,
+    //     mimeType?: string,
+    //     fileName?: string,
+    //     raw?: any,                // same shape as API raw field (imageMessage.url, etc.)
+    //   }
+    // }
     const onNewMessage = (data: {
       channelId: string;
-      jid: string;
-      message: { body: string; from: string; timestamp: string };
+      accountId?: string;
+      message?: {
+        id?: string;
+        messageId?: string;
+        senderJid?: string;
+        fromMe?: boolean;
+        type?: string;
+        text?: string;
+        timestamp?: string;
+        mediaUrl?: string;
+        mimeType?: string;
+        fileName?: string;
+        raw?: any;
+      };
     }) => {
       if (!selectedChannel || data.channelId !== selectedChannel._id) return;
+
+      const msg = data.message;
+      if (!msg) return;
+
+      // Extract media from raw if the payload matches the API response shape
+      const mediaFromRaw = extractMediaFromRaw(msg.raw);
+      const mediaUrl = mediaFromRaw.mediaUrl || msg.mediaUrl;
+      const mimeType = mediaFromRaw.mimeType || msg.mimeType;
+      const fileName = mediaFromRaw.fileName || msg.fileName;
+
+      // Determine message type
+      const rawType = msg.type || "text";
+      const displayType = rawType === "text" ? "conversation" : rawType;
+
+      // Determine sender
+      const senderJid = msg.senderJid || "";
+
+      // Determine body/caption (socket uses `text` field for both text content and image caption)
+      const body = msg.text || "";
+
       const optimistic: TransformedMessage = {
-        _id: `opt_${Date.now()}`,
-        keyId: `opt_${Date.now()}`,
-        fromMe: false,
-        pushName: data.jid?.split("@")[0] || "Unknown",
-        body: data.message.body || "",
-        type: "conversation",
+        _id: msg.id || `opt_${Date.now()}`,
+        keyId: msg.messageId || `opt_${Date.now()}`,
+        fromMe: msg.fromMe ?? false,
+        pushName: senderJid.split("@")[0] || "Unknown",
+        body,
+        type: displayType,
         status: "pending",
-        timestamp: data.message.timestamp || new Date().toISOString(),
+        timestamp: msg.timestamp || new Date().toISOString(),
+        ...(mediaUrl ? { mediaUrl, mimeType, fileName } : {}),
       };
-      setMessages((prev) => [...prev, optimistic]);
+      setMessages((prev) => {
+        const updated = [...prev, optimistic];
+        console.log("[Socket] message added, now have", updated.length, "messages");
+        return updated;
+      });
     };
 
     socket.on("whatsapp:new-message", onNewMessage);
-    if (!socket.connected) socket.connect();
 
     return () => {
       socket.off("whatsapp:new-message", onNewMessage);
+
+      // Leave account room on cleanup
+      if (joinedAccountRef.current) {
+        socket.emit("admin:leave", { accountId: joinedAccountRef.current });
+        console.log("[Socket] left account room", joinedAccountRef.current);
+        joinedAccountRef.current = null;
+      }
     };
   }, [selectedChannel]);
 

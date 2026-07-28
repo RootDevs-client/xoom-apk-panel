@@ -43,7 +43,6 @@ export default function MessageBubble({ message, onDeleted }: Props) {
   const [isHovering, setIsHovering] = useState(false);
   const [imageError, setImageError] = useState(false);
   const [modalImage, setModalImage] = useState<string | null>(null);
-  console.log("message", message);
 
   const isMine = message.fromMe;
   const time = message.timestamp
