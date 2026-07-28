@@ -82,13 +82,20 @@ export default function MessageBubble({ message, onDeleted }: Props) {
   };
 
   const isImage =
-    message.type === "imageMessage" || message.mimeType?.startsWith("image/");
+    message.type === "imageMessage" ||
+    message.type === "image" ||
+    message.mimeType?.startsWith("image/");
   const isVideo =
-    message.type === "videoMessage" || message.mimeType?.startsWith("video/");
+    message.type === "videoMessage" ||
+    message.type === "video" ||
+    message.mimeType?.startsWith("video/");
   const isAudio =
-    message.type === "audioMessage" || message.mimeType?.startsWith("audio/");
+    message.type === "audioMessage" ||
+    message.type === "audio" ||
+    message.mimeType?.startsWith("audio/");
   const isDocument =
     message.type === "documentMessage" ||
+    message.type === "document" ||
     (message.mediaUrl && !isImage && !isVideo && !isAudio);
 
   const renderMedia = () => {

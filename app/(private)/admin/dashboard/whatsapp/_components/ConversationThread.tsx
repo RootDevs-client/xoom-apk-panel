@@ -1,11 +1,10 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
 import { getWhatsAppMessages } from "@/actions/whatsapp/whatsappActions";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Loader2, MessageSquare, RefreshCw, User } from "lucide-react";
+import { Loader2, MessageSquare, User } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import MessageBubble from "./MessageBubble";
 import MessageInput from "./MessageInput";
 
@@ -53,6 +52,7 @@ export default function ConversationThread({
 }: Props) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [refreshing, setRefreshing] = useState(false);
+  console.log("ConversationThread", messages);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });

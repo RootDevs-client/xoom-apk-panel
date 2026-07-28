@@ -33,7 +33,8 @@ interface ChannelMessage {
   senderJid: string;
   fromMe: boolean;
   type: string;
-  text: string;
+  text?: string;
+  caption?: string;
   forwarded: boolean;
   mentions: string[];
   raw: any;
@@ -51,18 +52,42 @@ interface TransformedMessage {
   type: string;
   status: string;
   timestamp: string;
+  mediaUrl?: string;
+  mimeType?: string;
+  fileName?: string;
+}
+
+function extractMediaFromRaw(raw: any): { mediaUrl?: string; mimeType?: string; fileName?: string } {
+  if (!raw) return {};
+  // Check for different message sub-types in raw
+  const mediaTypes = ["imageMessage", "videoMessage", "audioMessage", "documentMessage"];
+  for (const mediaType of mediaTypes) {
+    const media = raw[mediaType];
+    if (media?.url) {
+      return {
+        mediaUrl: media.url,
+        mimeType: media.mimetype,
+        fileName: media.fileName,
+      };
+    }
+  }
+  return {};
 }
 
 function transformMessage(msg: ChannelMessage): TransformedMessage {
+  const media = extractMediaFromRaw(msg.raw);
+  // Use caption from raw imageMessage if available, fall back to msg.text
+  const body = msg.text || msg.caption || (msg.raw?.imageMessage?.caption) || "";
   return {
     _id: msg._id,
     keyId: msg.messageId,
     fromMe: msg.fromMe,
     pushName: msg.senderJid?.split("@")[0] || "Unknown",
-    body: msg.text || "",
+    body,
     type: msg.type === "text" ? "conversation" : msg.type,
     status: msg.status,
     timestamp: msg.timestamp,
+    ...media,
   };
 }
 
@@ -99,6 +124,8 @@ export default function ChannelMessagePanel() {
         1,
         200,
       );
+
+      console.log("response======", result);
       if (result?.status) {
         const rawMessages = Array.isArray(result.data)
           ? result.data
