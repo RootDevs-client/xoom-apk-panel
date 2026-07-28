@@ -14,17 +14,13 @@ const generateSlug = (text: string) =>
 export const POST = asyncHandler(async (req: NextRequest) => {
   const body = await req.json();
 
-  const { name, icon, slug: rawSlug } = body;
+  const { name, icon } = body;
 
   if (!name?.trim()) {
     return apiResponse(false, 400, "Category name is required.");
   }
 
-  const slug = rawSlug?.trim() ? generateSlug(rawSlug) : generateSlug(name);
-
-  if (!slug) {
-    return apiResponse(false, 400, "Slug cannot be empty.");
-  }
+  const slug = generateSlug(name);
   const exists = await Category.findOne({
     $or: [{ name: name.trim() }, { slug }],
   });

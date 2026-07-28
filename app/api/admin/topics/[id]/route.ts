@@ -13,17 +13,13 @@ const generateSlug = (text: string) =>
 
 export const PATCH = asyncHandler(
   async (req: NextRequest, { id }: { id: string }) => {
-    const { name, icon, slug: rawSlug } = await req.json();
+    const { name, icon } = await req.json();
 
     if (!name?.trim()) {
       return apiResponse(false, 400, "Topic name is required.");
     }
 
-    const slug = rawSlug?.trim() ? generateSlug(rawSlug) : generateSlug(name);
-
-    if (!slug) {
-      return apiResponse(false, 400, "Slug cannot be empty.");
-    }
+    const slug = generateSlug(name);
 
     const exists = await Topic.findOne({
       _id: { $ne: id },
