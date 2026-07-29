@@ -11,7 +11,6 @@ function createSocket(url: string, userId?: string, token?: string): Socket {
     transports: ["websocket", "polling"],
     auth: { token },
   });
-  console.log("s", s, url);
   if (userId) {
     s.auth = { userId };
   }
@@ -21,7 +20,7 @@ function createSocket(url: string, userId?: string, token?: string): Socket {
 
 export function getSocket(urlOverride?: string): Socket {
   const defaultUrl =
-    process.env.NEXT_PUBLIC_SOCKET_URL || "http://192.168.66.66:8000";
+    process.env.NEXT_PUBLIC_SOCKET_URL || "http://192.168.66.66:8000/admin";
   const url = urlOverride || defaultUrl;
 
   if (!socket || currentUrl !== url) {
@@ -58,7 +57,8 @@ export function initSocket(userId?: string, token?: string) {
   if (_onConnect) socket.off("connect", _onConnect);
   if (_onDisconnect) socket.off("disconnect", _onDisconnect);
   if (_onConnectError) socket.off("connect_error", _onConnectError);
-  if (_onWhatsAppNewMessage) socket.off("whatsapp:new-message", _onWhatsAppNewMessage);
+  if (_onWhatsAppNewMessage)
+    socket.off("whatsapp:new-message", _onWhatsAppNewMessage);
 
   _onConnect = () => console.log("[Socket] Connected");
   _onDisconnect = () => console.log("[Socket] Disconnected");

@@ -237,6 +237,7 @@ export default function GeneralSettings({ general }: any) {
         { title: result?.message || "General settings updated!" },
         { id: loadingToast },
       );
+      window.dispatchEvent(new CustomEvent("settings-updated"));
     } catch {
       ToastMessage.error(
         { title: "Something went wrong." },

@@ -1,23 +1,12 @@
-import { getAllSettingsDetails } from "@/actions/landing/landingActions";
+import { getOpenSettings } from "@/actions/settings/settingsActions";
 import { ImageResponse } from "next/og";
 
 export const size = { width: 32, height: 32 };
 export const contentType = "image/png";
 
-// Helper to check if URL is valid and absolute
-function isValidUrl(url: string) {
-  try {
-    const parsed = new URL(url);
-    return parsed.protocol === "http:" || parsed.protocol === "https:";
-  } catch {
-    return false;
-  }
-}
-
 export default async function Icon() {
-  const generalSetting = await getAllSettingsDetails("general");
-  const data = generalSetting?.data || {};
-  const favicon = data?.favicon;
+  const generalSetting = await getOpenSettings();
+  const appLogo = generalSetting?.data?.appLogo;
 
   return new ImageResponse(
     <div
@@ -27,14 +16,11 @@ export default async function Icon() {
         height: "100%",
         alignItems: "center",
         justifyContent: "center",
-        background: "#111111",
       }}
     >
-      {/* Only render img if favicon is a valid absolute URL */}
-      {isValidUrl(favicon) ? (
-        <img src={favicon} width="28" height="28" />
+      {appLogo ? (
+        <img src={appLogo} width={32} height={32} alt="App Logo" />
       ) : (
-        // Fallback: text/shape — no external image needed
         <div
           style={{
             color: "white",
@@ -43,7 +29,7 @@ export default async function Icon() {
             fontFamily: "sans-serif",
           }}
         >
-          XS
+          TN
         </div>
       )}
     </div>,
