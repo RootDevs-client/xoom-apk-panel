@@ -52,7 +52,6 @@ export default function ConversationThread({
 }: Props) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [refreshing, setRefreshing] = useState(false);
-  console.log("ConversationThread", messages);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });

@@ -1,13 +1,10 @@
 import { getOpenSettings } from "@/actions/settings/settingsActions";
 import PrivacyContent from "@/components/terms-policy/privacy-content";
-import dbConnect from "@/config/database";
-import Settings from "@/model/Settings";
 
 export async function generateMetadata() {
   try {
-    await dbConnect();
-    const settings = await Settings.findOne({}).select("general").lean();
-    const appName = settings?.general?.appName || "Xoom Sports";
+    const setting = await getOpenSettings();
+    const appName = setting?.data?.appName || "Xoom Sports";
     return {
       title: `Privacy Policy | ${appName}`,
       description: `Read the privacy policy for ${appName} to understand how we collect, use, and protect your personal information.`,

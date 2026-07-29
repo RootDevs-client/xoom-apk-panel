@@ -1,7 +1,5 @@
 import { getOpenSettings } from "@/actions/settings/settingsActions";
-import dbConnect from "@/config/database";
 import { prependAwsBaseUrl } from "@/lib/server.utils";
-import Settings from "@/model/Settings";
 import { Shield, Star, Zap } from "lucide-react";
 import Image from "next/image";
 import PublicFooter from "./_components/PublicFooter";
@@ -9,13 +7,12 @@ import PublicNavbar from "./_components/PublicNavbar";
 
 export async function generateMetadata() {
   try {
-    await dbConnect();
-    const settings = await Settings.findOne({}).select("general").lean();
-    const appName = settings?.general?.appName || "Xoom Sports";
+    const setting = await getOpenSettings();
+    const appName = setting?.data?.appName || "Xoom Sports";
     return {
       title: appName,
       description:
-        settings?.general?.aboutUs ||
+        setting?.data?.aboutUs ||
         `Welcome to ${appName} — your premium sports experience.`,
     };
   } catch {
@@ -75,7 +72,7 @@ export default async function HomePage() {
               Welcome to{" "}
               <span className="text-primary relative">
                 {appName}
-                <span className="absolute -bottom-1 left-0 right-0 h-[3px] bg-primary/30 rounded-full" />
+                <span className="absolute -bottom-1 left-0 right-0 h-0.75 bg-primary/30 rounded-full" />
               </span>
             </h1>
 

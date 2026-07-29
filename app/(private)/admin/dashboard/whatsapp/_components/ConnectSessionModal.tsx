@@ -12,11 +12,11 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { connectSocket } from "@/lib/socket-client";
-import type { Socket } from "socket.io-client";
 import { CheckCircle2, Loader2, QrCode, Smartphone } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { ImSpinner9 } from "react-icons/im";
+import type { Socket } from "socket.io-client";
 
 interface Props {
   open: boolean;
@@ -141,8 +141,6 @@ export default function ConnectSessionModal({
         name: data.name.trim(),
         phone: data.phone.trim(),
       });
-
-      console.log("res====", res);
 
       if (res?.status) {
         setChannelId(res.data._id);

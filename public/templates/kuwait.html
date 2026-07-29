@@ -387,24 +387,34 @@
             </div>
           </div>
 
-          <div style="margin-top: 16px;">
-            <label style="font-size: 13px; color: var(--muted); display: block; margin-bottom: 6px;">
+          <div style="margin-top: 16px">
+            <label
+              style="
+                font-size: 13px;
+                color: var(--muted);
+                display: block;
+                margin-bottom: 6px;
+              "
+            >
               Select Operator
             </label>
-            <select id="telco-input" style="
-              width: 100%;
-              height: 48px;
-              background: var(--white);
-              border: none;
-              border-radius: 12px;
-              font-family: var(--font);
-              font-size: 15px;
-              color: #222;
-              padding: 0 14px;
-              outline: none;
-              appearance: auto;
-              cursor: pointer;
-            ">
+            <select
+              id="telco-input"
+              style="
+                width: 100%;
+                height: 48px;
+                background: var(--white);
+                border: none;
+                border-radius: 12px;
+                font-family: var(--font);
+                font-size: 15px;
+                color: #222;
+                padding: 0 14px;
+                outline: none;
+                appearance: auto;
+                cursor: pointer;
+              "
+            >
               <option value="Kuwait-stc">stc Kuwait</option>
               <option value="Kuwait-Zain">Zain Kuwait</option>
               <option value="Kuwait-Ooredoo">Ooredoo Kuwait</option>
@@ -731,7 +741,6 @@
 
       // ========== STEP 1: GetEvinaJS → Evina.load() → Show Confirm ==========
       async function handleGetEvinaJs() {
-        console.log("-----------------------------------");
         if (!validatePhone()) return;
         var raw = document
           .getElementById("phone-input")
@@ -1024,7 +1033,6 @@
       }
 
       function bindEvents() {
-        console.log("sdffffffffffffffffffffffff");
         document
           .getElementById("ContinueBtn")
           .addEventListener("click", handleGetEvinaJs);

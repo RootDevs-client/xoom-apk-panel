@@ -21,7 +21,6 @@ export default function WhatsAppChannelList() {
     try {
       setIsLoading(true);
       const result = await getWhatsAppChannelList(page, limit, search);
-      console.log("resulyhhhhh", result);
       if (result?.status) {
         setData(result.data || []);
         setTotal(result.pagination?.totalDocs || result.totalDocs || 0);

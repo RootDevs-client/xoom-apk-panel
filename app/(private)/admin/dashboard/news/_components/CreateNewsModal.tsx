@@ -77,7 +77,6 @@ export default function CreateNewsModal({
 
   const loadCategories = async () => {
     const res = await getCategoryList(1, 100, "");
-    console.log("res", res);
     if (res?.status) {
       setCategoryOptions(res.data || []);
     }
@@ -85,7 +84,6 @@ export default function CreateNewsModal({
 
   const loadTopics = async () => {
     const res = await getTopicList(1, 100, "");
-    console.log("res", res);
     if (res?.status) {
       setTopicOptions(res.data || []);
     }
@@ -154,7 +152,6 @@ export default function CreateNewsModal({
         topics: selectedTopicIds,
         publishedDate,
       };
-      console.log("data", data);
 
       const res = await createNews(data);
 

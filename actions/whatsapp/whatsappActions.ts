@@ -47,7 +47,6 @@ export async function getWhatsAppChannels(
       method: "GET",
       tags: ["whatsapp-channel"],
     });
-    console.log("response====", res);
 
     return res;
   } catch (error: any) {
@@ -164,8 +163,6 @@ export async function getWhatsAppMessages(
       `/admin/whatsapp-message?${params.toString()}`,
       { method: "GET", tags: ["whatsapp-messages"] },
     );
-
-    console.log(res);
     return res;
   } catch (error: any) {
     if (error?.digest?.startsWith("NEXT_REDIRECT")) throw error;

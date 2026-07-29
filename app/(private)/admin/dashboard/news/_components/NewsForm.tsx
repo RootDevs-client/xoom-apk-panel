@@ -113,7 +113,6 @@ export default function NewsForm({ mode, initialData }: Props) {
   // ── Load categories ───────────────────────────────────────────────────────
   useEffect(() => {
     getCategoryList(1, 100, "").then((res) => {
-      console.log("res", res);
       if (res?.status) setCategoryOptions(res.data || []);
     });
   }, []);
@@ -185,7 +184,6 @@ export default function NewsForm({ mode, initialData }: Props) {
         topics: selectedTopicIds,
         publishedDate: values.publishedDate,
       };
-      console.log("data=====", data);
 
       const res = isEdit
         ? await updateNews(initialData!._id, data)

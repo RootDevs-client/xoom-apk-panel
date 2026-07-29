@@ -112,7 +112,6 @@ export default function ChannelMessagePanel() {
     const fetchChannels = async () => {
       setIsLoadingChannels(true);
       const result = await getWhatsAppChannelList(1, 100, "");
-      console.log("result====", result);
       if (result?.status) {
         const list = Array.isArray(result.data)
           ? result.data
@@ -133,8 +132,6 @@ export default function ChannelMessagePanel() {
         1,
         200,
       );
-
-      console.log("response======", result);
       if (result?.status) {
         const rawMessages = Array.isArray(result.data)
           ? result.data
@@ -250,11 +247,6 @@ export default function ChannelMessagePanel() {
       };
       setMessages((prev) => {
         const updated = [...prev, optimistic];
-        console.log(
-          "[Socket] message added, now have",
-          updated.length,
-          "messages",
-        );
         return updated;
       });
     };

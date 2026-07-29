@@ -166,7 +166,7 @@ export async function updateTerms(data: any) {
 
 export async function getAllSettingsDetails(context: string) {
   try {
-    const res = await apiClient(`/api/settings?context=${context}`, {
+    const res = await apiClient(`/settings?context=${context}`, {
       method: "GET",
       tags: ["settings"],
       cache: "force-cache",
@@ -188,7 +188,7 @@ export async function getAllSettingsDetails(context: string) {
 }
 export async function getPublicSettingsDetails() {
   try {
-    const res = await apiClient(`/api/public/settings`, {
+    const res = await apiClient(`/public/settings`, {
       method: "GET",
       tags: ["settings"],
       cache: "force-cache",
@@ -211,7 +211,7 @@ export async function getPublicSettingsDetails() {
 
 export async function getOpenSettings() {
   try {
-    const res = await apiClient(`/api/settings/public`, {
+    const res = await apiClient(`/public/settings`, {
       method: "GET",
       // tags: ["settings"],
       // cache: "force-cache",

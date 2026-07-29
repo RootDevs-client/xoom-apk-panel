@@ -16,8 +16,6 @@ export default function TabsSettings({
     { id: "privacy", label: "Privacy Policy", icon: FaShieldAlt },
     { id: "terms", label: "Terms & Conditions", icon: FaBalanceScale },
   ];
-
-  console.log("privacySettings==========", privacySettings);
   const renderContent = () => {
     switch (activeTab) {
       case "general":
