@@ -8,6 +8,7 @@ const breadcrumbItems = [
 ];
 export default async function Analytics() {
   const result = await getSubscribeAnalytics();
+  console.log("result", result);
 
   const data = result?.data ?? null;
 

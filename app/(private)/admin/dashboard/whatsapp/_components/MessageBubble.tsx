@@ -13,9 +13,49 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { Check, CheckCheck, Download, FileText, Trash2 } from "lucide-react";
+import { Check, CheckCheck, Download, ExternalLink, FileText, Trash2 } from "lucide-react";
 import moment from "moment-timezone";
 import Link from "next/link";
+
+// Regular expression to match URLs (http/https only)
+const URL_REGEX = /(https?:\/\/[^\s<]+[^\s<.,;:!?)\]}>])/gi;
+
+/** Split text into segments, converting URLs into clickable link metadata */
+function linkifyText(text: string): React.ReactNode[] {
+  const parts: React.ReactNode[] = [];
+  let lastIndex = 0;
+  let match: RegExpExecArray | null;
+  const regex = new RegExp(URL_REGEX.source, URL_REGEX.flags);
+
+  while ((match = regex.exec(text)) !== null) {
+    // Text before the URL
+    if (match.index > lastIndex) {
+      parts.push(text.slice(lastIndex, match.index));
+    }
+    const url = match[0];
+    parts.push(
+      <Link
+        key={match.index}
+        href={url}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="inline-flex items-center gap-0.5 underline underline-offset-2 hover:opacity-80 transition-opacity"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {url}
+        <ExternalLink className="size-2.5 shrink-0" />
+      </Link>,
+    );
+    lastIndex = match.index + url.length;
+  }
+
+  // Remaining text after last URL
+  if (lastIndex < text.length) {
+    parts.push(text.slice(lastIndex));
+  }
+
+  return parts.length > 0 ? parts : [text];
+}
 import { useState } from "react";
 
 interface Message {
@@ -209,7 +249,9 @@ export default function MessageBubble({ message, onDeleted }: Props) {
 
             {/* Caption / text body */}
             {message.body && (
-              <p className={message.mediaUrl ? "mt-1.5" : ""}>{message.body}</p>
+              <p className={`${message.mediaUrl ? "mt-1.5" : ""} break-words`}>
+                {linkifyText(message.body)}
+              </p>
             )}
 
             {/* Empty media fallback */}

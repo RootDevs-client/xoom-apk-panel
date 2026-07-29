@@ -1,9 +1,6 @@
 "use client";
 
-import {
-  deleteWhatsAppSession,
-  disconnectWhatsAppChannel,
-} from "@/actions/whatsapp/whatsappActions";
+import { deleteWhatsAppSession } from "@/actions/whatsapp/whatsappActions";
 import { ToastMessage } from "@/components/custom/ToastMessage";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -23,9 +20,7 @@ import {
 import { connectSocket } from "@/lib/socket-client";
 import { ColumnDef } from "@tanstack/react-table";
 import {
-  Link2,
   Loader2,
-  LogOut,
   MoreHorizontal,
   Pencil,
   QrCode,
@@ -179,23 +174,33 @@ function ActionCell({
   const log = (msg: string, ...args: any[]) =>
     console.log(`[WA:QR:${session._id}]`, msg, ...args);
 
-  const handleDisconnect = async () => {
-    const res = await disconnectWhatsAppChannel(session._id);
-    if (res?.status) {
-      ToastMessage.success({ title: "Channel disconnected" });
-      onSuccess();
-    } else {
-      ToastMessage.error({ title: res?.message || "Failed to disconnect" });
-    }
-  };
+  // const handleDisconnect = async () => {
+  //   const loading = ToastMessage.loading("Disconnecting...");
+  //   const res = await disconnectWhatsAppChannel(session._id);
+
+  //   if (res?.status) {
+  //     ToastMessage.success({ title: "Channel disconnected" }, { id: loading });
+  //     onSuccess();
+  //   } else {
+  //     ToastMessage.error(
+  //       { title: res?.message || "Failed to disconnect" },
+  //       { id: loading },
+  //     );
+  //   }
+  // };
 
   const handleDelete = async () => {
+    const loading = ToastMessage.loading("Deleting...");
     const res = await deleteWhatsAppSession(session._id);
+
     if (res?.status) {
-      ToastMessage.success({ title: "Channel deleted" });
+      ToastMessage.success({ title: "Channel deleted" }, { id: loading });
       onSuccess();
     } else {
-      ToastMessage.error({ title: res?.message || "Failed to delete" });
+      ToastMessage.error(
+        { title: res?.message || "Failed to delete" },
+        { id: loading },
+      );
     }
   };
 
@@ -330,15 +335,9 @@ function ActionCell({
       log("error event received", data);
       setQrLoading(false);
 
-      // If session not found (e.g., after logout), close the QR dialog
-      // and tell the user to create a new connection
       if (data.code === "SESSION_NOT_FOUND") {
         setQrOpen(false);
-        ToastMessage.error({
-          title: "Session no longer exists",
-          description:
-            "This WhatsApp session was logged out. Create a new connection to reconnect.",
-        });
+        ToastMessage.error({ title: "Session no longer exists" });
         onSuccess();
         return;
       }
@@ -370,6 +369,9 @@ function ActionCell({
   };
 
   const handleRefreshQR = () => {
+    const loadingToastId = ToastMessage.loading({
+      title: "Refreshing QR Code...",
+    });
     if (session.status === "CONNECTED") return;
 
     setQrOpen(true);
@@ -384,7 +386,10 @@ function ActionCell({
       socket.emit("admin:join", { accountId: session._id });
       socket.emit("refresh-qr", { accountId: session._id });
       log("admin:join + refresh-qr emitted");
-      ToastMessage.info({ title: "Requesting QR code..." });
+      ToastMessage.info(
+        { title: "Requesting QR code..." },
+        { id: loadingToastId },
+      );
     };
 
     if (socket.connected) {
@@ -405,21 +410,16 @@ function ActionCell({
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          {isConnected ? (
-            <DropdownMenuItem onClick={handleDisconnect}>
+          {isConnected && (
+            <DropdownMenuItem onClick={handleLogout}>
               <WifiOff className="size-4 mr-2" />
               Disconnect
             </DropdownMenuItem>
-          ) : (
+          )}
+          {!isConnected && (
             <DropdownMenuItem onClick={handleRefreshQR}>
               <QrCode className="size-4 mr-2" />
               Connect / Reconnect
-            </DropdownMenuItem>
-          )}
-          {isConnected && (
-            <DropdownMenuItem onClick={handleLogout}>
-              <LogOut className="size-4 mr-2" />
-              Logout
             </DropdownMenuItem>
           )}
           <DropdownMenuItem onClick={() => setEditOpen(true)}>

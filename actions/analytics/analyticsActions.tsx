@@ -4,7 +4,7 @@ import { apiClient } from "@/lib/api-client";
 
 export async function getSubscribeAnalytics() {
   try {
-    const res = await apiClient(`/api/admin/subscribe/analytics`, {
+    const res = await apiClient(`/admin/subscribe/analytics`, {
       method: "GET",
       //   tags: ["contact-us"],
       //   cache: "no-store",

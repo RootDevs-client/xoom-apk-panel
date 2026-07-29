@@ -57,10 +57,19 @@ interface TransformedMessage {
   fileName?: string;
 }
 
-function extractMediaFromRaw(raw: any): { mediaUrl?: string; mimeType?: string; fileName?: string } {
+function extractMediaFromRaw(raw: any): {
+  mediaUrl?: string;
+  mimeType?: string;
+  fileName?: string;
+} {
   if (!raw) return {};
   // Check for different message sub-types in raw
-  const mediaTypes = ["imageMessage", "videoMessage", "audioMessage", "documentMessage"];
+  const mediaTypes = [
+    "imageMessage",
+    "videoMessage",
+    "audioMessage",
+    "documentMessage",
+  ];
   for (const mediaType of mediaTypes) {
     const media = raw[mediaType];
     if (media?.url) {
@@ -77,7 +86,7 @@ function extractMediaFromRaw(raw: any): { mediaUrl?: string; mimeType?: string; 
 function transformMessage(msg: ChannelMessage): TransformedMessage {
   const media = extractMediaFromRaw(msg.raw);
   // Use caption from raw imageMessage if available, fall back to msg.text
-  const body = msg.text || msg.caption || (msg.raw?.imageMessage?.caption) || "";
+  const body = msg.text || msg.caption || msg.raw?.imageMessage?.caption || "";
   return {
     _id: msg._id,
     keyId: msg.messageId,
@@ -161,8 +170,13 @@ export default function ChannelMessagePanel() {
     // Join the selected channel's WhatsApp account room to receive events
     if (selectedChannel?.whatsappAccountId) {
       joinedAccountRef.current = selectedChannel.whatsappAccountId;
-      socket.emit("admin:join", { accountId: selectedChannel.whatsappAccountId });
-      console.log("[Socket] joined account room", selectedChannel.whatsappAccountId);
+      socket.emit("admin:join", {
+        accountId: selectedChannel.whatsappAccountId,
+      });
+      console.log(
+        "[Socket] joined account room",
+        selectedChannel.whatsappAccountId,
+      );
     } else {
       joinedAccountRef.current = null;
     }
@@ -236,7 +250,11 @@ export default function ChannelMessagePanel() {
       };
       setMessages((prev) => {
         const updated = [...prev, optimistic];
-        console.log("[Socket] message added, now have", updated.length, "messages");
+        console.log(
+          "[Socket] message added, now have",
+          updated.length,
+          "messages",
+        );
         return updated;
       });
     };
