@@ -6,15 +6,18 @@ import { InputHTMLAttributes } from "react";
 export default function SearchBar({
   value,
   onChange,
+  placeholder = "Search topics...",
+  ...props
 }: InputHTMLAttributes<HTMLInputElement>) {
   return (
     <div className="relative min-w-50 max-w-100 flex-1">
       <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
       <Input
-        placeholder="Search topics..."
+        placeholder={placeholder}
         className="pl-9"
         value={value}
         onChange={onChange}
+        {...props}
       />
     </div>
   );

@@ -5,6 +5,7 @@ import {
   Hash,
   LayoutDashboard,
   MessageCircle,
+  Monitor,
   Newspaper,
   Settings2,
   Tags,
@@ -62,6 +63,11 @@ export const adminDashboardMenu = {
       title: "WhatsApp",
       url: routes.privateRoutes.admin.whatsapp,
       icon: MessageCircle,
+    },
+    {
+      title: "Devices",
+      url: routes.privateRoutes.admin.devices,
+      icon: Monitor,
     },
     {
       title: "Subscription",
