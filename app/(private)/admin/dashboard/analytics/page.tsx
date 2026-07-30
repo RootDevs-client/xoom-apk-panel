@@ -1,34 +1,53 @@
-import { getSubscribeAnalytics } from "@/actions/analytics/analyticsActions";
+import { Suspense } from "react";
+import {
+  getAdminDashboardAnalytics,
+  getSubscribeAnalytics,
+} from "@/actions/analytics/analyticsActions";
+import { BarChart3 } from "lucide-react";
 import { DynamicBreadcrumb } from "../settings/_components/DynamicBreadcrumb";
-import { SubscriptionAnalyticsDashboard } from "./_components/SubscriptionAnalyticsDashboard";
+import { DashboardAnalyticsCards } from "./_components/DashboardAnalyticsCards";
+import { AnalyticsSkeleton } from "./_components/AnalyticsSkeleton";
 
 const breadcrumbItems = [
   { label: "Dashboard", href: "/admin/dashboard" },
   { label: "Analytics" },
 ];
-export default async function Analytics() {
-  const result = await getSubscribeAnalytics();
 
-  const data = result?.data ?? null;
+async function AnalyticsContent() {
+  const [subscribeResult, dashboardResult] = await Promise.all([
+    getSubscribeAnalytics(),
+    getAdminDashboardAnalytics(),
+  ]);
+
+  const subscribeData = subscribeResult?.data ?? null;
+  const dashboardData = dashboardResult?.data ?? null;
 
   return (
+    <div className="space-y-10">
+      {/* Dashboard Analytics */}
+      {dashboardData && <DashboardAnalyticsCards data={dashboardData} />}
+    </div>
+  );
+}
+
+export default function Analytics() {
+  return (
     <>
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex flex-col flex-1 gap-2">
-          <div className="mb-2 flex items-start justify-between flex-wrap space-y-2">
-            <div>
-              <h2 className="font-dm-sans font-medium text-lg">
-                Subscription Analytics
-              </h2>
-              <DynamicBreadcrumb items={breadcrumbItems} />
-            </div>
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-3">
+          <div className="p-2.5 rounded-xl bg-linear-to-br from-primary/20 to-primary/5 shadow-sm">
+            <BarChart3 className="h-5 w-5 text-primary" />
+          </div>
+          <div>
+            <h3 className="text-lg font-semibold">Dashboard Analytics</h3>
+            <DynamicBreadcrumb items={breadcrumbItems} />
           </div>
         </div>
       </div>
 
-      <div className="">
-        <SubscriptionAnalyticsDashboard data={data} />
-      </div>
+      <Suspense fallback={<AnalyticsSkeleton />}>
+        <AnalyticsContent />
+      </Suspense>
     </>
   );
 }

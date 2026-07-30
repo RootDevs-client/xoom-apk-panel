@@ -25,3 +25,21 @@ export interface AnalyticsData {
   platformBreakdown: PlatformBreakdownItem[];
   locationBreakdown: LocationBreakdownItem[];
 }
+
+export interface DashboardAnalyticsData {
+  totalDevices: number;
+  activeDevices: number;
+  inactiveDevices: number;
+  deletedDevices: number;
+  todayDownloads: number;
+  yesterdayDownloads: number;
+  last7DaysDownloads: number;
+  last30DaysDownloads: number;
+  androidDevices: number;
+  iosDevices: number;
+  liveUsers: number;
+  totalPinRequests: number;
+  totalPinReceived: number;
+  conversionRate: number;
+  averageDailyDownloads: number;
+}

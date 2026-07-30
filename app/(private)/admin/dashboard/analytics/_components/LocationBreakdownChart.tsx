@@ -44,7 +44,7 @@ export function LocationBreakdownChart({ data }: LocationBreakdownChartProps) {
         <CardDescription>Subscriptions by country</CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="w-full h-[280px] sm:h-[320px]">
+        <div className="w-full h-70 sm:h-80">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart
               data={data}
