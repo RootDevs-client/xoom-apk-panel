@@ -27,6 +27,7 @@ const general = new mongoose.Schema(
     universalSubscriptionApiUrl: { type: String, trim: true },
     xoomSportsUrl: { type: String, trim: true },
     geminiApiKey: { type: String, trim: true },
+    telcoProviderWebhookUrl: { type: String, trim: true },
 
     manual_flow_enabled: { type: Boolean, default: false },
     web_view_enabled: { type: Boolean, default: true },

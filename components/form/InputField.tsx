@@ -3,8 +3,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { FormInputProps } from "@/lib/types";
 import { cn } from "@/lib/utils";
-import { BadgeAlert, Info } from "lucide-react";
+import { BadgeAlert, Info, Eye, EyeOff } from "lucide-react";
 import { FieldError, FieldValues, get, useFormContext } from "react-hook-form";
+import { useState } from "react";
 import {
   Tooltip,
   TooltipContent,
@@ -20,6 +21,7 @@ type ExtendedInputProps<TFieldValues extends FieldValues> =
     minLength?: number;
     maxLength?: number;
     tooltip?: string;
+    showPassword?: boolean;
   };
 
 export default function InputField<TFieldValues extends FieldValues>({
@@ -38,7 +40,10 @@ export default function InputField<TFieldValues extends FieldValues>({
   minLength,
   maxLength,
   tooltip,
+  showPassword = false,
 }: ExtendedInputProps<TFieldValues>) {
+  const [showText, setShowText] = useState(showPassword ? false : type === "password");
+  const [inputType, setInputType] = useState(showText ? "text" : type);
   const {
     register,
     trigger,
@@ -139,7 +144,7 @@ export default function InputField<TFieldValues extends FieldValues>({
 
         <Input
           id={id || name}
-          type={type}
+          type={inputType}
           placeholder={placeholder}
           {...registerProps}
           onChange={async (e) => {
@@ -153,12 +158,26 @@ export default function InputField<TFieldValues extends FieldValues>({
                 : "!focus-visible:ring-red-700"
             } transition-all w-full`,
             prefix ? "pl-9" : "",
-            postfix ? "pr-9" : "",
+            (postfix || (showPassword && type === "password")) ? "pr-9" : "",
             className,
           )}
         />
 
-        {postfix && (
+        {(showPassword && type === "password") && (
+          <button
+            type="button"
+            onClick={() => {
+              setShowText(!showText);
+              setInputType(showText ? "password" : "text");
+            }}
+            className="absolute right-3 pointer-events-auto text-muted-foreground hover:text-foreground transition-colors"
+            aria-label={showText ? "Hide password" : "Show password"}
+          >
+            {showText ? <EyeOff className="size-4.5" /> : <Eye className="size-4.5" />}
+          </button>
+        )}
+
+        {postfix && !showPassword && (
           <div className="absolute right-3 pointer-events-none">{postfix}</div>
         )}
       </div>

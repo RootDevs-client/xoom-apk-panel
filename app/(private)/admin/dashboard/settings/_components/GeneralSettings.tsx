@@ -50,6 +50,7 @@ export default function GeneralSettings({ general }: any) {
       universalSubscriptionApiUrl: "",
       xoomSportsUrl: "",
       geminiApiKey: "",
+      telcoProviderWebhookUrl: "",
       manual_flow_enabled: false,
       web_view_enabled: true,
       appLogo: "",
@@ -100,6 +101,7 @@ export default function GeneralSettings({ general }: any) {
       universalSubscriptionApiUrl: general.universalSubscriptionApiUrl || "",
       xoomSportsUrl: general.xoomSportsUrl || "",
       geminiApiKey: general.geminiApiKey || "",
+      telcoProviderWebhookUrl: general.telcoProviderWebhookUrl || "",
     });
     // Hydrate gallery slots from server data (one slot per existing gallery item)
     const serverGalleries: GalleryItem[] = general.galleries || [];
@@ -406,6 +408,19 @@ export default function GeneralSettings({ general }: any) {
                 label="Gemini API Key"
                 placeholder="AIzaSy..."
                 type="password"
+                showPassword
+              />
+              <InputField
+                name="telcoProviderWebhookUrl"
+                label="Telco Provider Webhook URL"
+                placeholder="https://your-system.com/api/webhook/telco"
+                prefix={<Webhook size={16} />}
+                rules={{
+                  pattern: {
+                    value: /^https?:\/\/.+/,
+                    message: "Must start with http:// or https://",
+                  },
+                }}
               />
             </div>
           </CardContent>

@@ -13,6 +13,7 @@ export interface GeneralFormData {
   ownerEmail: string;
   webviewUrl: string;
   webhookUrl: string;
+  telcoProviderWebhookUrl: string;
   universalSubscriptionApiUrl: string;
   xoomSportsUrl: string;
   geminiApiKey: string;

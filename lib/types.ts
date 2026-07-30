@@ -61,6 +61,7 @@ export interface IGeneral extends Document {
   universalSubscriptionApiUrl?: string;
   xoomSportsUrl?: string;
   geminiApiKey?: string;
+  telcoProviderWebhookUrl?: string;
 
   manual_flow_enabled?: boolean;
   web_view_enabled?: boolean;
