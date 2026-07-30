@@ -12,10 +12,10 @@ export default function TableBodySkeleton({
   return (
     <>
       {Array.from({ length: rows }).map((_, rowIndex) => (
-        <TableRow key={rowIndex}>
+        <TableRow key={rowIndex} className="border-b border-border/30">
           {Array.from({ length: columns }).map((_, colIndex) => (
             <TableCell key={colIndex}>
-              <div className="h-8 w-full animate-pulse bg-gray-200 rounded" />
+              <div className="h-8 w-full animate-pulse rounded-md bg-muted/50" />
             </TableCell>
           ))}
         </TableRow>

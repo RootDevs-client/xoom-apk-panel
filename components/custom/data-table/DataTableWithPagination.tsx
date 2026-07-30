@@ -56,6 +56,7 @@ import {
   ChevronsLeft,
   ChevronsRight,
   Grip,
+  SearchX,
 } from "lucide-react";
 import { useEffect, useId, useMemo, useState } from "react";
 import toast from "react-hot-toast";
@@ -75,9 +76,9 @@ function DragHandle({ id }: { id: string }) {
       {...listeners}
       variant="ghost"
       size="icon"
-      className="text-muted-foreground size-7 dark:hover:bg-primary hover:bg-primary  cursor-grabbing"
+      className="text-muted-foreground/40 hover:text-muted-foreground size-7 hover:bg-muted/50 cursor-grab shrink-0"
     >
-      <Grip className="dark:hover:text-white size-3" />
+      <Grip className="size-3.5" />
       <span className="sr-only">Drag to reorder</span>
     </Button>
   );
@@ -99,14 +100,14 @@ function DraggableRow<T>({
       data-state={row.getIsSelected() && "selected"}
       data-dragging={isDragging}
       ref={setNodeRef}
-      className="relative z-0 data-[dragging=true]:z-10 data-[dragging=true]:opacity-80"
+      className="relative z-0 data-[dragging=true]:z-10 data-[dragging=true]:opacity-80 transition-all duration-200"
       style={{
         transform: CSS.Transform.toString(transform),
         transition: transition,
       }}
     >
       {draggable && (
-        <TableCell>
+        <TableCell className="w-10">
           <DragHandle id={row.original._id} />
         </TableCell>
       )}
@@ -219,8 +220,9 @@ export function DataTableWithPagination<T>({
   const canNextPage = page < totalPages;
 
   return (
-    <div className="relative flex flex-col gap-4 overflow-auto">
-      <div className="overflow-hidden border">
+    <div className="relative flex flex-col gap-4">
+      {/* Table wrapper with modern card styling */}
+      <div className="overflow-hidden rounded-xl border border-border/60 bg-card shadow-sm">
         <DndContext
           collisionDetection={closestCenter}
           modifiers={[restrictToVerticalAxis]}
@@ -229,13 +231,17 @@ export function DataTableWithPagination<T>({
           id={sortableId}
         >
           <Table>
-            <TableHeader className="bg-muted h-12 sticky top-0 z-10">
+            <TableHeader className="bg-muted/40 sticky top-0 z-10">
               {table.getHeaderGroups().map((headerGroup) => (
-                <TableRow key={headerGroup.id}>
-                  {draggable && <TableHead>{null}</TableHead>}
+                <TableRow key={headerGroup.id} className="border-b border-border/50 hover:bg-transparent">
+                  {draggable && <TableHead className="w-10" />}
                   {headerGroup.headers.map((header) => {
                     return (
-                      <TableHead key={header.id} colSpan={header.colSpan}>
+                      <TableHead
+                        key={header.id}
+                        colSpan={header.colSpan}
+                        className="h-11 px-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground/80"
+                      >
                         {header.isPlaceholder
                           ? null
                           : flexRender(
@@ -248,7 +254,7 @@ export function DataTableWithPagination<T>({
                 </TableRow>
               ))}
             </TableHeader>
-            <TableBody className="**:data-[slot=table-cell]:first:w-8">
+            <TableBody>
               {isLoading ? (
                 <TableBodySkeleton
                   columns={
@@ -262,7 +268,7 @@ export function DataTableWithPagination<T>({
                   items={dataIds}
                   strategy={verticalListSortingStrategy}
                 >
-                  {table.getRowModel().rows.map((row) => (
+                  {table.getRowModel().rows.map((row, index) => (
                     <DraggableRow
                       key={row.id}
                       row={row}
@@ -274,9 +280,21 @@ export function DataTableWithPagination<T>({
                 <TableRow>
                   <TableCell
                     colSpan={columns.length + (draggable ? 1 : 0)}
-                    className="h-24 text-center"
+                    className="h-60 text-center"
                   >
-                    No results.
+                    <div className="flex flex-col items-center justify-center gap-3">
+                      <div className="rounded-full bg-muted/50 p-4">
+                        <SearchX className="h-8 w-8 text-muted-foreground/40" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-semibold text-muted-foreground">
+                          No results found
+                        </p>
+                        <p className="text-xs text-muted-foreground/60 mt-0.5">
+                          Try adjusting your search or filters
+                        </p>
+                      </div>
+                    </div>
                   </TableCell>
                 </TableRow>
               )}
@@ -284,75 +302,109 @@ export function DataTableWithPagination<T>({
           </Table>
         </DndContext>
       </div>
+
+      {/* Modern pagination bar */}
       {showPagination && (
-        <div className="flex items-center justify-between px-4">
-          <div className="text-muted-foreground hidden flex-1 text-sm lg:flex">
-            Showing {data.length === 0 ? 0 : (page - 1) * limit + 1} to{" "}
-            {Math.min(page * limit, total)} of {total} row(s)
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 rounded-xl border border-border/60 bg-card px-4 py-3 shadow-sm">
+          {/* Info text */}
+          <div className="text-xs text-muted-foreground/70 order-2 sm:order-1">
+            Showing{" "}
+            <span className="font-semibold text-muted-foreground">
+              {data.length === 0 ? 0 : (page - 1) * limit + 1}
+            </span>{" "}
+            to{" "}
+            <span className="font-semibold text-muted-foreground">
+              {Math.min(page * limit, total)}
+            </span>{" "}
+            of{" "}
+            <span className="font-semibold text-muted-foreground">{total}</span>{" "}
+            results
           </div>
-          <div className="flex w-full items-center gap-8 lg:w-fit">
-            <div className="hidden items-center gap-2 lg:flex">
-              <Label htmlFor="rows-per-page" className="text-sm font-medium">
-                Rows per page
+
+          {/* Controls */}
+          <div className="flex items-center gap-3 order-1 sm:order-2">
+            {/* Rows per page */}
+            <div className="hidden items-center gap-2 sm:flex">
+              <Label
+                htmlFor="rows-per-page"
+                className="text-xs text-muted-foreground/70 whitespace-nowrap"
+              >
+                Rows
               </Label>
               <Select
                 value={limit.toString()}
                 onValueChange={handleLimitChange}
               >
-                <SelectTrigger size="sm" className="w-20" id="rows-per-page">
+                <SelectTrigger
+                  size="sm"
+                  className="h-8 w-16 text-xs border-muted-foreground/20"
+                  id="rows-per-page"
+                >
                   <SelectValue placeholder={limit} />
                 </SelectTrigger>
                 <SelectContent side="top">
                   {[10, 20, 30, 40, 50].map((pageSize) => (
-                    <SelectItem key={pageSize} value={`${pageSize}`}>
+                    <SelectItem key={pageSize} value={`${pageSize}`} className="text-xs">
                       {pageSize}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
-            <div className="flex w-fit items-center justify-center text-sm font-medium">
-              Page {page} of {totalPages || 1}
+
+            {/* Page info */}
+            <div className="text-xs text-muted-foreground/70 whitespace-nowrap">
+              Page{" "}
+              <span className="font-semibold text-muted-foreground">
+                {page}
+              </span>{" "}
+              of{" "}
+              <span className="font-semibold text-muted-foreground">
+                {totalPages || 1}
+              </span>
             </div>
-            <div className="ml-auto flex items-center gap-2 lg:ml-0">
+
+            {/* Navigation buttons */}
+            <div className="flex items-center gap-0.5">
               <Button
-                variant="outline"
-                className="hidden h-8 w-8 p-0 lg:flex"
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 text-muted-foreground/60 hover:text-muted-foreground hover:bg-muted/50"
                 onClick={() => handlePageChange(1)}
                 disabled={!canPreviousPage}
               >
-                <span className="sr-only">Go to first page</span>
-                <ChevronsLeft />
+                <ChevronsLeft className="h-4 w-4" />
+                <span className="sr-only">First page</span>
               </Button>
               <Button
-                variant="outline"
-                className="size-8"
+                variant="ghost"
                 size="icon"
+                className="h-8 w-8 text-muted-foreground/60 hover:text-muted-foreground hover:bg-muted/50"
                 onClick={() => handlePageChange(page - 1)}
                 disabled={!canPreviousPage}
               >
-                <span className="sr-only">Go to previous page</span>
-                <ChevronLeft />
+                <ChevronLeft className="h-4 w-4" />
+                <span className="sr-only">Previous page</span>
               </Button>
               <Button
-                variant="outline"
-                className="size-8"
+                variant="ghost"
                 size="icon"
+                className="h-8 w-8 text-muted-foreground/60 hover:text-muted-foreground hover:bg-muted/50"
                 onClick={() => handlePageChange(page + 1)}
                 disabled={!canNextPage}
               >
-                <span className="sr-only">Go to next page</span>
-                <ChevronRight />
+                <ChevronRight className="h-4 w-4" />
+                <span className="sr-only">Next page</span>
               </Button>
               <Button
-                variant="outline"
-                className="hidden size-8 lg:flex"
+                variant="ghost"
                 size="icon"
+                className="h-8 w-8 text-muted-foreground/60 hover:text-muted-foreground hover:bg-muted/50"
                 onClick={() => handlePageChange(totalPages)}
                 disabled={!canNextPage}
               >
-                <span className="sr-only">Go to last page</span>
-                <ChevronsRight />
+                <ChevronsRight className="h-4 w-4" />
+                <span className="sr-only">Last page</span>
               </Button>
             </div>
           </div>

@@ -48,7 +48,7 @@
 /* Light mode */
 :root {
   --primary: #ff642b;
-  --primary-foreground: #1a1a1a;
+  --primary-foreground: #f0f0f0;
   --background: #f0f0f0;
   --foreground: #1a1a1a;
   --radius: 0.625rem;

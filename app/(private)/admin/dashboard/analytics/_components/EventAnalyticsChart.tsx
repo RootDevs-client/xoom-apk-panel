@@ -43,7 +43,8 @@ const CUSTOM_TOOLTIP_STYLE = {
 };
 
 // Event name formatting
-const formatEventName = (name: string) => {
+const formatEventName = (name: string | null | undefined) => {
+  if (!name) return "—";
   return name
     .replace(/_/g, " ")
     .replace(/\b\w/g, (c) => c.toUpperCase());

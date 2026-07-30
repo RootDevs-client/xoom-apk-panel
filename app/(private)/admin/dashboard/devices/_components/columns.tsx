@@ -25,9 +25,7 @@ export type Device = {
 
 const formatDate = (date: string) => {
   if (!date) return "—";
-  return moment(date)
-    .tz("Asia/Dhaka")
-    .format("DD MMM YYYY, HH:mm");
+  return moment(date).tz("Asia/Dhaka").format("DD MMM YYYY, HH:mm");
 };
 
 const timeAgo = (date: string) => {
@@ -36,16 +34,28 @@ const timeAgo = (date: string) => {
 };
 
 function StatusBadge({ status }: { status: string }) {
-  const variants: Record<string, { variant: "default" | "secondary" | "destructive" | "outline"; label: string }> = {
+  const variants: Record<
+    string,
+    {
+      variant: "default" | "secondary" | "destructive" | "outline";
+      label: string;
+    }
+  > = {
     APP_ACTIVE: { variant: "default", label: "Active" },
     APP_INACTIVE: { variant: "secondary", label: "Inactive" },
     APP_DELETED: { variant: "destructive", label: "Deleted" },
   };
 
-  const config = variants[status] ?? { variant: "outline" as const, label: status };
+  const config = variants[status] ?? {
+    variant: "outline" as const,
+    label: status,
+  };
 
   return (
-    <Badge variant={config.variant} className="text-xs font-medium whitespace-nowrap">
+    <Badge
+      variant={config.variant}
+      className="text-xs font-medium whitespace-nowrap"
+    >
       {config.label}
     </Badge>
   );
@@ -73,10 +83,10 @@ export const columns: ColumnDef<Device>[] = [
     header: "Device",
     cell: ({ row }) => (
       <div className="flex flex-col min-w-0">
-        <span className="font-medium text-sm truncate max-w-[180px]">
+        <span className="font-medium text-sm truncate max-w-45">
           {row.original.deviceName || "—"}
         </span>
-        <span className="text-xs text-muted-foreground truncate max-w-[180px]">
+        <span className="text-xs text-muted-foreground truncate max-w-45">
           {row.original.deviceModel || ""}
         </span>
       </div>
