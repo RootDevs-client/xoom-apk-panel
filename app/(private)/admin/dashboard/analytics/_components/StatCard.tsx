@@ -65,7 +65,7 @@ export function StatCard({
       <div className="relative p-5 flex items-start justify-between gap-4">
         <div className="space-y-2.5 min-w-0 flex-1">
           {/* Label */}
-          <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-[0.12em] flex items-center gap-1.5">
+          <p className="text-xs font-bold text-foreground/75 uppercase tracking-[0.08em] flex items-center gap-1.5">
             <span className="inline-block w-1.5 h-1.5 rounded-full bg-current opacity-90" />
             {label}
           </p>

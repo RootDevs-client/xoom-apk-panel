@@ -1,12 +1,14 @@
-import { Suspense } from "react";
 import {
   getAdminDashboardAnalytics,
-  getSubscribeAnalytics,
+  getDeviceModels,
+  getEventAnalytics,
+  getUninstallAnalytics,
 } from "@/actions/analytics/analyticsActions";
 import { BarChart3 } from "lucide-react";
+import { Suspense } from "react";
 import { DynamicBreadcrumb } from "../settings/_components/DynamicBreadcrumb";
-import { DashboardAnalyticsCards } from "./_components/DashboardAnalyticsCards";
 import { AnalyticsSkeleton } from "./_components/AnalyticsSkeleton";
+import { DashboardAnalyticsCards } from "./_components/DashboardAnalyticsCards";
 
 const breadcrumbItems = [
   { label: "Dashboard", href: "/admin/dashboard" },
@@ -14,18 +16,30 @@ const breadcrumbItems = [
 ];
 
 async function AnalyticsContent() {
-  const [subscribeResult, dashboardResult] = await Promise.all([
-    getSubscribeAnalytics(),
-    getAdminDashboardAnalytics(),
-  ]);
+  const [dashboardResult, deviceModelsResult, uninstallResult, eventResult] =
+    await Promise.all([
+      getAdminDashboardAnalytics(),
+      getDeviceModels(),
+      getUninstallAnalytics(),
+      getEventAnalytics(),
+    ]);
 
-  const subscribeData = subscribeResult?.data ?? null;
   const dashboardData = dashboardResult?.data ?? null;
+  const deviceModels = deviceModelsResult?.data ?? null;
+  const uninstallData = uninstallResult?.data ?? null;
+  const eventData = eventResult?.data ?? null;
 
   return (
     <div className="space-y-10">
       {/* Dashboard Analytics */}
-      {dashboardData && <DashboardAnalyticsCards data={dashboardData} />}
+      {dashboardData && (
+        <DashboardAnalyticsCards
+          data={dashboardData}
+          deviceModels={deviceModels}
+          uninstallData={uninstallData}
+          eventData={eventData}
+        />
+      )}
     </div>
   );
 }

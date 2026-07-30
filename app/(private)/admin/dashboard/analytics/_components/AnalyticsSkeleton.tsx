@@ -1,54 +1,6 @@
 export function AnalyticsSkeleton() {
   return (
     <div className="space-y-6" aria-label="Loading analytics data">
-      {/* ─── Devices Overview Section ─── */}
-      <div className="space-y-4">
-        {/* Section Header */}
-        <div className="flex items-center gap-3">
-          <div className="relative">
-            <div className="absolute inset-0 bg-blue-500/10 blur-xl rounded-full" />
-            <div className="relative p-2 rounded-xl bg-blue-500/5 border border-blue-500/5">
-              <div className="h-4 w-4 shimmer rounded" />
-            </div>
-          </div>
-          <div className="space-y-1.5">
-            <div className="h-4 w-36 shimmer rounded-md" />
-            <div className="h-3 w-48 shimmer rounded-md" />
-          </div>
-        </div>
-
-        {/* 4 Stat Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {[...Array(4)].map((_, i) => (
-            <StatCardSkeleton key={`dev-${i}`} hasTrend={false} />
-          ))}
-        </div>
-      </div>
-
-      {/* ─── Downloads Analytics Section ─── */}
-      <div className="space-y-4">
-        {/* Section Header */}
-        <div className="flex items-center gap-3">
-          <div className="relative">
-            <div className="absolute inset-0 bg-violet-500/10 blur-xl rounded-full" />
-            <div className="relative p-2 rounded-xl bg-violet-500/5 border border-violet-500/5">
-              <div className="h-4 w-4 shimmer rounded" />
-            </div>
-          </div>
-          <div className="space-y-1.5">
-            <div className="h-4 w-40 shimmer rounded-md" />
-            <div className="h-3 w-52 shimmer rounded-md" />
-          </div>
-        </div>
-
-        {/* 4 Stat Cards (first card with trend) */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {[...Array(4)].map((_, i) => (
-            <StatCardSkeleton key={`dl-${i}`} hasTrend={i === 0} />
-          ))}
-        </div>
-      </div>
-
       {/* ─── Charts Row 1 ─── */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Device Status Chart */}
@@ -164,22 +116,6 @@ export function AnalyticsSkeleton() {
 }
 
 /* ─── Sub-components ─── */
-
-function StatCardSkeleton({ hasTrend }: { hasTrend: boolean }) {
-  return (
-    <div className="relative overflow-hidden rounded-2xl border border-white/10 dark:border-white/5 bg-white/50 dark:bg-white/3 p-5">
-      <div className="absolute inset-0 shimmer-overlay" />
-      <div className="relative flex items-start justify-between gap-4">
-        <div className="space-y-3 min-w-0 flex-1">
-          <div className="h-3 w-20 shimmer rounded-full" />
-          <div className="h-8 w-28 shimmer rounded-md" />
-          {hasTrend && <div className="h-3 w-24 shimmer rounded-full" />}
-        </div>
-        <div className="h-11.5 w-11.5 shimmer rounded-2xl shrink-0 mt-1" />
-      </div>
-    </div>
-  );
-}
 
 function ChartCardSkeleton({
   titleWidth,

@@ -3,26 +3,19 @@
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
 import {
-  ArrowRight,
-  CheckCircle2,
-  MousePointerClick,
-  Percent,
-} from "lucide-react";
-import {
-  Bar,
-  BarChart,
+  Area,
+  AreaChart,
   CartesianGrid,
-  Cell,
   ResponsiveContainer,
   Tooltip,
   XAxis,
   YAxis,
 } from "recharts";
+import { CheckCircle2, MousePointerClick, Percent, Zap } from "lucide-react";
 import { DashboardAnalyticsData } from "./types";
 
 interface PinConversionChartProps {
@@ -36,18 +29,29 @@ const CUSTOM_TOOLTIP_STYLE = {
   padding: "10px 14px",
 };
 
-const BAR_COLORS = ["#6366f1", "#10b981"];
-
 export function PinConversionChart({ data }: PinConversionChartProps) {
+  const rate = data.totalPinRequests > 0
+    ? (data.totalPinReceived / data.totalPinRequests) * 100
+    : 0;
+
   const chartData = [
-    { name: "PIN Requests", value: data.totalPinRequests, fill: BAR_COLORS[0] },
-    { name: "PIN Received", value: data.totalPinReceived, fill: BAR_COLORS[1] },
+    { name: "Requests", value: data.totalPinRequests },
+    { name: "Received", value: data.totalPinReceived },
   ];
 
   const maxValue = Math.max(data.totalPinRequests, data.totalPinReceived, 1);
 
+  const getQualityColor = (r: number) => {
+    if (r >= 75) return { from: "#10b981", label: "Excellent" };
+    if (r >= 50) return { from: "#3b82f6", label: "Good" };
+    if (r >= 25) return { from: "#f59e0b", label: "Moderate" };
+    return { from: "#f43f5e", label: "Low" };
+  };
+
+  const quality = getQualityColor(rate);
+
   return (
-    <Card className="group relative overflow-hidden border-0 shadow-sm transition-all duration-300 hover:shadow-md">
+    <Card className="group relative overflow-hidden border-0 shadow-sm transition-all duration-300 hover:shadow-md h-full">
       {/* Gradient accent strip */}
       <div className="absolute top-0 left-0 right-0 h-1 bg-linear-to-r from-indigo-500 via-emerald-500 to-emerald-400" />
 
@@ -61,93 +65,105 @@ export function PinConversionChart({ data }: PinConversionChartProps) {
         ))}
       </div>
 
-      <CardHeader className="relative">
+      <CardHeader className="relative pb-1">
         <CardTitle className="flex items-center gap-2 text-base">
           <div className="p-1.5 rounded-lg bg-linear-to-br from-indigo-500/10 to-emerald-500/10">
-            <Percent className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
+            <Zap className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
           </div>
-          PIN Conversion Overview
+          PIN Conversion
         </CardTitle>
-        <CardDescription>
-          Request to received conversion comparison
-        </CardDescription>
       </CardHeader>
+
       <CardContent className="relative">
-        <div className="w-full h-65">
+        {/* Area Chart */}
+        <div className="h-40 sm:h-44">
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart
+            <AreaChart
               data={chartData}
-              margin={{ top: 5, right: 10, left: -15, bottom: 5 }}
-              barSize={72}
-              barGap={24}
+              margin={{ top: 5, right: 5, left: -15, bottom: 0 }}
             >
+              <defs>
+                <linearGradient id="pinConversionGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor={quality.from} stopOpacity={0.5} />
+                  <stop offset="100%" stopColor={quality.from} stopOpacity={0.05} />
+                </linearGradient>
+              </defs>
               <CartesianGrid
                 strokeDasharray="3 3"
                 vertical={false}
-                opacity={0.3}
+                opacity={0.25}
               />
               <XAxis
                 dataKey="name"
-                tick={{ fontSize: 12 }}
+                tick={{ fontSize: 11, fontWeight: 500 }}
                 tickLine={false}
                 axisLine={false}
               />
               <YAxis
                 allowDecimals={false}
-                tick={{ fontSize: 12 }}
+                tick={{ fontSize: 10 }}
                 tickLine={false}
                 axisLine={false}
-                width={35}
-                domain={[0, Math.ceil(maxValue * 1.4)]}
+                width={28}
+                domain={[0, Math.ceil(maxValue * 1.3)]}
               />
               <Tooltip
                 contentStyle={CUSTOM_TOOLTIP_STYLE}
-                formatter={(value: any) => [
-                  `${(value as number).toLocaleString()}`,
-                  "Count",
-                ]}
+                formatter={(value: any) => [(value as number).toLocaleString(), "Count"]}
                 labelFormatter={(label) => `${label}`}
                 cursor={{ fill: "rgba(0,0,0,0.03)" }}
               />
-              <Bar
+              <Area
+                type="monotone"
                 dataKey="value"
-                radius={[6, 6, 0, 0]}
-                animationDuration={1000}
+                stroke={quality.from}
+                strokeWidth={2.5}
+                fill="url(#pinConversionGradient)"
+                dot={{ r: 5, fill: quality.from, strokeWidth: 2, stroke: "white" }}
+                activeDot={{ r: 7, fill: quality.from, strokeWidth: 2, stroke: "white" }}
+                animationDuration={1200}
                 animationEasing="ease-out"
-              >
-                {chartData.map((entry, index) => (
-                  <Cell
-                    key={`cell-${index}`}
-                    fill={entry.fill}
-                    className="transition-all duration-300 hover:opacity-80"
-                  />
-                ))}
-              </Bar>
-            </BarChart>
+              />
+            </AreaChart>
           </ResponsiveContainer>
         </div>
 
-        {/* Conversion rate summary */}
-        <div className="flex items-center justify-center gap-3 pt-3 border-t border-border/50 mt-3">
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-indigo-50 dark:bg-indigo-900/20">
-            <MousePointerClick className="h-3.5 w-3.5 text-indigo-500" />
-            <span className="text-xs font-medium text-indigo-600 dark:text-indigo-400">
-              {data.totalPinRequests.toLocaleString()} requested
-            </span>
+        {/* Stats row */}
+        <div className="flex items-center justify-between gap-2 pt-2.5 border-t border-border/50 mt-1">
+          <div className="flex items-center gap-1.5">
+            <div className="p-1 rounded-md bg-indigo-100 dark:bg-indigo-900/30">
+              <MousePointerClick className="h-3 w-3 text-indigo-500" />
+            </div>
+            <div>
+              <span className="text-[10px] text-muted-foreground block leading-none">Requests</span>
+              <span className="text-sm font-bold text-indigo-600 dark:text-indigo-400">
+                {data.totalPinRequests.toLocaleString()}
+              </span>
+            </div>
           </div>
-          <ArrowRight className="h-4 w-4 text-muted-foreground" />
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-900/20">
-            <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
-            <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400">
-              {data.totalPinReceived.toLocaleString()} received
+
+          <div className="text-center">
+            <span className="text-lg font-bold" style={{ color: quality.from }}>
+              {rate.toFixed(0)}%
             </span>
+            <div className="flex items-center gap-1 justify-center">
+              <Percent className="h-2.5 w-2.5" style={{ color: quality.from }} />
+              <span className="text-[9px] font-medium text-muted-foreground uppercase">
+                {quality.label}
+              </span>
+            </div>
           </div>
-          <div className="px-3 py-1.5 rounded-lg bg-muted">
-            <span className="text-xs font-semibold">
-              {data.totalPinRequests > 0
-                ? `${data.conversionRate.toFixed(0)}% rate`
-                : "No data"}
-            </span>
+
+          <div className="flex items-center gap-1.5">
+            <div className="p-1 rounded-md bg-emerald-100 dark:bg-emerald-900/30">
+              <CheckCircle2 className="h-3 w-3 text-emerald-500" />
+            </div>
+            <div className="text-right">
+              <span className="text-[10px] text-muted-foreground block leading-none">Received</span>
+              <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400">
+                {data.totalPinReceived.toLocaleString()}
+              </span>
+            </div>
           </div>
         </div>
       </CardContent>

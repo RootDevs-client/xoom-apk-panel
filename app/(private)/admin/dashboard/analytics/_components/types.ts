@@ -26,6 +26,22 @@ export interface AnalyticsData {
   locationBreakdown: LocationBreakdownItem[];
 }
 
+export interface EventAnalyticsItem {
+  total: number;
+  event: string;
+}
+
+export interface DeviceModelItem {
+  total: number;
+  model: string;
+}
+
+export interface UninstallAnalyticsData {
+  downloads: number;
+  deleted: number;
+  uninstallRate: number;
+}
+
 export interface DashboardAnalyticsData {
   totalDevices: number;
   activeDevices: number;

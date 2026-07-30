@@ -1,38 +1,37 @@
 "use client";
 
-import { Separator } from "@/components/ui/separator";
 import { ConversionMetricsCard } from "./ConversionMetricsCard";
+import { DeviceModelsChart } from "./DeviceModelsChart";
 import { DeviceStatusChart } from "./DeviceStatusChart";
-import { DevicesOverview } from "./DevicesOverview";
 import { DownloadTrendChart } from "./DownloadTrendChart";
-import { DownloadsAnalytics } from "./DownloadsAnalytics";
+import { EventAnalyticsChart } from "./EventAnalyticsChart";
 import { PinConversionChart } from "./PinConversionChart";
 import { PlatformBreakdownCard } from "./PlatformBreakdownCard";
 import { QuickStatsCard } from "./QuickStatsCard";
-import { DashboardAnalyticsData } from "./types";
+import { UninstallAnalyticsCard } from "./UninstallAnalyticsCard";
+import { DashboardAnalyticsData, DeviceModelItem, EventAnalyticsItem, UninstallAnalyticsData } from "./types";
 
 interface DashboardAnalyticsCardsProps {
   data: DashboardAnalyticsData;
+  deviceModels?: DeviceModelItem[];
+  uninstallData?: UninstallAnalyticsData;
+  eventData?: EventAnalyticsItem[];
 }
 
 export function DashboardAnalyticsCards({
   data,
+  deviceModels,
+  uninstallData,
+  eventData,
 }: DashboardAnalyticsCardsProps) {
   return (
     <div className="space-y-6">
-      {/* Devices Overview */}
-      <DevicesOverview data={data} />
-
-      {/* Downloads Analytics */}
-      <DownloadsAnalytics data={data} />
-
-      {/* Charts Row 1: Device Status & Download Trends */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {/* Charts Row: Device Status, Download Trends & PIN Conversion */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <DeviceStatusChart data={data} />
         <DownloadTrendChart data={data} />
+        <PinConversionChart data={data} />
       </div>
-
-      <Separator className="opacity-50" />
 
       {/* Platform & Conversion & Quick Stats Row */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -41,8 +40,14 @@ export function DashboardAnalyticsCards({
         <QuickStatsCard data={data} />
       </div>
 
-      {/* PIN Conversion Chart */}
-      <PinConversionChart data={data} />
+      {/* Event Funnel & Device Models - side by side */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {eventData && <EventAnalyticsChart data={eventData} />}
+        {deviceModels && <DeviceModelsChart data={deviceModels} />}
+      </div>
+
+      {/* Uninstall Analytics (full width) */}
+      {uninstallData && <UninstallAnalyticsCard data={uninstallData} />}
     </div>
   );
 }
