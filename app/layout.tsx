@@ -1,7 +1,8 @@
+import { getOpenSettings } from "@/actions/settings/settingsActions";
 import ToasterComponents from "@/components/custom/ToasterComponents";
 import AuthSessionProvider from "@/providers/AuthSessionProvider";
 import { DM_Sans, Urbanist } from "next/font/google";
-import { Metadata } from "next/types";
+import type { Metadata } from "next/types";
 import "./globals.css";
 
 const dmSans = DM_Sans({
@@ -16,10 +17,22 @@ const urbanist = Urbanist({
   variable: "--font-urbanist",
 });
 
-export const metadata: Metadata = {
-  title: "Xoom Sports",
-  description: "Xoom Sports",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  try {
+    const setting = await getOpenSettings();
+    const appName = setting?.data?.appName || "Xoom Sports";
+    const aboutUs = setting?.data?.aboutUs || `Welcome to ${appName}`;
+    return {
+      title: appName,
+      description: aboutUs,
+    };
+  } catch {
+    return {
+      title: "Xoom Sports",
+      description: "Welcome to Xoom Sports",
+    };
+  }
+}
 
 export default function RootLayout({
   children,
