@@ -12,11 +12,7 @@ export interface NewsFormData {
   publishedDate: string;
 }
 
-export async function getNewsList(
-  page: number,
-  limit: number,
-  search: string,
-) {
+export async function getNewsList(page: number, limit: number, search: string) {
   try {
     const params = new URLSearchParams({
       page: String(page),
@@ -43,6 +39,8 @@ export async function getNewsList(
   }
 }
 
+// modify news section
+
 export async function createNews(data: NewsFormData) {
   try {
     const res = await apiClient("/api/admin/news", {
@@ -56,8 +54,7 @@ export async function createNews(data: NewsFormData) {
     }
     return {
       ok: false,
-      message:
-        error instanceof Error ? error.message : "Failed to create news",
+      message: error instanceof Error ? error.message : "Failed to create news",
     };
   }
 }
@@ -75,8 +72,7 @@ export async function updateNews(id: string, data: Partial<NewsFormData>) {
     }
     return {
       ok: false,
-      message:
-        error instanceof Error ? error.message : "Failed to update news",
+      message: error instanceof Error ? error.message : "Failed to update news",
     };
   }
 }
@@ -93,8 +89,7 @@ export async function getNewsById(id: string) {
     }
     return {
       ok: false,
-      message:
-        error instanceof Error ? error.message : "Failed to get news",
+      message: error instanceof Error ? error.message : "Failed to get news",
     };
   }
 }
@@ -111,8 +106,7 @@ export async function deleteNews(id: string) {
     }
     return {
       ok: false,
-      message:
-        error instanceof Error ? error.message : "Failed to delete news",
+      message: error instanceof Error ? error.message : "Failed to delete news",
     };
   }
 }
