@@ -85,4 +85,81 @@ export const adminDashboardMenu = {
       icon: Settings2,
     },
   ],
+  navSections: [
+    {
+      label: "Overview",
+      items: [
+        {
+          title: "Dashboard",
+          url: routes.privateRoutes.admin.dashboard,
+          icon: LayoutDashboard,
+        },
+        {
+          title: "Analytics",
+          url: routes.privateRoutes.admin.analytics,
+          icon: BarChart3,
+        },
+      ],
+    },
+    {
+      label: "Content",
+      items: [
+        {
+          title: "Categories",
+          url: routes.privateRoutes.admin.categories,
+          icon: Tags,
+        },
+        {
+          title: "Topics",
+          url: routes.privateRoutes.admin.topics,
+          icon: Hash,
+        },
+        {
+          title: "News",
+          url: routes.privateRoutes.admin.news,
+          icon: Newspaper,
+        },
+        {
+          title: "Promotion Categories",
+          url: routes.privateRoutes.admin.promotionCategory,
+          icon: Megaphone,
+        },
+      ],
+    },
+    {
+      label: "Operations",
+      items: [
+        {
+          title: "Operators",
+          url: routes.privateRoutes.admin.operators,
+          icon: Cable,
+        },
+        {
+          title: "WhatsApp",
+          url: routes.privateRoutes.admin.whatsapp,
+          icon: MessageCircle,
+        },
+        {
+          title: "Devices",
+          url: routes.privateRoutes.admin.devices,
+          icon: Monitor,
+        },
+        {
+          title: "Subscription",
+          url: routes.privateRoutes.admin.subscription,
+          icon: User,
+        },
+      ],
+    },
+    {
+      label: "System",
+      items: [
+        {
+          title: "Settings",
+          url: routes.privateRoutes.admin.settings,
+          icon: Settings2,
+        },
+      ],
+    },
+  ],
 };
