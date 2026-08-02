@@ -2,119 +2,101 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 const SettingsShimmerLoader = () => {
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4 md:p-8">
-      <div className="max-w-7xl mx-auto">
-        {/* Page Title */}
-        <Skeleton className="h-9 w-32 mb-4" />
+    <div className="space-y-6">
+      {/* Page Header */}
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <Skeleton className="size-11 rounded-xl" />
+          <div className="space-y-2">
+            <Skeleton className="h-6 w-32" />
+            <Skeleton className="h-4 w-48" />
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <Skeleton className="h-4 w-16" />
+          <Skeleton className="h-4 w-4 rounded-full" />
+          <Skeleton className="h-4 w-24" />
+        </div>
+      </div>
 
-        {/* Breadcrumb */}
-        <div className="flex items-center gap-2 mb-8">
-          <Skeleton className="h-4 w-12" />
-          <Skeleton className="h-4 w-4 rounded-full" />
-          <Skeleton className="h-4 w-20" />
-          <Skeleton className="h-4 w-4 rounded-full" />
-          <Skeleton className="h-4 w-28" />
+      <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
+        {/* Sidebar */}
+        <div className="w-full shrink-0 lg:w-72">
+          <div className="space-y-4 lg:space-y-2 lg:rounded-2xl lg:border lg:border-border/80 lg:bg-card lg:p-2 lg:shadow-sm">
+            {[0, 1, 2].map((item) => (
+              <div
+                key={item}
+                className="flex items-center gap-3 rounded-xl p-2.5"
+              >
+                <Skeleton className="size-9 rounded-lg" />
+                <div className="space-y-2">
+                  <Skeleton className="h-4 w-28" />
+                  <Skeleton className="h-3 w-36" />
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          {/* Sidebar */}
-          {/* <div className="lg:col-span-3">
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden">
-              <div className="bg-orange-500 p-4">
-                <Skeleton className="h-5 w-20 bg-white/20" />
+        {/* Main Content */}
+        <div className="min-w-0 flex-1 space-y-6">
+          {/* App Branding */}
+          <div className="rounded-2xl border border-border/80 bg-card p-6 shadow-sm">
+            <div className="flex items-center gap-3 border-b border-border/60 pb-5">
+              <Skeleton className="size-10 rounded-xl" />
+              <div className="space-y-2">
+                <Skeleton className="h-5 w-32" />
+                <Skeleton className="h-3 w-56" />
               </div>
+            </div>
+            <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-2">
+              <div>
+                <Skeleton className="mb-2 h-4 w-24" />
+                <Skeleton className="h-52 rounded-xl" />
+              </div>
+              <div>
+                <Skeleton className="mb-2 h-4 w-32" />
+                <Skeleton className="h-52 rounded-xl" />
+              </div>
+            </div>
+            <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-2">
+              <div>
+                <Skeleton className="mb-2 h-4 w-20" />
+                <Skeleton className="h-12 rounded-xl" />
+              </div>
+              <div>
+                <Skeleton className="mb-2 h-4 w-20" />
+                <Skeleton className="h-[7.5rem] rounded-xl" />
+              </div>
+            </div>
+          </div>
 
-              {[1, 2, 3, 4, 5].map((item) => (
-                <div
-                  key={item}
-                  className="p-4 border-b border-gray-200 dark:border-gray-700"
-                >
-                  <Skeleton className="h-5 w-24" />
+          {/* URL Configuration */}
+          <div className="rounded-2xl border border-border/80 bg-card p-6 shadow-sm">
+            <div className="flex items-center gap-3 border-b border-border/60 pb-5">
+              <Skeleton className="size-10 rounded-xl" />
+              <div className="space-y-2">
+                <Skeleton className="h-5 w-40" />
+                <Skeleton className="h-3 w-52" />
+              </div>
+            </div>
+            <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-2">
+              {[0, 1, 2, 3].map((item) => (
+                <div key={item}>
+                  <Skeleton className="mb-2 h-4 w-32" />
+                  <Skeleton className="h-12 rounded-xl" />
                 </div>
               ))}
             </div>
-          </div> */}
+          </div>
 
-          {/* Main Content */}
-          <div className="col-span-12">
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
-              {/* Section Title */}
-              <div className="mb-2">
-                <Skeleton className="h-6 w-48 mb-2" />
-                <Skeleton className="h-4 w-80" />
-              </div>
-
-              <div className="mt-8 space-y-6">
-                {/* Company Name & Support Email Row */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <Skeleton className="h-4 w-32 mb-2" />
-                    <Skeleton className="h-12 w-full rounded-md" />
-                  </div>
-                  <div>
-                    <Skeleton className="h-4 w-32 mb-2" />
-                    <Skeleton className="h-12 w-full rounded-md" />
-                  </div>
-                </div>
-
-                {/* Phone Number & Home View Row */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <Skeleton className="h-4 w-28 mb-2" />
-                    <Skeleton className="h-12 w-full rounded-md" />
-                  </div>
-                  <div>
-                    <Skeleton className="h-4 w-24 mb-2" />
-                    <Skeleton className="h-12 w-full rounded-md" />
-                  </div>
-                </div>
-
-                {/* Company Address */}
-                <div>
-                  <Skeleton className="h-4 w-36 mb-2" />
-                  <Skeleton className="h-24 w-full rounded-md" />
-                </div>
-
-                {/* Owner Name & Owner Email Row */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <Skeleton className="h-4 w-28 mb-2" />
-                    <Skeleton className="h-12 w-full rounded-md" />
-                  </div>
-                  <div>
-                    <Skeleton className="h-4 w-28 mb-2" />
-                    <Skeleton className="h-12 w-full rounded-md" />
-                  </div>
-                </div>
-
-                {/* Logo & Favicon Row */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* Logo */}
-                  <div>
-                    <Skeleton className="h-4 w-16 mb-2" />
-                    <div className="relative">
-                      <Skeleton className="h-48 w-full rounded-lg" />
-                      <div className="absolute inset-0 flex flex-col items-center justify-center">
-                        <Skeleton className="h-5 w-28 mb-1" />
-                        <Skeleton className="h-4 w-24" />
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Favicon */}
-                  <div>
-                    <Skeleton className="h-4 w-16 mb-2" />
-                    <div className="relative">
-                      <Skeleton className="h-48 w-full rounded-lg" />
-                      <div className="absolute inset-0 flex flex-col items-center justify-center">
-                        <Skeleton className="h-5 w-28 mb-1" />
-                        <Skeleton className="h-4 w-24" />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+          {/* Save bar */}
+          <div className="flex items-center justify-between gap-3 rounded-2xl border border-border/80 bg-card/95 px-5 py-4 shadow-lg shadow-primary/5">
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-32" />
+              <Skeleton className="h-3 w-48" />
             </div>
+            <Skeleton className="h-11 w-40 rounded-xl" />
           </div>
         </div>
       </div>

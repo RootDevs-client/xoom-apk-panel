@@ -3,23 +3,29 @@ import { updateGeneralSettings } from "@/actions/settings/settingsActions";
 import { ToastMessage } from "@/components/custom/ToastMessage";
 import InputField from "@/components/form/InputField";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { uploadSingleFile } from "@/lib/fileUpload";
-import { Globe, Link, Save, ToggleLeft, Webhook } from "lucide-react";
+import {
+  Building2,
+  Globe,
+  KeyRound,
+  Link,
+  Loader2,
+  Save,
+  Smartphone,
+  ToggleLeft,
+  UserRound,
+  Webhook,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import { FormProvider, useFieldArray, useForm } from "react-hook-form";
 import { AppBrandingCard } from "./AppBrandingCard";
 import { GalleryCard } from "./GalleryCard";
+import { SettingsCard } from "./SettingsCard";
 import ToggleRow from "./ToggleRow";
 import { GalleryItem, GallerySlot, GeneralFormData } from "./types";
+
 function emptySlot(index: number): GallerySlot {
   return {
     title: `Gallery ${index + 1}`,
@@ -28,6 +34,10 @@ function emptySlot(index: number): GallerySlot {
     removedExisting: false,
   };
 }
+
+const inputClassName =
+  "h-12 rounded-xl border-border/80 bg-background/50 font-normal tracking-normal shadow-none !focus-visible:ring-primary/25 focus-visible:ring-2 transition-shadow focus-visible:shadow-sm";
+
 // ─── Component ────────────────────────────────────────────────────────────────
 export default function GeneralSettings({ general }: any) {
   // ── App logo ────────────────────────────────────────────────────────────────
@@ -247,6 +257,7 @@ export default function GeneralSettings({ general }: any) {
       );
     }
   };
+
   return (
     <FormProvider {...methods}>
       <div className="space-y-6">
@@ -274,20 +285,19 @@ export default function GeneralSettings({ general }: any) {
           removeSlotExisting={removeSlotExisting}
         />
         {/* ── Company Information ───────────────────────────────────────────── */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Company Information</CardTitle>
-            <CardDescription>
-              Basic details about your organisation
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <SettingsCard
+          icon={Building2}
+          title="Company Information"
+          description="Basic details about your organisation"
+        >
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
               <InputField
                 name="companyName"
                 label="Company Name"
                 placeholder="XoomSports Ltd."
                 rules={{ required: "Required!" }}
+                className={inputClassName}
               />
               <InputField
                 name="supportEmail"
@@ -301,165 +311,194 @@ export default function GeneralSettings({ general }: any) {
                     message: "Invalid email address",
                   },
                 }}
+                className={inputClassName}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="companyAddress">Company Address</Label>
+              <Label
+                htmlFor="companyAddress"
+                className="text-sm font-medium text-foreground"
+              >
+                Company Address
+              </Label>
               <Textarea
                 id="companyAddress"
                 placeholder="Adabor, Dhaka 1207"
                 rows={3}
-                className="focus-visible:ring-primary"
+                className="min-h-[6.5rem] rounded-xl border-border/80 bg-background/50 text-base font-normal shadow-none focus-visible:ring-2 focus-visible:ring-primary/20 md:text-sm"
                 {...register("companyAddress")}
               />
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </SettingsCard>
         {/* ── Owner Information ─────────────────────────────────────────────── */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Owner Information</CardTitle>
-            <CardDescription>Primary account holder details</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <InputField
-                name="ownerName"
-                label="Owner Name"
-                placeholder="Joynal Khan"
-                rules={{ required: "Required!" }}
-              />
-              <InputField
-                name="ownerEmail"
-                label="Owner Email"
-                type="email"
-                placeholder="joynal@email.com"
-                rules={{
-                  required: "Required!",
-                  pattern: {
-                    value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                    message: "Invalid email address",
-                  },
-                }}
-              />
-            </div>
-          </CardContent>
-        </Card>
+        <SettingsCard
+          icon={UserRound}
+          title="Owner Information"
+          description="Primary account holder details"
+        >
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+            <InputField
+              name="ownerName"
+              label="Owner Name"
+              placeholder="Joynal Khan"
+              rules={{ required: "Required!" }}
+              className={inputClassName}
+            />
+            <InputField
+              name="ownerEmail"
+              label="Owner Email"
+              type="email"
+              placeholder="joynal@email.com"
+              rules={{
+                required: "Required!",
+                pattern: {
+                  value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                  message: "Invalid email address",
+                },
+              }}
+              className={inputClassName}
+            />
+          </div>
+        </SettingsCard>
         {/* ── App URL Configuration ─────────────────────────────────────────── */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Globe className="h-4 w-4 text-primary" />
-              App URL Configuration
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="grid lg:grid-cols-2 gap-4 grid-cols-1">
-              <InputField
-                name="webviewUrl"
-                label="WebView URL"
-                placeholder="https://xoomsports.com"
-                prefix={<Globe size={16} />}
-                rules={{
-                  pattern: {
-                    value: /^https?:\/\/.+/,
-                    message: "Must start with http:// or https://",
-                  },
-                }}
-              />
-              <InputField
-                name="webhookUrl"
-                label="Unsubscribe Webhook URL"
-                placeholder="https://your-system.com/api/webhook/unsubscribe"
-                prefix={<Webhook size={16} />}
-                rules={{
-                  pattern: {
-                    value: /^https?:\/\/.+/,
-                    message: "Must start with http:// or https://",
-                  },
-                }}
-              />
-              <InputField
-                name="universalSubscriptionApiUrl"
-                label="Universal Subscription API URL"
-                placeholder="https://api.example.com/api/v1"
-                prefix={<Link size={16} />}
-                rules={{
-                  pattern: {
-                    value: /^https?:\/\/.+/,
-                    message: "Must start with http:// or https://",
-                  },
-                }}
-              />
-              <InputField
-                name="xoomSportsUrl"
-                label="Xoom Sports URL"
-                placeholder="https://backend.xoomsports.com"
-                prefix={<Link size={16} />}
-                rules={{
-                  pattern: {
-                    value: /^https?:\/\/.+/,
-                    message: "Must start with http:// or https://",
-                  },
-                }}
-              />
-              <InputField
-                name="geminiApiKey"
-                label="Gemini API Key"
-                placeholder="AIzaSy..."
-                type="password"
-                showPassword
-              />
-              <InputField
-                name="telcoProviderWebhookUrl"
-                label="Telco Provider Webhook URL"
-                placeholder="https://your-system.com/api/webhook/telco"
-                prefix={<Webhook size={16} />}
-                rules={{
-                  pattern: {
-                    value: /^https?:\/\/.+/,
-                    message: "Must start with http:// or https://",
-                  },
-                }}
-              />
-            </div>
-          </CardContent>
-        </Card>
+        <SettingsCard
+          icon={Globe}
+          title="App URL Configuration"
+          description="Endpoints and API URLs used across the app"
+        >
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+            <InputField
+              name="webviewUrl"
+              label="WebView URL"
+              placeholder="https://xoomsports.com"
+              prefix={<Globe size={16} />}
+              rules={{
+                pattern: {
+                  value: /^https?:\/\/.+/,
+                  message: "Must start with http:// or https://",
+                },
+              }}
+              className={inputClassName}
+            />
+            <InputField
+              name="webhookUrl"
+              label="Unsubscribe Webhook URL"
+              placeholder="https://your-system.com/api/webhook/unsubscribe"
+              prefix={<Webhook size={16} />}
+              rules={{
+                pattern: {
+                  value: /^https?:\/\/.+/,
+                  message: "Must start with http:// or https://",
+                },
+              }}
+              className={inputClassName}
+            />
+            <InputField
+              name="universalSubscriptionApiUrl"
+              label="Universal Subscription API URL"
+              placeholder="https://api.example.com/api/v1"
+              prefix={<Link size={16} />}
+              rules={{
+                pattern: {
+                  value: /^https?:\/\/.+/,
+                  message: "Must start with http:// or https://",
+                },
+              }}
+              className={inputClassName}
+            />
+            <InputField
+              name="xoomSportsUrl"
+              label="Xoom Sports URL"
+              placeholder="https://backend.xoomsports.com"
+              prefix={<Link size={16} />}
+              rules={{
+                pattern: {
+                  value: /^https?:\/\/.+/,
+                  message: "Must start with http:// or https://",
+                },
+              }}
+              className={inputClassName}
+            />
+            <InputField
+              name="geminiApiKey"
+              label="Gemini API Key"
+              placeholder="AIzaSy..."
+              type="password"
+              showPassword
+              prefix={<KeyRound size={16} />}
+              className={inputClassName}
+            />
+            <InputField
+              name="telcoProviderWebhookUrl"
+              label="Telco Provider Webhook URL"
+              placeholder="https://your-system.com/api/webhook/telco"
+              prefix={<Webhook size={16} />}
+              rules={{
+                pattern: {
+                  value: /^https?:\/\/.+/,
+                  message: "Must start with http:// or https://",
+                },
+              }}
+              className={inputClassName}
+            />
+          </div>
+        </SettingsCard>
         {/* ── App Flow Control ──────────────────────────────────────────────── */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <ToggleLeft className="h-4 w-4 text-primary" />
-              App Flow Control
-            </CardTitle>
-            <CardDescription>
-              Toggle mobile app behaviour instantly — no app release required
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-0 divide-y">
+        <SettingsCard
+          icon={ToggleLeft}
+          title="App Flow Control"
+          description="Toggle mobile app behaviour instantly — no app release required"
+          noPadding
+        >
+          <div className="divide-y divide-border/60 px-2 py-2 sm:px-3">
             <ToggleRow
               name="manual_flow_enabled"
               control={control}
               title="Manual flow"
               description="When ON, the app shows phone number and OTP input screens instead of auto-detecting. Enable for Play Store review or when auto-detection fails."
+              icon={Smartphone}
             />
             <ToggleRow
               name="web_view_enabled"
               control={control}
               title="Web View"
               description="When enabled, content will open inside the app using a web view. Turn it off to open links in your default browser."
+              icon={Globe}
             />
-          </CardContent>
-        </Card>
-        <div className="flex justify-end">
-          <Button
-            onClick={handleSubmit(onSubmit)}
-            disabled={isSubmitting}
-            className="flex items-center gap-2 cursor-pointer text-white rounded-sm"
-          >
-            <Save className="h-4 w-4" />
-            {isSubmitting ? "Updating..." : "Update General Settings"}
-          </Button>
+          </div>
+        </SettingsCard>
+
+        {/* ── Sticky save bar ───────────────────────────────────────────────── */}
+        <div className="sticky bottom-4 z-10">
+          <div className="flex flex-col-reverse items-stretch justify-between gap-3 rounded-2xl border border-border/80 bg-card/95 px-5 py-4 shadow-lg shadow-primary/5 backdrop-blur sm:flex-row sm:items-center">
+            <div className="hidden sm:block">
+              <p className="text-sm font-semibold text-foreground">
+                General Settings
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Review and save your changes
+              </p>
+            </div>
+            <Button
+              onClick={handleSubmit(onSubmit)}
+              disabled={isSubmitting}
+              size="lg"
+              className="w-full cursor-pointer rounded-xl bg-primary font-semibold shadow-sm transition-all duration-200 hover:-translate-y-px hover:bg-primary/90 hover:shadow-md disabled:hover:translate-y-0 disabled:hover:shadow-none sm:w-auto"
+            >
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="size-4 animate-spin" />
+                  Saving changes...
+                </>
+              ) : (
+                <>
+                  <Save className="size-4" />
+                  Save changes
+                </>
+              )}
+            </Button>
+          </div>
         </div>
       </div>
     </FormProvider>

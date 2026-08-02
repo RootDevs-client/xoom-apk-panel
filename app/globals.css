@@ -227,6 +227,15 @@
 
 /* Utilities for Tailwind usage */
 @layer utilities {
+  /* Hide scrollbar while keeping scroll behavior */
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
   .font-dmSans {
     font-family: var(--font-dm-sans);
   }
