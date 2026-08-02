@@ -1,9 +1,36 @@
 "use client";
 
+import { deleteWhatsAppChannel } from "@/actions/whatsapp/whatsappActions";
+import { ToastMessage } from "@/components/custom/ToastMessage";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { ColumnDef } from "@tanstack/react-table";
-import { CheckCircle2, Hash, Radio, Users, XCircle } from "lucide-react";
+import {
+  CheckCircle2,
+  Hash,
+  MoreHorizontal,
+  Pencil,
+  Radio,
+  Trash2,
+  Users,
+  XCircle,
+} from "lucide-react";
 import moment from "moment-timezone";
+import { useState } from "react";
+import { ImSpinner9 } from "react-icons/im";
 
 export type WhatsAppChannel = {
   _id: string;
@@ -46,7 +73,11 @@ const syncStatusConfig: Record<string, { label: string; className: string }> = {
   },
 };
 
-export const channelColumns: ColumnDef<WhatsAppChannel>[] = [
+export const channelColumns = ({
+  onSuccess,
+}: {
+  onSuccess: () => void;
+}): ColumnDef<WhatsAppChannel>[] => [
   {
     accessorKey: "name",
     header: "Channel",
@@ -143,4 +174,153 @@ export const channelColumns: ColumnDef<WhatsAppChannel>[] = [
         <span className="text-xs text-muted-foreground">—</span>
       ),
   },
+  {
+    id: "actions",
+    header: "Actions",
+    cell: ({ row }) => (
+      <ActionCell channel={row.original} onSuccess={onSuccess} />
+    ),
+  },
 ];
+
+function ActionCell({
+  channel,
+  onSuccess,
+}: {
+  channel: WhatsAppChannel;
+  onSuccess: () => void;
+}) {
+  const [editOpen, setEditOpen] = useState(false);
+
+  const handleDelete = async () => {
+    const loading = ToastMessage.loading("Deleting...");
+    const res = await deleteWhatsAppChannel(channel._id);
+
+    if (res?.status) {
+      ToastMessage.success({ title: "Channel deleted" }, { id: loading });
+      onSuccess();
+    } else {
+      ToastMessage.error(
+        { title: res?.message || "Failed to delete" },
+        { id: loading },
+      );
+    }
+  };
+
+  return (
+    <>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" size="icon" className="size-8">
+            <MoreHorizontal className="size-4" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuItem onClick={() => setEditOpen(true)}>
+            <Pencil className="size-4 mr-2" />
+            Edit Name
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            onClick={handleDelete}
+            className="text-red-600 focus:text-red-600"
+          >
+            <Trash2 className="size-4 mr-2" />
+            Delete
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      <EditNameDialog
+        channel={channel}
+        open={editOpen}
+        onOpenChange={setEditOpen}
+        onSuccess={onSuccess}
+      />
+    </>
+  );
+}
+
+function EditNameDialog({
+  channel,
+  open,
+  onOpenChange,
+  onSuccess,
+}: {
+  channel: WhatsAppChannel;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onSuccess: () => void;
+}) {
+  const [name, setName] = useState(channel.name);
+  const [isActive, setIsActive] = useState(channel.isActive);
+  const [loading, setLoading] = useState(false);
+
+  const handleSave = async () => {
+    if (!name.trim()) return;
+    setLoading(true);
+    const { updateWhatsAppChannel } =
+      await import("@/actions/whatsapp/whatsappActions");
+    const res = await updateWhatsAppChannel(channel._id, {
+      name: name.trim(),
+      isActive,
+    });
+    if (res?.status) {
+      ToastMessage.success({ title: "Channel updated" });
+      onSuccess();
+      onOpenChange(false);
+    } else {
+      ToastMessage.error({ title: res?.message || "Failed to update" });
+    }
+    setLoading(false);
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-sm">
+        <DialogHeader>
+          <DialogTitle>Edit Channel</DialogTitle>
+        </DialogHeader>
+        <div className="py-2 space-y-4">
+          <div className="space-y-1.5">
+            <label className="text-sm font-medium">Channel Name</label>
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+              placeholder="Channel name"
+            />
+          </div>
+          <label className="flex items-center gap-2 text-sm">
+            <input
+              type="checkbox"
+              checked={isActive}
+              onChange={(e) => setIsActive(e.target.checked)}
+              className="size-4 rounded border-input"
+            />
+            Active
+          </label>
+        </div>
+        <DialogFooter>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+            disabled={loading}
+          >
+            Cancel
+          </Button>
+          <Button
+            type="button"
+            onClick={handleSave}
+            disabled={loading || !name.trim()}
+            className="text-white cursor-pointer"
+          >
+            {loading && <ImSpinner9 className="mr-2 h-3 w-3 animate-spin" />}
+            Save
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}

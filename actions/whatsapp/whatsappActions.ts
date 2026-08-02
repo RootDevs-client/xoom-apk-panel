@@ -309,6 +309,42 @@ export async function updateWhatsAppChannelName(
   }
 }
 
+export async function updateWhatsAppChannel(
+  id: string,
+  data: { name?: string; isActive?: boolean },
+) {
+  try {
+    const res = await apiClient(`/admin/whatsapp-channel/${id}`, {
+      method: "PUT",
+      body: data,
+    });
+    return res;
+  } catch (error: any) {
+    if (error?.digest?.startsWith("NEXT_REDIRECT")) throw error;
+    return {
+      ok: false,
+      message:
+        error instanceof Error ? error.message : "Failed to update channel",
+    };
+  }
+}
+
+export async function deleteWhatsAppChannel(id: string) {
+  try {
+    const res = await apiClient(`/admin/whatsapp-channel/${id}`, {
+      method: "DELETE",
+    });
+    return res;
+  } catch (error: any) {
+    if (error?.digest?.startsWith("NEXT_REDIRECT")) throw error;
+    return {
+      ok: false,
+      message:
+        error instanceof Error ? error.message : "Failed to delete channel",
+    };
+  }
+}
+
 export async function sendWhatsAppMessage(data: {
   sessionId: string;
   remoteJid: string;

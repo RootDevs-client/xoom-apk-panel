@@ -81,7 +81,7 @@ export default function WhatsAppChannelList() {
         <CardContent className="pt-6">
           <DataTableWithPagination
             data={data}
-            columns={channelColumns}
+            columns={channelColumns({ onSuccess: fetchChannels })}
             total={total}
             tableId={tableId}
             isLoading={isLoading}
