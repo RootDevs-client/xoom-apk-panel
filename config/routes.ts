@@ -28,6 +28,7 @@ export const routes = {
       whatsapp: `/admin/dashboard/whatsapp`,
       promotionCategory: `/admin/dashboard/promotion-category`,
       devices: `/admin/dashboard/devices`,
+      deviceDetails: (id: string) => `/admin/dashboard/devices/${id}`,
     },
   },
 };

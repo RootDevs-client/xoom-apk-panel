@@ -1,27 +1,15 @@
 "use client";
 
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { routes } from "@/config/routes";
 import { ColumnDef } from "@tanstack/react-table";
+import { ChevronRight } from "lucide-react";
 import moment from "moment-timezone";
+import Link from "next/link";
+import { formatEventLabel, type Device } from "./device.utils";
 
-export type Device = {
-  _id: string;
-  deviceId: string;
-  appVersion: string;
-  createdAt: string;
-  deviceModel: string;
-  deviceName: string;
-  lastEvent: string;
-  lastHeartbeatCheckAt: string;
-  lastSuccessfulHeartbeatAt: string;
-  lifecycleStatus: string;
-  manufacturer: string;
-  mobileNumber: string;
-  osName: string;
-  osVersion: string;
-  platform: string;
-  updatedAt: string;
-};
+export type { Device, DeviceStatusLog } from "./device.utils";
 
 const formatDate = (date: string) => {
   if (!date) return "—";
@@ -33,7 +21,7 @@ const timeAgo = (date: string) => {
   return moment(date).tz("Asia/Dhaka").fromNow();
 };
 
-function StatusBadge({ status }: { status: string }) {
+export function StatusBadge({ status }: { status: string }) {
   const variants: Record<
     string,
     {
@@ -61,7 +49,7 @@ function StatusBadge({ status }: { status: string }) {
   );
 }
 
-function PlatformBadge({ platform }: { platform: string }) {
+export function PlatformBadge({ platform }: { platform: string }) {
   const isAndroid = platform?.toLowerCase() === "android";
   return (
     <Badge
@@ -82,14 +70,17 @@ export const columns: ColumnDef<Device>[] = [
     accessorKey: "deviceName",
     header: "Device",
     cell: ({ row }) => (
-      <div className="flex flex-col min-w-0">
-        <span className="font-medium text-sm truncate max-w-45">
+      <Link
+        href={routes.privateRoutes.admin.deviceDetails(row.original._id)}
+        className="group flex flex-col min-w-0"
+      >
+        <span className="font-medium text-sm truncate max-w-45 group-hover:text-primary group-hover:underline underline-offset-2 transition-colors">
           {row.original.deviceName || "—"}
         </span>
         <span className="text-xs text-muted-foreground truncate max-w-45">
           {row.original.deviceModel || ""}
         </span>
-      </div>
+      </Link>
     ),
   },
   {
@@ -121,13 +112,11 @@ export const columns: ColumnDef<Device>[] = [
   {
     accessorKey: "lastEvent",
     header: "Last Event",
-    cell: ({ row }) => {
-      const event = row.original.lastEvent;
-      const formatted = event
-        ? event.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())
-        : "—";
-      return <span className="text-xs text-muted-foreground">{formatted}</span>;
-    },
+    cell: ({ row }) => (
+      <span className="text-xs text-muted-foreground">
+        {formatEventLabel(row.original.lastEvent)}
+      </span>
+    ),
   },
   {
     accessorKey: "lastHeartbeatCheckAt",
@@ -141,6 +130,23 @@ export const columns: ColumnDef<Device>[] = [
           {formatDate(row.original.lastHeartbeatCheckAt)}
         </span>
       </div>
+    ),
+  },
+  {
+    id: "actions",
+    header: "",
+    cell: ({ row }) => (
+      <Button
+        asChild
+        variant="outline"
+        size="sm"
+        className="group h-8 rounded-full border-border/70 px-3 text-xs font-medium text-muted-foreground shadow-none hover:border-primary/40 hover:bg-primary/10 hover:text-primary dark:hover:bg-primary/15"
+      >
+        <Link href={routes.privateRoutes.admin.deviceDetails(row.original._id)}>
+          Details
+          <ChevronRight className="size-3.5 transition-transform group-hover:translate-x-0.5" />
+        </Link>
+      </Button>
     ),
   },
 ];

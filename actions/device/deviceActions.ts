@@ -32,3 +32,23 @@ export async function getDeviceList(
     };
   }
 }
+
+export async function getDeviceById(id: string) {
+  try {
+    const res = await apiClient(`/admin/device/${id}`, {
+      method: "GET",
+      tags: ["devices", `device-${id}`],
+    });
+
+    return res;
+  } catch (error: any) {
+    if (error?.digest?.startsWith("NEXT_REDIRECT")) {
+      throw error;
+    }
+    return {
+      ok: false,
+      message: error instanceof Error ? error.message : "Failed to get device",
+      data: null,
+    };
+  }
+}

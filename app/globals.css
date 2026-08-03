@@ -227,6 +227,38 @@
 
 /* Utilities for Tailwind usage */
 @layer utilities {
+  /* Shimmer placeholder — a light band sweeping across a muted block */
+  .shimmer {
+    position: relative;
+    overflow: hidden;
+    background-color: color-mix(in oklab, var(--muted) 70%, transparent);
+  }
+  .shimmer::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    transform: translateX(-100%);
+    background-image: linear-gradient(
+      90deg,
+      transparent 0%,
+      color-mix(in oklab, var(--foreground) 8%, transparent) 50%,
+      transparent 100%
+    );
+    animation: shimmer-sweep 1.6s infinite;
+  }
+
+  @keyframes shimmer-sweep {
+    100% {
+      transform: translateX(100%);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .shimmer::after {
+      animation: none;
+    }
+  }
+
   /* Hide scrollbar while keeping scroll behavior */
   .no-scrollbar {
     -ms-overflow-style: none;
