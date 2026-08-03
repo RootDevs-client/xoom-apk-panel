@@ -25,9 +25,15 @@ export async function getSubscribeAnalytics() {
     };
   }
 }
-export async function getAdminDashboardAnalytics() {
+export async function getAdminDashboardAnalytics(from?: string, to?: string) {
   try {
-    const res = await apiClient(`/admin/analytics/dashboard`, {
+    const params = new URLSearchParams();
+    if (from) params.set("from", from);
+    if (to) params.set("to", to);
+    const queryString = params.toString();
+    const url = `/admin/analytics/dashboard${queryString ? `?${queryString}` : ""}`;
+
+    const res = await apiClient(url, {
       method: "GET",
       //   tags: ["contact-us"],
       //   cache: "no-store",

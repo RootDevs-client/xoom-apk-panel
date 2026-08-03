@@ -73,7 +73,10 @@ export default function DeviceInfoCard({ device }: { device: Device }) {
             label="Status"
             value={<StatusBadge status={device.lifecycleStatus} />}
           />
-          <Field label="Last Event" value={formatEventLabel(device.lastEvent)} />
+          <Field
+            label="Last Event"
+            value={formatEventLabel(device.lastEvent)}
+          />
           <Field
             label="Last Heartbeat Check"
             value={
@@ -101,10 +104,7 @@ export default function DeviceInfoCard({ device }: { device: Device }) {
           </div>
           <Field label="Registered At" value={formatDate(device.createdAt)} />
           <Field label="Updated At" value={formatDate(device.updatedAt)} />
-          <Field
-            label="Total Events"
-            value={device.statusLogs?.length ?? 0}
-          />
+          <Field label="Total Events" value={device.statusLogs?.length ?? 0} />
         </CardContent>
       </Card>
     </div>

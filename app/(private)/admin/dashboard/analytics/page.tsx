@@ -7,21 +7,26 @@ import {
 import { BarChart3 } from "lucide-react";
 import { Suspense } from "react";
 import { DynamicBreadcrumb } from "../settings/_components/DynamicBreadcrumb";
+import AnalyticsDateRangeFilter from "./_components/AnalyticsDateRangeFilter";
 import { AnalyticsSkeleton } from "./_components/AnalyticsSkeleton";
 import { DashboardAnalyticsCards } from "./_components/DashboardAnalyticsCards";
+
+interface Props {
+  searchParams: Promise<{ from?: string; to?: string }>;
+}
 
 const breadcrumbItems = [
   { label: "Dashboard", href: "/admin/dashboard" },
   { label: "Analytics" },
 ];
 
-async function AnalyticsContent() {
+async function AnalyticsContent({ from, to }: { from?: string; to?: string }) {
   const [dashboardResult, deviceModelsResult, uninstallResult, eventResult] =
     await Promise.all([
-      getAdminDashboardAnalytics(),
-      getDeviceModels(),
-      getUninstallAnalytics(),
-      getEventAnalytics(),
+      getAdminDashboardAnalytics(from, to),
+      getDeviceModels(from, to),
+      getUninstallAnalytics(from, to),
+      getEventAnalytics(from, to),
     ]);
 
   const dashboardData = dashboardResult?.data ?? null;
@@ -44,7 +49,9 @@ async function AnalyticsContent() {
   );
 }
 
-export default function Analytics() {
+export default async function Analytics({ searchParams }: Props) {
+  const { from, to } = await searchParams;
+
   return (
     <>
       <div className="flex items-center justify-between mb-6">
@@ -59,8 +66,18 @@ export default function Analytics() {
         </div>
       </div>
 
-      <Suspense fallback={<AnalyticsSkeleton />}>
-        <AnalyticsContent />
+      <div className="mb-6">
+        <Suspense fallback={null}>
+          <AnalyticsDateRangeFilter />
+        </Suspense>
+      </div>
+
+      {/* re-keyed so the skeleton shows again whenever the range changes */}
+      <Suspense
+        key={`${from ?? ""}-${to ?? ""}`}
+        fallback={<AnalyticsSkeleton />}
+      >
+        <AnalyticsContent from={from} to={to} />
       </Suspense>
     </>
   );

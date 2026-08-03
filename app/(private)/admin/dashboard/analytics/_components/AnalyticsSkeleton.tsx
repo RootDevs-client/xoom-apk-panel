@@ -1,3 +1,8 @@
+/**
+ * Loading state for the analytics dashboard.
+ * Placeholders use the global `.shimmer` utility (app/globals.css), which is
+ * token-driven and therefore correct in both light and dark mode.
+ */
 export function AnalyticsSkeleton() {
   return (
     <div className="space-y-6" aria-label="Loading analytics data">
@@ -33,16 +38,9 @@ export function AnalyticsSkeleton() {
       </div>
 
       {/* ─── PIN Conversion Chart ─── */}
-      <div className="relative overflow-hidden rounded-xl border border-white/10 dark:border-white/5 bg-white/50 dark:bg-white/3 p-5">
-        <div className="absolute inset-0 shimmer-overlay" />
-        <div className="relative space-y-4">
-          <div className="flex items-center gap-2">
-            <div className="h-8 w-8 shimmer rounded-lg" />
-            <div className="space-y-1.5">
-              <div className="h-4 w-40 shimmer rounded-md" />
-              <div className="h-3 w-32 shimmer rounded-md" />
-            </div>
-          </div>
+      <div className={cardShell}>
+        <div className="space-y-4">
+          <CardHeaderSkeleton titleWidth="w-40" descWidth="w-32" />
           <div className="flex items-end justify-center gap-16 pt-4 h-44">
             {[80, 55].map((h, i) => (
               <div
@@ -59,63 +57,38 @@ export function AnalyticsSkeleton() {
           </div>
           <div className="flex items-center justify-center gap-3 pt-3 border-t border-border/50">
             <div className="h-7 w-28 shimmer rounded-lg" />
-            <div className="h-4 w-4 shimmer" />
+            <div className="h-4 w-4 shimmer rounded-sm" />
             <div className="h-7 w-28 shimmer rounded-lg" />
             <div className="h-7 w-16 shimmer rounded-lg" />
           </div>
         </div>
       </div>
-
-      {/* Inline styles for shimmer animation */}
-      <style>
-        {`
-          @keyframes shimmer-slide {
-            0% { transform: translateX(-100%); }
-            100% { transform: translateX(100%); }
-          }
-          .shimmer-overlay {
-            background: linear-gradient(
-              90deg,
-              transparent 0%,
-              rgba(255,255,255,0.08) 40%,
-              rgba(255,255,255,0.15) 50%,
-              rgba(255,255,255,0.08) 60%,
-              transparent 100%
-            );
-            animation: shimmer-slide 2s ease-in-out infinite;
-            pointer-events: none;
-          }
-          .dark .shimmer-overlay {
-            background: linear-gradient(
-              90deg,
-              transparent 0%,
-              rgba(255,255,255,0.07) 40%,
-              rgba(255,255,255,0.12) 50%,
-              rgba(255,255,255,0.07) 60%,
-              transparent 100%
-            );
-          }
-          .shimmer {
-            background: linear-gradient(
-              90deg,
-              hsl(var(--muted-foreground) / 0.06) 25%,
-              hsl(var(--muted-foreground) / 0.12) 37%,
-              hsl(var(--muted-foreground) / 0.06) 63%
-            );
-            background-size: 200% 100%;
-            animation: shimmer-bg 1.5s ease-in-out infinite;
-          }
-          @keyframes shimmer-bg {
-            0% { background-position: 200% 0; }
-            100% { background-position: -200% 0; }
-          }
-        `}
-      </style>
     </div>
   );
 }
 
 /* ─── Sub-components ─── */
+
+const cardShell =
+  "rounded-xl border border-border/60 bg-card p-5 shadow-sm overflow-hidden";
+
+function CardHeaderSkeleton({
+  titleWidth,
+  descWidth,
+}: {
+  titleWidth: string;
+  descWidth: string;
+}) {
+  return (
+    <div className="flex items-center gap-2">
+      <div className="h-8 w-8 shimmer rounded-lg" />
+      <div className="space-y-1.5">
+        <div className={`h-4 ${titleWidth} shimmer rounded-md`} />
+        <div className={`h-3 ${descWidth} shimmer rounded-md`} />
+      </div>
+    </div>
+  );
+}
 
 function ChartCardSkeleton({
   titleWidth,
@@ -129,16 +102,9 @@ function ChartCardSkeleton({
   donut: boolean;
 }) {
   return (
-    <div className="relative overflow-hidden rounded-xl border border-white/10 dark:border-white/5 bg-white/50 dark:bg-white/3 p-5">
-      <div className="absolute inset-0 shimmer-overlay" />
-      <div className="relative space-y-4">
-        <div className="flex items-center gap-2">
-          <div className="h-8 w-8 shimmer rounded-lg" />
-          <div className="space-y-1.5">
-            <div className={`h-4 ${titleWidth} shimmer rounded-md`} />
-            <div className={`h-3 ${descWidth} shimmer rounded-md`} />
-          </div>
-        </div>
+    <div className={cardShell}>
+      <div className="space-y-4">
+        <CardHeaderSkeleton titleWidth={titleWidth} descWidth={descWidth} />
         {donut && (
           <>
             <div className="flex justify-center py-4">
@@ -181,16 +147,9 @@ function DetailCardSkeleton({
   type: "progress" | "conversion" | "badges";
 }) {
   return (
-    <div className="relative overflow-hidden rounded-xl border border-white/10 dark:border-white/5 bg-white/50 dark:bg-white/3 p-5">
-      <div className="absolute inset-0 shimmer-overlay" />
-      <div className="relative space-y-4">
-        <div className="flex items-center gap-2">
-          <div className="h-8 w-8 shimmer rounded-lg" />
-          <div className="space-y-1.5">
-            <div className="h-4 w-32 shimmer rounded-md" />
-            <div className="h-3 w-24 shimmer rounded-md" />
-          </div>
-        </div>
+    <div className={cardShell}>
+      <div className="space-y-4">
+        <CardHeaderSkeleton titleWidth="w-32" descWidth="w-24" />
 
         {type === "progress" && (
           <div className="space-y-5 pt-1">
