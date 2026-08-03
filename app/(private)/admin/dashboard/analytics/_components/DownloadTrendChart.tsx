@@ -26,10 +26,20 @@ interface DownloadTrendChartProps {
 
 const BAR_COLORS = ["#8b5cf6", "#6366f1", "#06b6d4", "#10b981"];
 
+// recharts colours item text from the series fill; these bars/slices are
+// coloured per-Cell, so the series fill is undefined and it falls back to black.
+const CUSTOM_TOOLTIP_ITEM_STYLE = { color: "var(--popover-foreground)" };
+const CUSTOM_TOOLTIP_LABEL_STYLE = {
+  color: "var(--popover-foreground)",
+  fontWeight: 600,
+};
+
 const CUSTOM_TOOLTIP_STYLE = {
+  background: "var(--popover)",
+  color: "var(--popover-foreground)",
   borderRadius: "12px",
-  border: "1px solid rgba(0,0,0,0.05)",
-  boxShadow: "0 8px 24px rgba(0,0,0,0.08)",
+  border: "1px solid var(--border)",
+  boxShadow: "0 8px 24px rgb(0 0 0 / 0.18)",
   padding: "10px 14px",
 };
 
@@ -65,7 +75,7 @@ export function DownloadTrendChart({ data }: DownloadTrendChartProps) {
       <div className="absolute top-0 left-0 right-0 h-1 bg-linear-to-r from-violet-500 via-blue-500 to-emerald-500" />
 
       {/* Subtle background gradient */}
-      <div className="absolute inset-0 bg-linear-to-br from-violet-500/3 to-emerald-500/2" />
+      <div className="absolute inset-0 bg-linear-to-br from-foreground/[0.02] to-transparent" />
 
       {/* Decorative dots */}
       <div className="absolute top-4 right-4 grid grid-cols-3 gap-1 opacity-[0.08]">
@@ -86,7 +96,7 @@ export function DownloadTrendChart({ data }: DownloadTrendChartProps) {
         </CardDescription>
       </CardHeader>
       <CardContent className="relative">
-        <div className="w-full h-70 sm:h-80">
+        <div className="w-full h-[210px] sm:h-[240px]">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart
               data={chartData}
@@ -115,6 +125,8 @@ export function DownloadTrendChart({ data }: DownloadTrendChartProps) {
               />
               <Tooltip
                 contentStyle={CUSTOM_TOOLTIP_STYLE}
+                itemStyle={CUSTOM_TOOLTIP_ITEM_STYLE}
+                labelStyle={CUSTOM_TOOLTIP_LABEL_STYLE}
                 formatter={(value: any) => [
                   `${(value as number).toLocaleString()} downloads`,
                   "Count",

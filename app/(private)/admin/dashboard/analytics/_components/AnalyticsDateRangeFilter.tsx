@@ -7,7 +7,7 @@ import "flatpickr/dist/flatpickr.min.css";
 import { Calendar, CalendarRange, RotateCcw } from "lucide-react";
 import moment from "moment-timezone";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useRef, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 
 const TZ = "Asia/Dhaka";
 const today = () => moment().tz(TZ);
@@ -35,7 +35,10 @@ const presets: Preset[] = [
   {
     key: "30d",
     label: "30 Days",
-    range: () => ({ from: fmt(today().subtract(29, "days")), to: fmt(today()) }),
+    range: () => ({
+      from: fmt(today().subtract(29, "days")),
+      to: fmt(today()),
+    }),
   },
   {
     key: "month",
@@ -45,7 +48,10 @@ const presets: Preset[] = [
   {
     key: "90d",
     label: "90 Days",
-    range: () => ({ from: fmt(today().subtract(89, "days")), to: fmt(today()) }),
+    range: () => ({
+      from: fmt(today().subtract(89, "days")),
+      to: fmt(today()),
+    }),
   },
   { key: "all", label: "All Time", range: () => null },
 ];
@@ -63,6 +69,20 @@ export default function AnalyticsDateRangeFilter() {
   const pickerRef = useRef<flatpickr.Instance | null>(null);
   /** latest push in a ref so the picker is initialised only once */
   const pushRef = useRef<(next: Range) => void>(() => {});
+  /** current range in a ref so a re-init can restore the selection */
+  const rangeRef = useRef<Range>(null);
+
+  /** two months side by side needs ~640px — show one on phones */
+  const [months, setMonths] = useState(1);
+
+  useEffect(() => {
+    const query = window.matchMedia("(min-width: 640px)");
+    const apply = () => setMonths(query.matches ? 2 : 1);
+
+    apply();
+    query.addEventListener("change", apply);
+    return () => query.removeEventListener("change", apply);
+  }, []);
 
   const push = (next: Range) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -77,17 +97,22 @@ export default function AnalyticsDateRangeFilter() {
     });
   };
   pushRef.current = push;
+  rangeRef.current =
+    fromParam && toParam ? { from: fromParam, to: toParam } : null;
 
-  // init flatpickr range picker once
+  // (re)init flatpickr — re-created only when the month count changes
   useEffect(() => {
     if (!inputRef.current) return;
+
+    const current = rangeRef.current;
 
     pickerRef.current = flatpickr(inputRef.current, {
       mode: "range",
       dateFormat: "Y-m-d",
       maxDate: "today",
-      showMonths: 2,
+      showMonths: months,
       allowInput: false,
+      defaultDate: current ? [current.from, current.to] : undefined,
       onClose: (selectedDates) => {
         if (selectedDates.length === 2) {
           pushRef.current({
@@ -104,7 +129,7 @@ export default function AnalyticsDateRangeFilter() {
       pickerRef.current?.destroy();
       pickerRef.current = null;
     };
-  }, []);
+  }, [months]);
 
   // keep the picker in sync with the URL (presets, reset, back button)
   useEffect(() => {
@@ -147,14 +172,14 @@ export default function AnalyticsDateRangeFilter() {
 
       {/* Custom range — flatpickr */}
       <div className="flex items-center gap-2">
-        <div className="relative">
+        <div className="relative flex-1 lg:flex-none">
           <Input
             ref={inputRef}
             type="text"
             readOnly
             disabled={isPending}
             placeholder="Custom range"
-            className="h-8 w-60 cursor-pointer pr-8 text-xs"
+            className="h-8 w-full cursor-pointer pr-8 text-xs lg:w-60"
             aria-label="Custom date range"
           />
           <Calendar className="pointer-events-none absolute right-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground/60" />

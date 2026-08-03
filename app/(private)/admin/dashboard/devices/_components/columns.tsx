@@ -34,9 +34,10 @@ export function StatusBadge({ status }: { status: string }) {
     APP_DELETED: { variant: "destructive", label: "Deleted" },
   };
 
+  // unknown statuses still read nicely: APP_SOMETHING → "App Something"
   const config = variants[status] ?? {
     variant: "outline" as const,
-    label: status,
+    label: formatEventLabel(status),
   };
 
   return (

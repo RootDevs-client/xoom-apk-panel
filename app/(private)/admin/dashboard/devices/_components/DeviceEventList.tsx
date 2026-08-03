@@ -47,9 +47,21 @@ const eventTone: Record<string, { dot: string; text: string }> = {
     dot: "bg-amber-500",
     text: "text-amber-600 dark:text-amber-400",
   },
+  EVINA_WAITING_ENABLED: {
+    dot: "bg-yellow-500",
+    text: "text-yellow-600 dark:text-yellow-400",
+  },
   PIN_REQUEST_CALLED: {
     dot: "bg-cyan-500",
     text: "text-cyan-600 dark:text-cyan-400",
+  },
+  PIN_RECEIVED: {
+    dot: "bg-sky-500",
+    text: "text-sky-600 dark:text-sky-400",
+  },
+  PIN_VERIFY_INVOKED: {
+    dot: "bg-teal-500",
+    text: "text-teal-600 dark:text-teal-400",
   },
   PIN_VERIFY_CALLED: {
     dot: "bg-cyan-500",

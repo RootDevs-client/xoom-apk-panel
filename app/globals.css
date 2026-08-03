@@ -688,3 +688,69 @@ span.flatpickr-weekday {
 input.form-control[readonly].flatpickr-input {
   cursor: pointer;
 }
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Recharts — theme the parts recharts renders with hardcoded SVG defaults
+   (#666 ticks, #ccc grid, white dot rings). CSS wins over presentation
+   attributes, so this applies to every chart without touching chart code.
+   ───────────────────────────────────────────────────────────────────────── */
+.recharts-cartesian-axis-tick-value,
+.recharts-polar-angle-axis-tick-value {
+  fill: var(--muted-foreground);
+}
+.recharts-cartesian-grid line,
+.recharts-polar-grid line,
+.recharts-polar-grid circle {
+  stroke: var(--border);
+}
+.recharts-cartesian-axis-line,
+.recharts-cartesian-axis-tick-line {
+  stroke: var(--border);
+}
+/* hover band behind bars/areas */
+.recharts-tooltip-cursor {
+  fill: color-mix(in oklab, var(--muted-foreground) 14%, transparent);
+}
+/* the tooltip must paint above chart overlays (e.g. the donut centre total),
+   which are later siblings and would otherwise cover it */
+.recharts-tooltip-wrapper {
+  z-index: 30 !important;
+  /* recharts sets the position inline on every pointer move — easing the
+     transform makes the tooltip glide instead of snapping to the cursor */
+  transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+@media (prefers-reduced-motion: reduce) {
+  .recharts-tooltip-wrapper {
+    transition: none;
+  }
+}
+/* line/area dots are ringed in the card colour so they read as lifted */
+.recharts-dot {
+  stroke: var(--card);
+}
+
+/* Flatpickr on small screens: flatpickr writes fixed pixel widths inline, so
+   these need !important to let the calendar fit inside the viewport. */
+@media (max-width: 639px) {
+  .flatpickr-calendar {
+    width: auto !important;
+    max-width: calc(100vw - 1.5rem) !important;
+    padding: 0.375rem;
+  }
+  .flatpickr-rContainer,
+  .flatpickr-days,
+  .flatpickr-weekdaycontainer,
+  .dayContainer {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+  }
+  .flatpickr-day {
+    max-width: none;
+    height: 2.25rem;
+    line-height: 2.25rem;
+  }
+  .flatpickr-current-month {
+    font-size: 0.8125rem;
+  }
+}

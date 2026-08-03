@@ -7,7 +7,13 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { AlertTriangle, Download, Trash2, TrendingDown, Users } from "lucide-react";
+import {
+  AlertTriangle,
+  Download,
+  Trash2,
+  TrendingDown,
+  Users,
+} from "lucide-react";
 import {
   Bar,
   BarChart,
@@ -26,18 +32,28 @@ interface UninstallAnalyticsCardProps {
   data: UninstallAnalyticsData;
 }
 
+// recharts colours item text from the series fill; these bars/slices are
+// coloured per-Cell, so the series fill is undefined and it falls back to black.
+const CUSTOM_TOOLTIP_ITEM_STYLE = { color: "var(--popover-foreground)" };
+const CUSTOM_TOOLTIP_LABEL_STYLE = {
+  color: "var(--popover-foreground)",
+  fontWeight: 600,
+};
+
 const CUSTOM_TOOLTIP_STYLE = {
+  background: "var(--popover)",
+  color: "var(--popover-foreground)",
   borderRadius: "12px",
-  border: "1px solid rgba(0,0,0,0.05)",
-  boxShadow: "0 8px 24px rgba(0,0,0,0.08)",
+  border: "1px solid var(--border)",
+  boxShadow: "0 8px 24px rgb(0 0 0 / 0.18)",
   padding: "10px 14px",
 };
 
 const GAUGE_COLORS = [
-  { threshold: 0, color: "#10b981" },    // Green - low uninstall
-  { threshold: 10, color: "#f59e0b" },   // Amber - medium
-  { threshold: 20, color: "#f97316" },   // Orange - high
-  { threshold: 35, color: "#ef4444" },   // Red - critical
+  { threshold: 0, color: "#10b981" }, // Green - low uninstall
+  { threshold: 10, color: "#f59e0b" }, // Amber - medium
+  { threshold: 20, color: "#f97316" }, // Orange - high
+  { threshold: 35, color: "#ef4444" }, // Red - critical
 ];
 
 function getGaugeColor(rate: number): string {
@@ -60,8 +76,18 @@ export function UninstallAnalyticsCard({ data }: UninstallAnalyticsCardProps) {
 
   // Donut data for the gauge: uninstallRate % vs rest
   const gaugeData = [
-    { name: "Uninstalled", value: Math.max(data.uninstallRate, 0.5), fill: gaugeColor },
-    { name: "Retained", value: Math.max(100 - data.uninstallRate, 0.5), fill: "#e5e7eb" },
+    {
+      name: "Uninstalled",
+      value: Math.max(data.uninstallRate, 0.5),
+      fill: gaugeColor,
+    },
+    {
+      name: "Retained",
+      value: Math.max(100 - data.uninstallRate, 0.5),
+      // gauge track: follows the theme instead of a fixed light grey
+      fill: "#e5e7eb",
+      className: "fill-muted",
+    },
   ];
 
   // Bar chart data: downloads vs deleted
@@ -80,7 +106,7 @@ export function UninstallAnalyticsCard({ data }: UninstallAnalyticsCardProps) {
       <div className="absolute top-0 left-0 right-0 h-1 bg-linear-to-r from-rose-500 via-orange-500 to-emerald-500" />
 
       {/* Subtle background gradient */}
-      <div className="absolute inset-0 bg-linear-to-br from-rose-500/3 to-orange-500/2" />
+      <div className="absolute inset-0 bg-linear-to-br from-foreground/2 to-transparent" />
 
       {/* Decorative dots */}
       <div className="absolute top-4 right-4 grid grid-cols-3 gap-1 opacity-[0.08]">
@@ -96,7 +122,9 @@ export function UninstallAnalyticsCard({ data }: UninstallAnalyticsCardProps) {
           </div>
           Uninstall Analytics
         </CardTitle>
-        <CardDescription>Download retention and uninstall rate tracking</CardDescription>
+        <CardDescription>
+          Download retention and uninstall rate tracking
+        </CardDescription>
       </CardHeader>
 
       <CardContent className="relative">
@@ -121,14 +149,21 @@ export function UninstallAnalyticsCard({ data }: UninstallAnalyticsCardProps) {
                       paddingAngle={0}
                     >
                       {gaugeData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.fill} />
+                        <Cell
+                          key={`cell-${index}`}
+                          fill={entry.fill}
+                          className={entry.className}
+                        />
                       ))}
                     </Pie>
                   </PieChart>
                 </ResponsiveContainer>
                 {/* Center text overlay */}
                 <div className="absolute inset-0 flex flex-col items-center justify-center">
-                  <span className="text-3xl font-bold tracking-tight" style={{ color: gaugeColor }}>
+                  <span
+                    className="text-3xl font-bold tracking-tight"
+                    style={{ color: gaugeColor }}
+                  >
                     {data.uninstallRate.toFixed(1)}%
                   </span>
                   <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider mt-0.5">
@@ -140,11 +175,14 @@ export function UninstallAnalyticsCard({ data }: UninstallAnalyticsCardProps) {
 
             {/* Status badge */}
             <div className="flex items-center justify-center gap-2">
-              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border" style={{
-                borderColor: `${gaugeColor}30`,
-                backgroundColor: `${gaugeColor}12`,
-                color: gaugeColor,
-              }}>
+              <div
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border"
+                style={{
+                  borderColor: `${gaugeColor}30`,
+                  backgroundColor: `${gaugeColor}12`,
+                  color: gaugeColor,
+                }}
+              >
                 <TrendingDown className="h-3 w-3" />
                 {gaugeLabel}
               </div>
@@ -162,7 +200,11 @@ export function UninstallAnalyticsCard({ data }: UninstallAnalyticsCardProps) {
                   barSize={48}
                   barGap={8}
                 >
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} opacity={0.3} />
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    vertical={false}
+                    opacity={0.3}
+                  />
                   <XAxis
                     dataKey="name"
                     tick={{ fontSize: 11, fontWeight: 500 }}
@@ -179,7 +221,12 @@ export function UninstallAnalyticsCard({ data }: UninstallAnalyticsCardProps) {
                   />
                   <Tooltip
                     contentStyle={CUSTOM_TOOLTIP_STYLE}
-                    formatter={(value: any) => [(value as number).toLocaleString(), "Count"]}
+                    itemStyle={CUSTOM_TOOLTIP_ITEM_STYLE}
+                    labelStyle={CUSTOM_TOOLTIP_LABEL_STYLE}
+                    formatter={(value: any) => [
+                      (value as number).toLocaleString(),
+                      "Count",
+                    ]}
                     cursor={{ fill: "rgba(0,0,0,0.03)" }}
                   />
                   <Bar
@@ -205,7 +252,9 @@ export function UninstallAnalyticsCard({ data }: UninstallAnalyticsCardProps) {
               <div className="text-center">
                 <div className="flex items-center justify-center gap-1.5 mb-1">
                   <Download className="h-3.5 w-3.5 text-indigo-500" />
-                  <span className="text-xs text-muted-foreground">Downloads</span>
+                  <span className="text-xs text-muted-foreground">
+                    Downloads
+                  </span>
                 </div>
                 <p className="text-lg font-bold text-indigo-600 dark:text-indigo-400">
                   {data.downloads.toLocaleString()}
@@ -223,7 +272,9 @@ export function UninstallAnalyticsCard({ data }: UninstallAnalyticsCardProps) {
               <div className="text-center">
                 <div className="flex items-center justify-center gap-1.5 mb-1">
                   <Users className="h-3.5 w-3.5 text-emerald-500" />
-                  <span className="text-xs text-muted-foreground">Retained</span>
+                  <span className="text-xs text-muted-foreground">
+                    Retained
+                  </span>
                 </div>
                 <p className="text-lg font-bold text-emerald-600 dark:text-emerald-400">
                   {Math.max(data.downloads - data.deleted, 0).toLocaleString()}

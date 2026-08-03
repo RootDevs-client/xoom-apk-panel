@@ -1,11 +1,6 @@
 "use client";
 
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Area,
   AreaChart,
@@ -22,17 +17,28 @@ interface PinConversionChartProps {
   data: DashboardAnalyticsData;
 }
 
+// recharts colours item text from the series fill; these bars/slices are
+// coloured per-Cell, so the series fill is undefined and it falls back to black.
+const CUSTOM_TOOLTIP_ITEM_STYLE = { color: "var(--popover-foreground)" };
+const CUSTOM_TOOLTIP_LABEL_STYLE = {
+  color: "var(--popover-foreground)",
+  fontWeight: 600,
+};
+
 const CUSTOM_TOOLTIP_STYLE = {
+  background: "var(--popover)",
+  color: "var(--popover-foreground)",
   borderRadius: "12px",
-  border: "1px solid rgba(0,0,0,0.05)",
-  boxShadow: "0 8px 24px rgba(0,0,0,0.08)",
+  border: "1px solid var(--border)",
+  boxShadow: "0 8px 24px rgb(0 0 0 / 0.18)",
   padding: "10px 14px",
 };
 
 export function PinConversionChart({ data }: PinConversionChartProps) {
-  const rate = data.totalPinRequests > 0
-    ? (data.totalPinReceived / data.totalPinRequests) * 100
-    : 0;
+  const rate =
+    data.totalPinRequests > 0
+      ? (data.totalPinReceived / data.totalPinRequests) * 100
+      : 0;
 
   const chartData = [
     { name: "Requests", value: data.totalPinRequests },
@@ -56,7 +62,7 @@ export function PinConversionChart({ data }: PinConversionChartProps) {
       <div className="absolute top-0 left-0 right-0 h-1 bg-linear-to-r from-indigo-500 via-emerald-500 to-emerald-400" />
 
       {/* Subtle background gradient */}
-      <div className="absolute inset-0 bg-linear-to-br from-indigo-500/3 to-emerald-500/2" />
+      <div className="absolute inset-0 bg-linear-to-br from-foreground/[0.02] to-transparent" />
 
       {/* Decorative dots */}
       <div className="absolute top-4 right-4 grid grid-cols-3 gap-1 opacity-[0.08]">
@@ -76,16 +82,30 @@ export function PinConversionChart({ data }: PinConversionChartProps) {
 
       <CardContent className="relative">
         {/* Area Chart */}
-        <div className="h-40 sm:h-44">
+        <div className="h-[150px] sm:h-[170px]">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart
               data={chartData}
               margin={{ top: 5, right: 5, left: -15, bottom: 0 }}
             >
               <defs>
-                <linearGradient id="pinConversionGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor={quality.from} stopOpacity={0.5} />
-                  <stop offset="100%" stopColor={quality.from} stopOpacity={0.05} />
+                <linearGradient
+                  id="pinConversionGradient"
+                  x1="0"
+                  y1="0"
+                  x2="0"
+                  y2="1"
+                >
+                  <stop
+                    offset="0%"
+                    stopColor={quality.from}
+                    stopOpacity={0.5}
+                  />
+                  <stop
+                    offset="100%"
+                    stopColor={quality.from}
+                    stopOpacity={0.05}
+                  />
                 </linearGradient>
               </defs>
               <CartesianGrid
@@ -109,7 +129,12 @@ export function PinConversionChart({ data }: PinConversionChartProps) {
               />
               <Tooltip
                 contentStyle={CUSTOM_TOOLTIP_STYLE}
-                formatter={(value: any) => [(value as number).toLocaleString(), "Count"]}
+                itemStyle={CUSTOM_TOOLTIP_ITEM_STYLE}
+                labelStyle={CUSTOM_TOOLTIP_LABEL_STYLE}
+                formatter={(value: any) => [
+                  (value as number).toLocaleString(),
+                  "Count",
+                ]}
                 labelFormatter={(label) => `${label}`}
                 cursor={{ fill: "rgba(0,0,0,0.03)" }}
               />
@@ -119,8 +144,18 @@ export function PinConversionChart({ data }: PinConversionChartProps) {
                 stroke={quality.from}
                 strokeWidth={2.5}
                 fill="url(#pinConversionGradient)"
-                dot={{ r: 5, fill: quality.from, strokeWidth: 2, stroke: "white" }}
-                activeDot={{ r: 7, fill: quality.from, strokeWidth: 2, stroke: "white" }}
+                dot={{
+                  r: 5,
+                  fill: quality.from,
+                  strokeWidth: 2,
+                  stroke: "white",
+                }}
+                activeDot={{
+                  r: 7,
+                  fill: quality.from,
+                  strokeWidth: 2,
+                  stroke: "white",
+                }}
                 animationDuration={1200}
                 animationEasing="ease-out"
               />
@@ -135,7 +170,9 @@ export function PinConversionChart({ data }: PinConversionChartProps) {
               <MousePointerClick className="h-3 w-3 text-indigo-500" />
             </div>
             <div>
-              <span className="text-[10px] text-muted-foreground block leading-none">Requests</span>
+              <span className="text-[10px] text-muted-foreground block leading-none">
+                Requests
+              </span>
               <span className="text-sm font-bold text-indigo-600 dark:text-indigo-400">
                 {data.totalPinRequests.toLocaleString()}
               </span>
@@ -147,7 +184,10 @@ export function PinConversionChart({ data }: PinConversionChartProps) {
               {rate.toFixed(0)}%
             </span>
             <div className="flex items-center gap-1 justify-center">
-              <Percent className="h-2.5 w-2.5" style={{ color: quality.from }} />
+              <Percent
+                className="h-2.5 w-2.5"
+                style={{ color: quality.from }}
+              />
               <span className="text-[9px] font-medium text-muted-foreground uppercase">
                 {quality.label}
               </span>
@@ -159,7 +199,9 @@ export function PinConversionChart({ data }: PinConversionChartProps) {
               <CheckCircle2 className="h-3 w-3 text-emerald-500" />
             </div>
             <div className="text-right">
-              <span className="text-[10px] text-muted-foreground block leading-none">Received</span>
+              <span className="text-[10px] text-muted-foreground block leading-none">
+                Received
+              </span>
               <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400">
                 {data.totalPinReceived.toLocaleString()}
               </span>

@@ -27,7 +27,7 @@ export function QuickStatsCard({ data }: QuickStatsCardProps) {
       <div className="absolute top-0 left-0 right-0 h-1 bg-linear-to-r from-amber-500 via-orange-500 to-rose-500" />
 
       {/* Subtle background gradient */}
-      <div className="absolute inset-0 bg-linear-to-br from-amber-500/3 to-rose-500/2" />
+      <div className="absolute inset-0 bg-linear-to-br from-foreground/[0.02] to-transparent" />
 
       {/* Decorative dots */}
       <div className="absolute top-4 right-4 grid grid-cols-3 gap-1 opacity-[0.08]">

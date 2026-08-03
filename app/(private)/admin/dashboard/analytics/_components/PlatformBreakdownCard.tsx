@@ -24,7 +24,7 @@ export function PlatformBreakdownCard({ data }: PlatformBreakdownCardProps) {
       <div className="absolute top-0 left-0 right-0 h-1 bg-linear-to-r from-emerald-500 via-blue-500 to-violet-500" />
 
       {/* Subtle background gradient */}
-      <div className="absolute inset-0 bg-linear-to-br from-emerald-500/3 to-blue-500/3" />
+      <div className="absolute inset-0 bg-linear-to-br from-foreground/[0.02] to-transparent" />
 
       {/* Decorative dots */}
       <div className="absolute top-4 right-4 grid grid-cols-3 gap-1 opacity-[0.08]">
