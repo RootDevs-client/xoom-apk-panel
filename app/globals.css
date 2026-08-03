@@ -253,8 +253,54 @@
     }
   }
 
+  /* Slowly panning gradient — for gradient-filled text / accent bars */
+  .animate-gradient-x {
+    background-size: 200% 200%;
+    animation: gradient-pan 6s ease infinite;
+  }
+
+  @keyframes gradient-pan {
+    0%,
+    100% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+  }
+
+  /* Diagonal light sweep, triggered by hovering the `group` ancestor */
+  .group:hover .sheen::after {
+    animation: sheen-sweep 0.9s ease-out;
+  }
+  .sheen::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    transform: translateX(-120%) skewX(-18deg);
+    background-image: linear-gradient(
+      90deg,
+      transparent 0%,
+      color-mix(in oklab, var(--foreground) 7%, transparent) 50%,
+      transparent 100%
+    );
+    pointer-events: none;
+  }
+
+  @keyframes sheen-sweep {
+    100% {
+      transform: translateX(120%) skewX(-18deg);
+    }
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .shimmer::after {
+      animation: none;
+    }
+    .animate-gradient-x {
+      animation: none;
+    }
+    .group:hover .sheen::after {
       animation: none;
     }
   }
@@ -729,28 +775,352 @@ input.form-control[readonly].flatpickr-input {
   stroke: var(--card);
 }
 
-/* Flatpickr on small screens: flatpickr writes fixed pixel widths inline, so
-   these need !important to let the calendar fit inside the viewport. */
-@media (max-width: 639px) {
+/* ---------------------------------------------------------------------------
+   Flatpickr theme
+
+   flatpickr.min.css is imported from a component, so its position in the
+   cascade relative to this file is not guaranteed. Every selector therefore
+   repeats `.flatpickr-calendar` to out-rank flatpickr's own rules on
+   specificity rather than on order — including the root rule, whose plain
+   `.flatpickr-calendar { background: #fff }` was previously winning the tie and
+   leaving a white calendar with light text under `.dark`.
+
+   All colours are theme tokens, so dark mode follows automatically and light
+   mode is unchanged. Two local aliases keep the surfaces readable:
+   --fp-hover  — neutral hover wash (--accent is the brand orange here, which
+                 would be indistinguishable from a selected day)
+   --fp-range  — tinted in-range fill
+   --------------------------------------------------------------------------- */
+
+.flatpickr-calendar.flatpickr-calendar {
+  --fp-hover: color-mix(in oklab, var(--popover-foreground) 12%, transparent);
+  --fp-range: color-mix(in oklab, var(--primary) 22%, transparent);
+  --fp-dim: color-mix(in oklab, var(--popover-foreground) 45%, transparent);
+
+  background: var(--popover);
+  color: var(--popover-foreground);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow:
+    0 10px 30px -12px rgb(0 0 0 / 0.35),
+    0 2px 8px -4px rgb(0 0 0 / 0.2);
+}
+
+/* The calendar is appended to <body>, so no ancestor `overflow: hidden` can
+   clip it — but it must still sit above sidebars, sticky headers and dialogs. */
+.flatpickr-calendar.flatpickr-calendar.open {
+  z-index: 1000;
+}
+
+/* Callout arrow — border triangle and fill triangle */
+.flatpickr-calendar.flatpickr-calendar.arrowTop:before,
+.flatpickr-calendar.flatpickr-calendar.arrowBottom:before {
+  border-bottom-color: var(--border);
+  border-top-color: var(--border);
+}
+.flatpickr-calendar.flatpickr-calendar.arrowTop:after,
+.flatpickr-calendar.flatpickr-calendar.arrowBottom:after {
+  border-bottom-color: var(--popover);
+  border-top-color: var(--popover);
+}
+
+/* Structural wrappers — flatpickr gives several of these their own white
+   background and light grey borders */
+.flatpickr-calendar.flatpickr-calendar .flatpickr-months,
+.flatpickr-calendar.flatpickr-calendar .flatpickr-month,
+.flatpickr-calendar.flatpickr-calendar .flatpickr-weekdays,
+.flatpickr-calendar.flatpickr-calendar .flatpickr-weekdaycontainer,
+.flatpickr-calendar.flatpickr-calendar .flatpickr-days,
+.flatpickr-calendar.flatpickr-calendar .dayContainer,
+.flatpickr-calendar.flatpickr-calendar .flatpickr-innerContainer,
+.flatpickr-calendar.flatpickr-calendar .flatpickr-rContainer {
+  background: transparent;
+  border: 0;
+}
+
+/* Month / year header */
+.flatpickr-calendar.flatpickr-calendar .flatpickr-month,
+.flatpickr-calendar.flatpickr-calendar .flatpickr-current-month,
+.flatpickr-calendar.flatpickr-calendar .flatpickr-current-month span.cur-month,
+.flatpickr-calendar.flatpickr-calendar .flatpickr-current-month input.cur-year,
+.flatpickr-calendar.flatpickr-calendar .numInputWrapper input.numInput {
+  color: var(--popover-foreground);
+  fill: var(--popover-foreground);
+  background: transparent;
+}
+/* the year spinner keeps a light text colour on focus otherwise */
+.flatpickr-calendar.flatpickr-calendar
+  .flatpickr-current-month
+  input.cur-year:focus {
+  color: var(--popover-foreground);
+  outline: none;
+}
+
+/* Month dropdown — the <select> and its <option> list, which the OS paints
+   from these two properties */
+.flatpickr-calendar.flatpickr-calendar
+  .flatpickr-current-month
+  .flatpickr-monthDropdown-months {
+  background: var(--popover);
+  color: var(--popover-foreground);
+  border-radius: calc(var(--radius) - 4px);
+}
+.flatpickr-calendar.flatpickr-calendar
+  .flatpickr-current-month
+  .flatpickr-monthDropdown-months:hover,
+.flatpickr-calendar.flatpickr-calendar
+  .flatpickr-current-month
+  .flatpickr-monthDropdown-months:focus {
+  background: var(--fp-hover);
+  outline: none;
+}
+.flatpickr-calendar.flatpickr-calendar
+  .flatpickr-monthDropdown-months
+  .flatpickr-monthDropdown-month {
+  background: var(--popover);
+  color: var(--popover-foreground);
+}
+
+/* Year spinner arrows */
+.flatpickr-calendar.flatpickr-calendar .numInputWrapper:hover {
+  background: var(--fp-hover);
+}
+.flatpickr-calendar.flatpickr-calendar .numInputWrapper span {
+  border-color: var(--border);
+}
+.flatpickr-calendar.flatpickr-calendar .numInputWrapper span:hover {
+  background: var(--fp-hover);
+}
+.flatpickr-calendar.flatpickr-calendar .numInputWrapper span.arrowUp:after {
+  border-bottom-color: var(--muted-foreground);
+}
+.flatpickr-calendar.flatpickr-calendar .numInputWrapper span.arrowDown:after {
+  border-top-color: var(--muted-foreground);
+}
+
+/* Prev / next month arrows — flatpickr hardcodes fill on the <svg> */
+.flatpickr-calendar.flatpickr-calendar .flatpickr-months .flatpickr-prev-month,
+.flatpickr-calendar.flatpickr-calendar .flatpickr-months .flatpickr-next-month {
+  color: var(--muted-foreground);
+  fill: var(--muted-foreground);
+  border-radius: calc(var(--radius) - 4px);
+}
+.flatpickr-calendar.flatpickr-calendar
+  .flatpickr-months
+  .flatpickr-prev-month
+  svg,
+.flatpickr-calendar.flatpickr-calendar
+  .flatpickr-months
+  .flatpickr-next-month
+  svg {
+  fill: var(--muted-foreground);
+}
+.flatpickr-calendar.flatpickr-calendar
+  .flatpickr-months
+  .flatpickr-prev-month:hover,
+.flatpickr-calendar.flatpickr-calendar
+  .flatpickr-months
+  .flatpickr-next-month:hover {
+  background: var(--fp-hover);
+}
+.flatpickr-calendar.flatpickr-calendar
+  .flatpickr-months
+  .flatpickr-prev-month:hover
+  svg,
+.flatpickr-calendar.flatpickr-calendar
+  .flatpickr-months
+  .flatpickr-next-month:hover
+  svg {
+  fill: var(--popover-foreground);
+}
+
+/* Weekday header */
+.flatpickr-calendar.flatpickr-calendar span.flatpickr-weekday {
+  background: transparent;
+  color: var(--muted-foreground);
+  font-weight: 500;
+}
+
+/* Days */
+.flatpickr-calendar.flatpickr-calendar .flatpickr-day {
+  color: var(--popover-foreground);
+  background: transparent;
+  border-color: transparent;
+  border-radius: calc(var(--radius) - 4px);
+}
+.flatpickr-calendar.flatpickr-calendar .flatpickr-day:hover,
+.flatpickr-calendar.flatpickr-calendar .flatpickr-day:focus {
+  background: var(--fp-hover);
+  border-color: transparent;
+  color: var(--popover-foreground);
+}
+.flatpickr-calendar.flatpickr-calendar .flatpickr-day.today {
+  border-color: var(--primary);
+  color: var(--popover-foreground);
+}
+.flatpickr-calendar.flatpickr-calendar .flatpickr-day.today:hover {
+  background: var(--fp-hover);
+  color: var(--popover-foreground);
+}
+.flatpickr-calendar.flatpickr-calendar .flatpickr-day.selected,
+.flatpickr-calendar.flatpickr-calendar .flatpickr-day.startRange,
+.flatpickr-calendar.flatpickr-calendar .flatpickr-day.endRange,
+.flatpickr-calendar.flatpickr-calendar .flatpickr-day.selected:hover,
+.flatpickr-calendar.flatpickr-calendar .flatpickr-day.startRange:hover,
+.flatpickr-calendar.flatpickr-calendar .flatpickr-day.endRange:hover,
+.flatpickr-calendar.flatpickr-calendar .flatpickr-day.selected.today,
+.flatpickr-calendar.flatpickr-calendar .flatpickr-day.startRange.today,
+.flatpickr-calendar.flatpickr-calendar .flatpickr-day.endRange.today {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: var(--primary-foreground);
+}
+.flatpickr-calendar.flatpickr-calendar .flatpickr-day.inRange,
+.flatpickr-calendar.flatpickr-calendar .flatpickr-day.inRange:hover {
+  background: var(--fp-range);
+  border-color: transparent;
+  color: var(--popover-foreground);
+  /* flatpickr bridges the gap between cells with a side box-shadow */
+  box-shadow:
+    -5px 0 0 var(--fp-range),
+    5px 0 0 var(--fp-range);
+}
+
+/* Two adjacent range ends: flatpickr bridges them with a hardcoded blue
+   (#569ff7) box-shadow */
+.flatpickr-calendar.flatpickr-calendar
+  .flatpickr-day.startRange.startRange
+  + .endRange:not(:nth-child(7n + 1)) {
+  box-shadow: -10px 0 0 var(--primary);
+}
+
+/* Out-of-month and disabled days — dimmed, but still legible */
+.flatpickr-calendar.flatpickr-calendar .flatpickr-day.prevMonthDay,
+.flatpickr-calendar.flatpickr-calendar .flatpickr-day.nextMonthDay {
+  color: var(--fp-dim);
+}
+.flatpickr-calendar.flatpickr-calendar .flatpickr-day.flatpickr-disabled,
+.flatpickr-calendar.flatpickr-calendar .flatpickr-day.flatpickr-disabled:hover,
+.flatpickr-calendar.flatpickr-calendar .flatpickr-day.notAllowed,
+.flatpickr-calendar.flatpickr-calendar .flatpickr-day.notAllowed.prevMonthDay,
+.flatpickr-calendar.flatpickr-calendar .flatpickr-day.notAllowed.nextMonthDay {
+  color: var(--fp-dim);
+  background: transparent;
+  border-color: transparent;
+  cursor: not-allowed;
+}
+
+/* Touch devices: bigger hit targets and no tap-highlight flash on the arrows.
+   Applies at every width — a touch laptop benefits too. */
+@media (hover: none) and (pointer: coarse) {
+  .flatpickr-day {
+    min-height: 2.5rem;
+    line-height: 2.5rem;
+  }
+  .flatpickr-months .flatpickr-prev-month,
+  .flatpickr-months .flatpickr-next-month {
+    height: 2.5rem;
+    padding: 0.625rem;
+    -webkit-tap-highlight-color: transparent;
+  }
+  /* stop iOS from selecting day text during a range drag */
+  .flatpickr-calendar {
+    -webkit-user-select: none;
+    user-select: none;
+    touch-action: manipulation;
+  }
+}
+
+/* Below 768px: flatpickr writes fixed pixel widths inline, so these need
+   !important to let the calendar shrink inside the viewport. Desktop
+   (>=768px) keeps flatpickr's own sizing and flex layout untouched. */
+@media (max-width: 767px) {
   .flatpickr-calendar {
     width: auto !important;
     max-width: calc(100vw - 1.5rem) !important;
-    padding: 0.375rem;
+    padding: 0.5rem;
+    box-sizing: border-box;
   }
-  .flatpickr-rContainer,
-  .flatpickr-days,
-  .flatpickr-weekdaycontainer,
-  .dayContainer {
+
+  /* Only one month is rendered on phones (showMonths=1), so every wrapper can
+     simply take the full width of the calendar. */
+  .flatpickr-calendar .flatpickr-innerContainer,
+  .flatpickr-calendar .flatpickr-rContainer,
+  .flatpickr-calendar .flatpickr-weekdays,
+  .flatpickr-calendar .flatpickr-days {
     width: 100% !important;
     min-width: 0 !important;
     max-width: 100% !important;
   }
-  .flatpickr-day {
-    max-width: none;
-    height: 2.25rem;
-    line-height: 2.25rem;
+
+  /* The alignment fix: flatpickr sizes weekday cells and day cells with two
+     different flex-basis rules, which drift apart once the widths stop being
+     the fixed 307px. One shared 7-column grid keeps them locked together. */
+  .flatpickr-calendar .flatpickr-weekdaycontainer,
+  .flatpickr-calendar .dayContainer {
+    display: grid !important;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
   }
-  .flatpickr-current-month {
-    font-size: 0.8125rem;
+  /* default is a fixed 28px with overflow hidden — would clip the padding */
+  .flatpickr-calendar .flatpickr-weekdays {
+    height: auto;
+    overflow: visible;
+  }
+  .flatpickr-calendar span.flatpickr-weekday {
+    width: auto;
+    flex: none;
+    font-size: 0.75rem;
+    padding-bottom: 0.25rem;
+  }
+  .flatpickr-calendar .flatpickr-day {
+    width: auto !important;
+    max-width: none !important;
+    flex: none;
+    margin: 0;
+    height: 2.5rem;
+    line-height: 2.5rem;
+    font-size: 0.875rem;
+  }
+
+  /* Grid cells sit flush, so the ±5px side shadow flatpickr uses to bridge the
+     flex gap would overhang. Square the in-range cells instead. The doubled
+     class is needed to out-rank the themed inRange rule above. */
+  .flatpickr-calendar.flatpickr-calendar .flatpickr-day.inRange,
+  .flatpickr-calendar.flatpickr-calendar .flatpickr-day.inRange:hover {
+    box-shadow: none;
+    border-radius: 0;
+  }
+  .flatpickr-calendar .flatpickr-day.startRange {
+    border-radius: calc(var(--radius) - 4px) 0 0 calc(var(--radius) - 4px);
+  }
+  .flatpickr-calendar .flatpickr-day.endRange {
+    border-radius: 0 calc(var(--radius) - 4px) calc(var(--radius) - 4px) 0;
+  }
+  .flatpickr-calendar .flatpickr-day.startRange.endRange {
+    border-radius: calc(var(--radius) - 4px);
+  }
+
+  /* Header breathing room */
+  .flatpickr-calendar .flatpickr-months {
+    padding-bottom: 0.25rem;
+  }
+  .flatpickr-calendar .flatpickr-current-month {
+    font-size: 0.875rem;
+    padding-top: 0.25rem;
+  }
+
+  /* Last resort only — engages under ~300px, where seven columns can no longer
+     shrink without the numbers colliding. Scrolling the innerContainer keeps
+     the weekday row and the day grid moving together, so they stay aligned. */
+  .flatpickr-calendar .flatpickr-innerContainer {
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+  .flatpickr-calendar .flatpickr-rContainer {
+    min-width: 16.5rem !important;
   }
 }

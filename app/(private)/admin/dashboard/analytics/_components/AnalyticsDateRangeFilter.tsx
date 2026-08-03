@@ -2,6 +2,13 @@
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import flatpickr from "flatpickr";
 import "flatpickr/dist/flatpickr.min.css";
 import { Calendar, CalendarRange, RotateCcw } from "lucide-react";
@@ -56,6 +63,9 @@ const presets: Preset[] = [
   { key: "all", label: "All Time", range: () => null },
 ];
 
+/** shown when the URL range was picked with the calendar, not a preset */
+const CUSTOM_KEY = "custom";
+
 export default function AnalyticsDateRangeFilter() {
   const router = useRouter();
   const pathname = usePathname();
@@ -72,11 +82,12 @@ export default function AnalyticsDateRangeFilter() {
   /** current range in a ref so a re-init can restore the selection */
   const rangeRef = useRef<Range>(null);
 
-  /** two months side by side needs ~640px — show one on phones */
+  /** two months side by side need ~620px — show one below the md breakpoint,
+      which is also where the responsive calendar CSS takes over */
   const [months, setMonths] = useState(1);
 
   useEffect(() => {
-    const query = window.matchMedia("(min-width: 640px)");
+    const query = window.matchMedia("(min-width: 768px)");
     const apply = () => setMonths(query.matches ? 2 : 1);
 
     apply();
@@ -112,6 +123,15 @@ export default function AnalyticsDateRangeFilter() {
       maxDate: "today",
       showMonths: months,
       allowInput: false,
+      /* On touch devices flatpickr swaps itself for a native <input type="date">,
+         which cannot express a range at all — keep our own calendar. */
+      disableMobile: true,
+      /* Rendered into <body> (not inline) so no ancestor's overflow can clip it. */
+      static: false,
+      appendTo: document.body,
+      /* One month: centre it under the full-width input on phones.
+         Two months: flatpickr's default left-anchored placement. */
+      position: months === 1 ? "auto center" : "auto left",
       defaultDate: current ? [current.from, current.to] : undefined,
       onClose: (selectedDates) => {
         if (selectedDates.length === 2) {
@@ -154,20 +174,40 @@ export default function AnalyticsDateRangeFilter() {
   return (
     <div className="flex flex-col gap-3 rounded-xl border border-border/60 bg-card p-3 shadow-sm lg:flex-row lg:items-center lg:justify-between">
       {/* Presets */}
-      <div className="flex flex-wrap items-center gap-1.5">
-        <CalendarRange className="mr-1 size-4 text-muted-foreground/60" />
-        {presets.map((preset) => (
-          <Button
-            key={preset.key}
-            variant={activePreset === preset.key ? "default" : "outline"}
-            size="sm"
-            disabled={isPending}
-            className="h-8 rounded-full px-3 text-xs font-medium"
-            onClick={() => push(preset.range())}
+      <div className="flex items-center gap-2">
+        <CalendarRange className="size-4 shrink-0 text-muted-foreground/60" />
+        <Select
+          value={activePreset ?? CUSTOM_KEY}
+          disabled={isPending}
+          onValueChange={(key) => {
+            const preset = presets.find((item) => item.key === key);
+            if (preset) push(preset.range());
+          }}
+        >
+          <SelectTrigger
+            className="w-full py-2.5 text-sm data-[size=default]:h-11 lg:w-44"
+            aria-label="Date range preset"
           >
-            {preset.label}
-          </Button>
-        ))}
+            <SelectValue placeholder="Select range" />
+          </SelectTrigger>
+          <SelectContent>
+            {presets.map((preset) => (
+              <SelectItem
+                key={preset.key}
+                value={preset.key}
+                className="py-2 text-sm"
+              >
+                {preset.label}
+              </SelectItem>
+            ))}
+            {/* only reachable when the URL holds a range no preset matches */}
+            {!activePreset && (
+              <SelectItem value={CUSTOM_KEY} className="py-2 text-sm">
+                Custom range
+              </SelectItem>
+            )}
+          </SelectContent>
+        </Select>
       </div>
 
       {/* Custom range — flatpickr */}
@@ -179,10 +219,10 @@ export default function AnalyticsDateRangeFilter() {
             readOnly
             disabled={isPending}
             placeholder="Custom range"
-            className="h-8 w-full cursor-pointer pr-8 text-xs lg:w-60"
+            className="h-11 w-full cursor-pointer py-2.5 pr-9 text-base md:text-sm lg:w-60"
             aria-label="Custom date range"
           />
-          <Calendar className="pointer-events-none absolute right-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground/60" />
+          <Calendar className="pointer-events-none absolute right-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground/60" />
         </div>
 
         {hasRange && (
@@ -190,7 +230,7 @@ export default function AnalyticsDateRangeFilter() {
             variant="ghost"
             size="sm"
             disabled={isPending}
-            className="h-8 px-2 text-xs text-muted-foreground"
+            className="h-11 px-3 text-xs text-muted-foreground"
             onClick={() => push(null)}
             aria-label="Reset date range"
           >

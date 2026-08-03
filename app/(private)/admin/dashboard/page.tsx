@@ -50,7 +50,7 @@ function DashboardFallback() {
           {[...Array(8)].map((_, i) => (
             <div
               key={i}
-              className="h-28 bg-gray-100 dark:bg-gray-800 rounded-2xl animate-pulse"
+              className="h-24 bg-gray-100 dark:bg-gray-800 rounded-xl animate-pulse"
             />
           ))}
         </div>
