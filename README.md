@@ -13,7 +13,7 @@ A full-stack sports news and subscription management platform with an admin dash
 **Rich Text:** TipTap 3  
 **File Storage:** Cloudinary (primary), AWS S3 (fallback)  
 **Charts:** Recharts, TanStack Table  
-**OCR:** Groq AI, Google Vision API, Tesseract.js  
+**OCR:** Groq AI, Google Vision API, Tesseract.js
 
 ## Getting Started
 
@@ -27,20 +27,20 @@ A full-stack sports news and subscription management platform with an admin dash
 
 Copy `.env.example` to `.env.local` and fill in:
 
-| Variable | Description |
-|---|---|
-| `MONGODB_URI` | MongoDB connection string |
-| `NEXTAUTH_SECRET` | JWT signing secret |
-| `NEXTAUTH_URL` | Application URL |
-| `NEXT_PUBLIC_BASE_URL` | Public-facing base URL |
-| `PUBLIC_API_KEY` | API key for public endpoints (`x-api-key` header) |
-| `GROQ_API_KEY` | Groq AI API key (OCR) |
-| `GOOGLE_VISION_API_KEY` | Google Vision API key (OCR) |
-| `AWS_ACCESS_KEY_ID` | AWS S3 access key |
-| `AWS_SECRET_ACCESS_KEY` | AWS S3 secret key |
-| `AWS_REGION` | AWS region (default: `ap-south-1`) |
-| `AWS_BUCKET_NAME` | S3 bucket name |
-| `AWS_BASE_URL` | S3 base URL |
+| Variable                | Description                                       |
+| ----------------------- | ------------------------------------------------- |
+| `MONGODB_URI`           | MongoDB connection string                         |
+| `NEXTAUTH_SECRET`       | JWT signing secret                                |
+| `NEXTAUTH_URL`          | Application URL                                   |
+| `NEXT_PUBLIC_BASE_URL`  | Public-facing base URL                            |
+| `PUBLIC_API_KEY`        | API key for public endpoints (`x-api-key` header) |
+| `GROQ_API_KEY`          | Groq AI API key (OCR)                             |
+| `GOOGLE_VISION_API_KEY` | Google Vision API key (OCR)                       |
+| `AWS_ACCESS_KEY_ID`     | AWS S3 access key                                 |
+| `AWS_SECRET_ACCESS_KEY` | AWS S3 secret key                                 |
+| `AWS_REGION`            | AWS region (default: `ap-south-1`)                |
+| `AWS_BUCKET_NAME`       | S3 bucket name                                    |
+| `AWS_BASE_URL`          | S3 base URL                                       |
 
 ### Install & Run
 
@@ -62,16 +62,16 @@ Login at `/admin/login`.
 
 ## Commands
 
-| Command | Action |
-|---|---|
-| `pnpm dev` | Start dev server |
-| `pnpm build` | Production build |
-| `pnpm lint` | ESLint |
-| `pnpm lint:fix` | ESLint fix (`--max-warnings=0`) |
-| `pnpm format` | Prettier write |
-| `pnpm format:check` | Prettier check |
-| `pnpm type-check` | `tsc --noEmit` |
-| `pnpm precommit` | lint-staged |
+| Command             | Action                          |
+| ------------------- | ------------------------------- |
+| `pnpm dev`          | Start dev server                |
+| `pnpm build`        | Production build                |
+| `pnpm lint`         | ESLint                          |
+| `pnpm lint:fix`     | ESLint fix (`--max-warnings=0`) |
+| `pnpm format`       | Prettier write                  |
+| `pnpm format:check` | Prettier check                  |
+| `pnpm type-check`   | `tsc --noEmit`                  |
+| `pnpm precommit`    | lint-staged                     |
 
 **Run order:** `pnpm lint:fix` → `pnpm type-check` → `pnpm build`
 
@@ -104,26 +104,26 @@ All endpoints return `{ status: boolean, message: string, data?, pagination? }`.
 
 ### Public Pages
 
-| Route | Description |
-|---|---|
-| `/` | Landing page |
-| `/privacy-policy` | Privacy policy |
-| `/terms` | Terms of service |
-| `/[phoneNumber]` | Mobile subscription (Evina PIN flow) |
+| Route             | Description                          |
+| ----------------- | ------------------------------------ |
+| `/`               | Landing page                         |
+| `/privacy-policy` | Privacy policy                       |
+| `/terms`          | Terms of service                     |
+| `/[phoneNumber]`  | Mobile subscription (Evina PIN flow) |
 
 ### Admin Pages
 
-| Route | Description |
-|---|---|
-| `/admin/login` | Login |
-| `/admin/dashboard` | Dashboard stats |
-| `/admin/dashboard/categories` | Category CRUD |
-| `/admin/dashboard/topics` | Topic CRUD |
-| `/admin/dashboard/news` | News articles CRUD |
-| `/admin/dashboard/subscription` | Subscription management |
-| `/admin/dashboard/analytics` | Event analytics |
-| `/admin/dashboard/settings` | App settings |
-| `/admin/dashboard/promotion-methods` | Operator promo config |
+| Route                                | Description             |
+| ------------------------------------ | ----------------------- |
+| `/admin/login`                       | Login                   |
+| `/admin/dashboard`                   | Dashboard stats         |
+| `/admin/dashboard/categories`        | Category CRUD           |
+| `/admin/dashboard/topics`            | Topic CRUD              |
+| `/admin/dashboard/news`              | News articles CRUD      |
+| `/admin/dashboard/subscription`      | Subscription management |
+| `/admin/dashboard/analytics`         | Event analytics         |
+| `/admin/dashboard/settings`          | App settings            |
+| `/admin/dashboard/promotion-methods` | Operator promo config   |
 
 ### Public API (requires `x-api-key`)
 

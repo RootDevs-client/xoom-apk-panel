@@ -7,7 +7,14 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
 import { connectSocket } from "@/lib/socket-client";
-import { Hash, Loader2, MessageSquare, Radio, Users } from "lucide-react";
+import {
+  ChevronLeft,
+  Hash,
+  Loader2,
+  MessageSquare,
+  Radio,
+  Users,
+} from "lucide-react";
 import moment from "moment-timezone";
 import { useCallback, useEffect, useRef, useState } from "react";
 import MessageBubble from "./MessageBubble";
@@ -270,6 +277,11 @@ export default function ChannelMessagePanel() {
     setMessages([]);
   }, []);
 
+  const handleBack = useCallback(() => {
+    setSelectedChannel(null);
+    setMessages([]);
+  }, []);
+
   const handleMessageDeleted = useCallback((messageId: string) => {
     setMessages((prev) => prev.filter((m) => m._id !== messageId));
   }, []);
@@ -299,10 +311,14 @@ export default function ChannelMessagePanel() {
   }
 
   return (
-    <div className="flex gap-4 h-[calc(100vh-12rem)]">
+    <div className="flex flex-col gap-4 md:flex-row md:h-[calc(100vh-12rem)]">
       {/* Left: Channel List */}
-      <div className="w-72 shrink-0">
-        <Card className="h-full overflow-hidden">
+      <div
+        className={`${
+          selectedChannel ? "hidden" : "block"
+        } w-full md:block md:w-72 md:shrink-0`}
+      >
+        <Card className="h-[60vh] md:h-full overflow-hidden">
           <CardContent className="p-0 h-full overflow-y-auto divide-y">
             {channels.map((ch) => {
               const isSelected = ch._id === selectedChannel?._id;
@@ -349,7 +365,11 @@ export default function ChannelMessagePanel() {
       </div>
 
       {/* Right: Messages */}
-      <div className="flex-1">
+      <div
+        className={`${
+          selectedChannel ? "block" : "hidden"
+        } flex-1 md:block`}
+      >
         {!selectedChannel ? (
           <Card className="h-full">
             <CardContent className="flex flex-col items-center justify-center h-full text-center p-6">
@@ -360,9 +380,17 @@ export default function ChannelMessagePanel() {
             </CardContent>
           </Card>
         ) : (
-          <Card className="h-full flex flex-col overflow-hidden">
+          <Card className="h-[calc(100vh-16rem)] md:h-full flex flex-col overflow-hidden">
             <div className="flex items-center gap-3 p-4 border-b shrink-0">
-              <Avatar className="size-9">
+              <button
+                type="button"
+                onClick={handleBack}
+                className="md:hidden p-1 -ml-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/50 cursor-pointer"
+                aria-label="Back to channels"
+              >
+                <ChevronLeft className="size-5" />
+              </button>
+              <Avatar className="size-9 shrink-0">
                 <AvatarFallback>
                   <Radio className="size-4" />
                 </AvatarFallback>
