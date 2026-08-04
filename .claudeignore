@@ -1,0 +1,13 @@
+# Claude Assist — automatically generated context exclusions.
+# Regenerate or edit freely; Claude Code reads this file to keep context focused.
+
+# Monorepo workspaces
+**/node_modules
+**/dist
+**/build
+**/out
+**/coverage
+**/.next
+**/.turbo
+**/target
+**/vendor

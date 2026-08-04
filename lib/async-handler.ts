@@ -149,8 +149,6 @@ export function asyncHandler<T, P = Record<string, string>>(
         );
       }
 
-      console.error(err);
-
       return apiResponse(false, 500, "Something went wrong!");
     }
   };
