@@ -1,6 +1,7 @@
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { CheckCircle2, MousePointerClick, Percent, Zap } from "lucide-react";
 import {
   Area,
   AreaChart,
@@ -10,7 +11,6 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { CheckCircle2, MousePointerClick, Percent, Zap } from "lucide-react";
 import { DashboardAnalyticsData } from "./types";
 
 interface PinConversionChartProps {
@@ -35,17 +35,18 @@ const CUSTOM_TOOLTIP_STYLE = {
 };
 
 export function PinConversionChart({ data }: PinConversionChartProps) {
+  const totalPinRequests = Number(data?.totalPinRequests) || 0;
+  const totalPinReceived = Number(data?.totalPinReceived) || 0;
+
   const rate =
-    data.totalPinRequests > 0
-      ? (data.totalPinReceived / data.totalPinRequests) * 100
-      : 0;
+    totalPinRequests > 0 ? (totalPinReceived / totalPinRequests) * 100 : 0;
 
   const chartData = [
-    { name: "Requests", value: data.totalPinRequests },
-    { name: "Received", value: data.totalPinReceived },
+    { name: "Requests", value: totalPinRequests },
+    { name: "Received", value: totalPinReceived },
   ];
 
-  const maxValue = Math.max(data.totalPinRequests, data.totalPinReceived, 1);
+  const maxValue = Math.max(totalPinRequests, totalPinReceived, 1);
 
   const getQualityColor = (r: number) => {
     if (r >= 75) return { from: "#10b981", label: "Excellent" };
@@ -62,7 +63,7 @@ export function PinConversionChart({ data }: PinConversionChartProps) {
       <div className="absolute top-0 left-0 right-0 h-1 bg-linear-to-r from-indigo-500 via-emerald-500 to-emerald-400" />
 
       {/* Subtle background gradient */}
-      <div className="absolute inset-0 bg-linear-to-br from-foreground/[0.02] to-transparent" />
+      <div className="absolute inset-0 bg-linear-to-br from-foreground/2 to-transparent" />
 
       {/* Decorative dots */}
       <div className="absolute top-4 right-4 grid grid-cols-3 gap-1 opacity-[0.08]">
@@ -82,7 +83,7 @@ export function PinConversionChart({ data }: PinConversionChartProps) {
 
       <CardContent className="relative">
         {/* Area Chart */}
-        <div className="h-[150px] sm:h-[170px]">
+        <div className="h-37.5 sm:h-42.5">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart
               data={chartData}
@@ -132,7 +133,7 @@ export function PinConversionChart({ data }: PinConversionChartProps) {
                 itemStyle={CUSTOM_TOOLTIP_ITEM_STYLE}
                 labelStyle={CUSTOM_TOOLTIP_LABEL_STYLE}
                 formatter={(value: any) => [
-                  (value as number).toLocaleString(),
+                  (Number(value) || 0).toLocaleString(),
                   "Count",
                 ]}
                 labelFormatter={(label) => `${label}`}
@@ -174,7 +175,7 @@ export function PinConversionChart({ data }: PinConversionChartProps) {
                 Requests
               </span>
               <span className="text-sm font-bold text-indigo-600 dark:text-indigo-400">
-                {data.totalPinRequests.toLocaleString()}
+                {totalPinRequests.toLocaleString()}
               </span>
             </div>
           </div>
@@ -203,7 +204,7 @@ export function PinConversionChart({ data }: PinConversionChartProps) {
                 Received
               </span>
               <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400">
-                {data.totalPinReceived.toLocaleString()}
+                {totalPinReceived.toLocaleString()}
               </span>
             </div>
           </div>

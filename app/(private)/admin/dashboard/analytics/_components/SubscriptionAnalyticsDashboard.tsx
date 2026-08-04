@@ -5,6 +5,7 @@ import { OverviewCards } from "./OverviewCards";
 import { PlatformBreakdownChart } from "./PlatformBreakdownChart";
 
 import { LocationBreakdownChart } from "./LocationBreakdownChart";
+import { normalizeAnalyticsData } from "./normalize";
 import { AnalyticsData } from "./types";
 
 interface SubscriptionAnalyticsDashboardProps {
@@ -12,8 +13,10 @@ interface SubscriptionAnalyticsDashboardProps {
 }
 
 export function SubscriptionAnalyticsDashboard({
-  data,
+  data: rawData,
 }: SubscriptionAnalyticsDashboardProps) {
+  const data = normalizeAnalyticsData(rawData);
+
   return (
     <div className="space-y-6">
       <OverviewCards overview={data.overview} />

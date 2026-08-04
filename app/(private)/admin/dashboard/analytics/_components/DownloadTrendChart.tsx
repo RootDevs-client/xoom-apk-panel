@@ -75,7 +75,7 @@ export function DownloadTrendChart({ data }: DownloadTrendChartProps) {
       <div className="absolute top-0 left-0 right-0 h-1 bg-linear-to-r from-violet-500 via-blue-500 to-emerald-500" />
 
       {/* Subtle background gradient */}
-      <div className="absolute inset-0 bg-linear-to-br from-foreground/[0.02] to-transparent" />
+      <div className="absolute inset-0 bg-linear-to-br from-foreground/2 to-transparent" />
 
       {/* Decorative dots */}
       <div className="absolute top-4 right-4 grid grid-cols-3 gap-1 opacity-[0.08]">
@@ -96,7 +96,7 @@ export function DownloadTrendChart({ data }: DownloadTrendChartProps) {
         </CardDescription>
       </CardHeader>
       <CardContent className="relative">
-        <div className="w-full h-[210px] sm:h-[240px]">
+        <div className="w-full h-52.5 sm:h-60">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart
               data={chartData}
@@ -128,7 +128,7 @@ export function DownloadTrendChart({ data }: DownloadTrendChartProps) {
                 itemStyle={CUSTOM_TOOLTIP_ITEM_STYLE}
                 labelStyle={CUSTOM_TOOLTIP_LABEL_STYLE}
                 formatter={(value: any) => [
-                  `${(value as number).toLocaleString()} downloads`,
+                  `${(Number(value) || 0).toLocaleString()} downloads`,
                   "Count",
                 ]}
                 labelFormatter={(label) => `Period: ${label}`}

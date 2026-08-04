@@ -224,7 +224,7 @@ export function UninstallAnalyticsCard({ data }: UninstallAnalyticsCardProps) {
                     itemStyle={CUSTOM_TOOLTIP_ITEM_STYLE}
                     labelStyle={CUSTOM_TOOLTIP_LABEL_STYLE}
                     formatter={(value: any) => [
-                      (value as number).toLocaleString(),
+                      (Number(value) || 0).toLocaleString(),
                       "Count",
                     ]}
                     cursor={{ fill: "rgba(0,0,0,0.03)" }}

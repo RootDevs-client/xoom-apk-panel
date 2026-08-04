@@ -17,7 +17,10 @@ export function PlatformProgress({
   barClassName,
   icon: Icon,
 }: PlatformProgressProps) {
-  const percentage = total > 0 ? Math.round((value / total) * 100) : 0;
+  const safeValue = Number(value) || 0;
+  const safeTotal = Number(total) || 0;
+  const percentage =
+    safeTotal > 0 ? Math.round((safeValue / safeTotal) * 100) : 0;
 
   return (
     <div className="space-y-2">
@@ -29,7 +32,7 @@ export function PlatformProgress({
           <span className="text-sm font-medium">{label}</span>
         </div>
         <div className="text-right">
-          <span className="text-sm font-bold">{value.toLocaleString()}</span>
+          <span className="text-sm font-bold">{safeValue.toLocaleString()}</span>
           <span className="text-xs text-muted-foreground ml-1">
             ({percentage}%)
           </span>

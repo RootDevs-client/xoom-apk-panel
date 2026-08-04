@@ -9,7 +9,18 @@ import { PinConversionChart } from "./PinConversionChart";
 import { PlatformBreakdownCard } from "./PlatformBreakdownCard";
 import { QuickStatsCard } from "./QuickStatsCard";
 import { UninstallAnalyticsCard } from "./UninstallAnalyticsCard";
-import { DashboardAnalyticsData, DeviceModelItem, EventAnalyticsItem, UninstallAnalyticsData } from "./types";
+import {
+  normalizeDashboardAnalytics,
+  normalizeDeviceModels,
+  normalizeEventAnalytics,
+  normalizeUninstallAnalytics,
+} from "./normalize";
+import {
+  DashboardAnalyticsData,
+  DeviceModelItem,
+  EventAnalyticsItem,
+  UninstallAnalyticsData,
+} from "./types";
 
 interface DashboardAnalyticsCardsProps {
   data: DashboardAnalyticsData;
@@ -19,11 +30,22 @@ interface DashboardAnalyticsCardsProps {
 }
 
 export function DashboardAnalyticsCards({
-  data,
-  deviceModels,
-  uninstallData,
-  eventData,
+  data: rawData,
+  deviceModels: rawDeviceModels,
+  uninstallData: rawUninstallData,
+  eventData: rawEventData,
 }: DashboardAnalyticsCardsProps) {
+  const data = normalizeDashboardAnalytics(rawData);
+  const deviceModels = rawDeviceModels
+    ? normalizeDeviceModels(rawDeviceModels)
+    : undefined;
+  const eventData = rawEventData
+    ? normalizeEventAnalytics(rawEventData)
+    : undefined;
+  const uninstallData = rawUninstallData
+    ? normalizeUninstallAnalytics(rawUninstallData)
+    : undefined;
+
   return (
     <div className="space-y-6">
       {/* Charts Row: Device Status, Download Trends & PIN Conversion */}
