@@ -295,7 +295,7 @@ export default function GeneralSettings({ general }: any) {
               <InputField
                 name="companyName"
                 label="Company Name"
-                placeholder="XoomSports Ltd."
+                placeholder="TextNest Ltd."
                 rules={{ required: "Required!" }}
                 className={inputClassName}
               />
@@ -303,7 +303,7 @@ export default function GeneralSettings({ general }: any) {
                 name="supportEmail"
                 label="Support Email"
                 type="email"
-                placeholder="support@xoomsports.com"
+                placeholder="support@textnest.com"
                 rules={{
                   required: "Required!",
                   pattern: {
@@ -325,7 +325,7 @@ export default function GeneralSettings({ general }: any) {
                 id="companyAddress"
                 placeholder="Adabor, Dhaka 1207"
                 rows={3}
-                className="min-h-[6.5rem] rounded-xl border-border/80 bg-background/50 text-base font-normal shadow-none focus-visible:ring-2 focus-visible:ring-primary/20 md:text-sm"
+                className="min-h-26 rounded-xl border-border/80 bg-background/50 text-base font-normal shadow-none focus-visible:ring-2 focus-visible:ring-primary/20 md:text-sm"
                 {...register("companyAddress")}
               />
             </div>

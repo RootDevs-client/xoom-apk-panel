@@ -28,7 +28,7 @@ export default function PublicNavbar({ appName, appLogo }: PublicNavbarProps) {
             </div>
           )}
           <span className="font-urbanist font-extrabold text-gray-900 text-lg tracking-wide uppercase">
-            {appName || "Xoom Sports"}
+            {appName || "TextNest"}
           </span>
         </Link>
 

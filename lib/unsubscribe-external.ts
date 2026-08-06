@@ -7,7 +7,7 @@ export async function unsubscribeExternal(
     const params = new URLSearchParams({
       mobilenumber: `+${phone}`,
       reference,
-      Platform: platform || "XoomSports",
+      Platform: platform || "TextNest",
     });
 
     const res = await fetch(

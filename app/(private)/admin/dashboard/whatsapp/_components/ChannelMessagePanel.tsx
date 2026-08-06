@@ -168,7 +168,6 @@ export default function ChannelMessagePanel() {
     // Leave previous account room if any
     if (joinedAccountRef.current) {
       socket.emit("admin:leave", { accountId: joinedAccountRef.current });
-      console.log("[Socket] left account room", joinedAccountRef.current);
     }
 
     // Join the selected channel's WhatsApp account room to receive events
@@ -177,10 +176,6 @@ export default function ChannelMessagePanel() {
       socket.emit("admin:join", {
         accountId: selectedChannel.whatsappAccountId,
       });
-      console.log(
-        "[Socket] joined account room",
-        selectedChannel.whatsappAccountId,
-      );
     } else {
       joinedAccountRef.current = null;
     }
@@ -366,9 +361,7 @@ export default function ChannelMessagePanel() {
 
       {/* Right: Messages */}
       <div
-        className={`${
-          selectedChannel ? "block" : "hidden"
-        } flex-1 md:block`}
+        className={`${selectedChannel ? "block" : "hidden"} flex-1 md:block`}
       >
         {!selectedChannel ? (
           <Card className="h-full">

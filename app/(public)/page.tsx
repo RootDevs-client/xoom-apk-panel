@@ -8,7 +8,7 @@ import PublicNavbar from "./_components/PublicNavbar";
 export async function generateMetadata() {
   try {
     const setting = await getOpenSettings();
-    const appName = setting?.data?.appName || "Xoom Sports";
+    const appName = setting?.data?.appName || "TextNest";
     return {
       title: appName,
       description:
@@ -16,16 +16,19 @@ export async function generateMetadata() {
         `Welcome to ${appName} — your premium sports experience.`,
     };
   } catch {
-    return { title: "Xoom Sports" };
+    return { title: "TextNest" };
   }
 }
 
 export default async function HomePage() {
   const setting = await getOpenSettings();
 
-  const appName = setting?.data?.appName || "Xoom Sports";
-  const rawLogo = setting?.data?.appLogo;
-  const appLogo = rawLogo ? prependAwsBaseUrl(rawLogo) : null;
+  const appName = setting?.data?.appName || "TextNest";
+  const rawLogo = setting?.data?.appLogo || "/assert/logo/app_logo.png";
+  console.log(rawLogo);
+  const appLogo = rawLogo
+    ? prependAwsBaseUrl(rawLogo)
+    : "/assert/logo/app_logo.png";
   const companyName = setting?.data?.companyName || appName;
   const aboutUs = setting?.data?.aboutUs || "";
   const supportEmail = setting?.data?.supportEmail || "";

@@ -44,7 +44,6 @@ export default function WhatsAppChannelList() {
       jid: string;
       message: { body: string; from: string; timestamp: string };
     }) => {
-      console.log("[SOCKET] whatsapp:new-message", data);
       setData((prev) =>
         prev.map((ch) =>
           ch._id === data.channelId
